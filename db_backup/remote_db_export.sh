@@ -51,9 +51,13 @@ COMMIT_COUNT=0
 COMMIT_LIMIT=15
 for DBTB in `cat ${FILE_NAME_TABLST}`
 do
-    echo "Starting to download new group... "
+	if [ ${COMMIT_COUNT} -eq 0 ]
+	then
+		echo "Starting new group of downloads... "
+	fi
     DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`
     TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
+    echo "Dowloading ${TB}.sql ... "
     ${MYSQL_PATH}mysqldump --host=${DB_HOST_NAME}  --user=${DB_USER} --password=${DB_PASSWORD} --hex-blob --triggers ${DB} ${TB} | gzip > ${DB}_${TB}.sql.gz &
     (( COMMIT_COUNT++ ))
     (( TOTAL++ ))
