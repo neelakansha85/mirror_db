@@ -32,7 +32,7 @@ cd db_backup
 
 FILE_NAME_TABLST='table_list.txt'
 
-/Applications/MAMP/Library/bin/mysql --host=${DB_HOST_NAME}  --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}'" > ${FILE_NAME_TABLST}
+/Applications/MAMP/Library/bin/mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}'" > ${FILE_NAME_TABLST}
 
 echo "Starting to download DB... "
 now=$(date +"%T")
@@ -40,7 +40,7 @@ echo "Current time : $now "
 
 TOTAL=1
 COMMIT_COUNT=0
-COMMIT_LIMIT=10
+COMMIT_LIMIT=20
 for DBTB in `cat ${FILE_NAME_TABLST}`
 do
     echo "Starting to download new group... "
@@ -53,7 +53,7 @@ do
     then
         COMMIT_COUNT=0
         echo "Waiting to start new group... "
-        sleep 4
+        sleep 2
     fi
 done
 
