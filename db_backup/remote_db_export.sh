@@ -48,7 +48,7 @@ echo "Current time : $now "
 
 TOTAL=1
 COMMIT_COUNT=0
-COMMIT_LIMIT=20
+COMMIT_LIMIT=15
 for DBTB in `cat ${FILE_NAME_TABLST}`
 do
     echo "Starting to download new group... "
@@ -61,7 +61,7 @@ do
     then
         COMMIT_COUNT=0
         echo "Waiting to start new group... "
-        sleep 2
+        sleep 3
     fi
 done
 
