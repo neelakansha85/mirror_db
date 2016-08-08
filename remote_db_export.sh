@@ -1,11 +1,12 @@
 #!/bin/bash
 
+cd ..
 . db.properties
 
 # Config Options
 SRC=$1
 REMOTE=$2
-GROUP_COUNT=${3:-10}
+GROUP_COUNT=${3:-12}
 WAIT_TIME=${4:-3}
 FILE_NAME_TABLST='table_list.txt'
 
