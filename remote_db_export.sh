@@ -8,6 +8,7 @@ REMOTE=$2
 GROUP_COUNT=${3:-12}
 WAIT_TIME=${4:-3}
 FILE_NAME_TABLST='table_list.txt'
+BACKUP_DIR='db_backup'
 
 
 if [ "$REMOTE" == 'remote']
@@ -40,7 +41,11 @@ else
   exit 1;
 fi
 
-cd db_backup
+# Empty BACKUP_DIR dir to remove any previous data
+rm -rf ${BACKUP_DIR}
+mkdir ${BACKUP_DIR}
+
+cd ${BACKUP_DIR}
 
 ${MYSQL_PATH}mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}'" > ${FILE_NAME_TABLST}
 
@@ -76,9 +81,13 @@ echo "Total no of tables downloaded = ${TOTAL}"
 now=$(date +"%T")
 echo "Current time : $now "
 
-cd ..
-
 if [ ${COMMIT_COUNT} -gt 0 ]
 then
     sleep 2
 fi
+
+# Get to root dir
+cd ..
+
+# Merge all tables to one mysql.sql
+./merge.sh
