@@ -65,7 +65,7 @@ do
     DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`
     TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
     echo "Dowloading ${TB}.sql ... "
-    ${MYSQL_PATH}mysqldump --host=${DB_HOST_NAME}  --user=${DB_USER} --password=${DB_PASSWORD} --hex-blob --triggers ${DB} ${TB} | gzip > ${DB}_${TB}.sql.gz &
+    ${MYSQL_PATH}mysqldump --host=${DB_HOST_NAME}  --user=${DB_USER} --password=${DB_PASSWORD} --hex-blob --single-transaction --quick --triggers ${DB} ${TB} | gzip > ${DB}_${TB}.sql.gz &
     (( COMMIT_COUNT++ ))
     (( TOTAL++ ))
     if [ ${COMMIT_COUNT} -eq ${COMMIT_LIMIT} ]
