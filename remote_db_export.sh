@@ -1,6 +1,5 @@
 #!/bin/bash
 
-cd ..
 . db.properties
 
 # Config Options
@@ -76,6 +75,8 @@ echo "Completed downloading DB... "
 echo "Total no of tables downloaded = ${TOTAL}"
 now=$(date +"%T")
 echo "Current time : $now "
+
+cd ..
 
 if [ ${COMMIT_COUNT} -gt 0 ]
 then
