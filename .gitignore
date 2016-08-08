@@ -13,6 +13,9 @@
 .Trashes
 
 # Properties File #
-######################
+###################
 db.properties
 
+# Archives of db #
+##################
+archives
