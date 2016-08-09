@@ -5,10 +5,12 @@
 # Config Options
 SRC=$1
 REMOTE=$2
-GROUP_COUNT=${3:-12}
+BATCH_LIMIT=${3:-10}
 WAIT_TIME=${4:-3}
 FILE_NAME_TABLST='table_list.txt'
 BACKUP_DIR='db_backup'
+POOL_LIMIT=7000
+POOL_WAIT_TIME=300
 
 
 if [ "$REMOTE" == 'remote']
@@ -54,25 +56,37 @@ now=$(date +"%T")
 echo "Current time : $now "
 
 TOTAL=1
-COMMIT_COUNT=0
-COMMIT_LIMIT=GROUP_COUNT
+BATCH_COUNT=0
+POOL_COUNT=0
+
 for DBTB in `cat ${FILE_NAME_TABLST}`
 do
-	if [ ${COMMIT_COUNT} -eq 0 ]
+	if [ ${POOL_COUNT} -eq 0 ]
 	then
-		echo "Starting new group of downloads... "
+		echo "Starting a new pool of downloads... "
+	fi
+	if [ ${BATCH_COUNT} -eq 0 ]
+	then
+		echo "Starting new batch of downloads... "
 	fi
     DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`
     TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
     echo "Dowloading ${TB}.sql ... "
     ${MYSQL_PATH}mysqldump --host=${DB_HOST_NAME}  --user=${DB_USER} --password=${DB_PASSWORD} --hex-blob --single-transaction --quick --triggers ${DB} ${TB} | gzip > ${DB}_${TB}.sql.gz &
-    (( COMMIT_COUNT++ ))
+    (( BATCH_COUNT++ ))
+    (( POOL_COUNT++ ))
     (( TOTAL++ ))
-    if [ ${COMMIT_COUNT} -eq ${COMMIT_LIMIT} ]
+    if [ ${BATCH_COUNT} -eq ${BATCH_LIMIT} ]
     then
-        COMMIT_COUNT=0
-        echo "Waiting to start new group... "
+        BATCH_COUNT=0
+        echo "Waiting to start new batch... "
         sleep WAIT_TIME
+    fi
+    if [ ${POOL_COUNT} -eq ${POOL_LIMIT} ]
+    then
+        POOL_COUNT=0
+        echo "Waiting to start new pool... "
+        sleep POOL_WAIT_TIME
     fi
 done
 
@@ -81,7 +95,7 @@ echo "Total no of tables downloaded = ${TOTAL}"
 now=$(date +"%T")
 echo "Current time : $now "
 
-if [ ${COMMIT_COUNT} -gt 0 ]
+if [ ${BATCH_COUNT} -gt 0 ]
 then
     sleep 2
 fi
