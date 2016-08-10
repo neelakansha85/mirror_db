@@ -1,14 +1,12 @@
 #!/bin/bash
 
 # Config Options
-FILE_NAME_TABLST==${1:-table_list.txt}
-DB_FILE_NAME==${2:-mysql}
+FILE_NAME_TABLST=${1:-table_list.txt}
+DB_FILE_NAME=${2:-mysql}
 BACKUP_DIR='db_backup'
 ARCHIVES_DIR='archives'
 
 cd ${BACKUP_DIR}
-
-gunzip *.sql.gz
 
 echo "Starting to merge DB to ${DB_FILE_NAME}.sql... "
 now=$(date +"%T")
@@ -18,6 +16,7 @@ for DBTB in `cat ${FILE_NAME_TABLST}`
 do
     DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`
     TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
+    gunzip ${DB}_${TB}.sql.gz
     `cat ${DB}_${TB}.sql >> ${DB_FILE_NAME}.sql`
 	echo "" >> ${DB_FILE_NAME}
 	`rm ${DB}_${TB}.sql`
