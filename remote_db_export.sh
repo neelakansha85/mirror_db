@@ -72,7 +72,7 @@ do
     DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`
     TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
     echo "Dowloading ${TB}.sql ... "
-    ${MYSQL_PATH}mysqldump --host=${DB_HOST_NAME}  --user=${DB_USER} --password=${DB_PASSWORD} --hex-blob --single-transaction --quick --triggers ${DB} ${TB} | gzip > ${DB}_${TB}.sql.gz &
+    ${MYSQL_PATH}mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --hex-blob --single-transaction --quick --triggers ${DB} ${TB} | gzip > ${DB}_${TB}.sql.gz &
     (( BATCH_COUNT++ ))
     (( POOL_COUNT++ ))
     (( TOTAL++ ))
@@ -80,13 +80,13 @@ do
     then
         BATCH_COUNT=0
         echo "Waiting to start new batch... "
-        sleep WAIT_TIME
+        sleep $WAIT_TIME
     fi
     if [ ${POOL_COUNT} -eq ${POOL_LIMIT} ]
     then
         POOL_COUNT=0
         echo "Waiting to start new pool... "
-        sleep POOL_WAIT_TIME
+        sleep $POOL_WAIT_TIME
     fi
 done
 

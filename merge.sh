@@ -4,6 +4,7 @@
 FILE_NAME_TABLST==${1:-table_list.txt}
 DB_FILE_NAME==${2:-mysql}
 BACKUP_DIR='db_backup'
+ARCHIVES_DIR='archives'
 
 cd ${BACKUP_DIR}
 
@@ -29,3 +30,10 @@ echo "Current time : $now "
 # Get to root dir
 cd ..
 
+# Move mysql.sql to archives with current date
+
+if [ ! -d "$ARCHIVES_DIR" ]; then
+  mkdir $ARCHIVES_DIR
+fi
+
+mv db_backup/mysql.sql archives/mysql_$(date +"%Y-%m-%d").sql
