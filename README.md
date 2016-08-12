@@ -25,7 +25,9 @@ If you have below conditions I would recommend using this script:
 * You need to automate this process
 
 I have been running this for our Wordpress system hosted at WPEngine which has 1GB to database with approx 68,000 tables in it.
+Please note: Reuqest your hosting provider to update mysql open file limit to value greater than the number of tables you have in database in order to avoid database server from crashing. 
 
+Please also test this on your local/dev environment before running on production to avoid any unwanted issues.
 
-Hope this helps you. Please give feedback if you feel 
+Hope this helps you. Please give feedback if you have any. 
 
