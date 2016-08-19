@@ -35,3 +35,5 @@ if [ ! -z $DEST ]; then
 		echo "Import process did not complete successfully"
 	fi
 fi
+
+exit
