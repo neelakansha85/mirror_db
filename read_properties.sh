@@ -8,7 +8,7 @@ if [ "$SRC" == 'prd' ]; then
   DB_USER=$prd_db_user
   DB_PASSWORD=$prd_db_pass
   DB_HOST_NAME=$prd_db_host
-  DB_SCHEMA=$pagely_prd_db_name
+  DB_SCHEMA=$prd_db_name
   G_ANALYTICS=$prd_g_analytics
   URL=$prd_url
   SHIB_URL=$prd_shib_url
@@ -17,7 +17,7 @@ elif [ "$SRC" == 'nyudev' ]; then
   DB_USER=$dev_db_user
   DB_PASSWORD=$dev_db_pass
   DB_HOST_NAME=$dev_db_host
-  DB_SCHEMA=$nyuupdates_db_name
+  DB_SCHEMA=$dev_db_name
   G_ANALYTICS=$dev_g_analytics
   URL=$dev_url
   SHIB_URL=$dev_shib_url
@@ -26,7 +26,7 @@ elif [ "$SRC" == 'nyuupdates' ]; then
   DB_USER=$nyuupdates_db_user
   DB_PASSWORD=$nyuupdates_db_pass
   DB_HOST_NAME=$nyuupdates_db_host
-  DB_SCHEMA=$sswtest_db_name
+  DB_SCHEMA=$nyuupdates_db_name
   G_ANALYTICS=$nyuupdates_g_analytics
   URL=$nyuupdates_url
   SHIB_URL=$nyuupdates_shib_url
@@ -75,7 +75,7 @@ elif [ "$SRC" == 'pagely_test_prd' ]; then
 elif [ "$SRC" == 'pagely_dev' ]; then
 	DB_USER=$pagely_dev_db_user
 	DB_PASSWORD=$pagely_dev_db_pass
-	DB_HOST_NAME=$dpagely_ev_db_host
+	DB_HOST_NAME=$pagely_dev_db_host
   DB_SCHEMA=$pagely_dev_db_name
 	URL=$pagely_dev_url # Value for URL replacement
   G_ANALYTICS=$pagely_dev_g_analytics
