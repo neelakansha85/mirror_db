@@ -8,7 +8,7 @@ if [ "$SRC" == 'prd' ]; then
   DB_USER=$prd_db_user
   DB_PASSWORD=$prd_db_pass
   DB_HOST_NAME=$prd_db_host
-  DB_SCHEMA=c
+  DB_SCHEMA=$pagely_prd_db_name
   G_ANALYTICS=$prd_g_analytics
   URL=$prd_url
   SHIB_URL=$prd_shib_url
