@@ -5,9 +5,9 @@ Please note this is not the most efficient way of getting a database export sinc
 
 ## How it works
 * Request your hosting provider to whitelist your static IP to access your database server directly.
-* Open Terminal run `git clone git@github.com:neelakansha85/remote_db_export.git`
+* Open Terminal run `git clone git@github.com:neelakansha85/mirror_db.git`
 * Create a `db.preperties` file using `sample_db.properties` with your server specific information
-* Execute remote_db_export.sh in terminal with src other optional arguments. `./remote_db_export.sh prd remote`
+* Execute mirror_db.sh in terminal with src dest and other optional arguments. `./mirror_db.sh -s prd -d dev`
 * It will create a list of all tables from the db server with the given database name and store it in `db_backup/table_list.txt`.
 * It then uses mysqldump to individually export each table from the `table_list.txt` in .gz format from the server.
 * Executes ./merge.sh at after exporting to merge them all to single mysql.sql file. 
