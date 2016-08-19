@@ -1,4 +1,4 @@
-# Remote DB Export
+# Mirror DB
 This is a script used to download or get an export of your database (**Recommended for Large Databases** though works for small ones too) using mysqldump command line. You can run this script on server or remotely from a machine which has direct access to the database server.
 
 Please note this is not the most efficient way of getting a database export since there are tons of other ways to do so, however this method is for a special use case where you do not have SSH access to your server.

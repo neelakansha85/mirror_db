@@ -19,3 +19,6 @@ db.properties
 # Archives of db #
 ##################
 archives
+
+
+!drop_tables.sql
