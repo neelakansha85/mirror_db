@@ -56,16 +56,6 @@ if [ $# -ge 2 ]; then
     export SRC_URL
     export SRC_SHIB_URL
     export SRC_G_ANALYTICS
-
-    echo $SRC
-    echo $DEST
-    echo $BATCH_LIMIT
-    echo $WAIT_TIME
-    echo $LIST_FILE_NAME
-    echo $DB_FILE_NAME
-    echo $SRC_URL
-    echo $SRC_SHIB_URL
-    echo $SRC_G_ANALYTICS
     
     return
 else

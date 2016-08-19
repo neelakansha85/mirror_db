@@ -7,15 +7,15 @@
 
 REMOTE_SCRIPT_DIR='mirror_db'
 SITE_DIR="sites/${DIR}"
-ARCHIVES_DIR='archives'
+BACKUP_DIR='db_backup'
 IMPORT_SCRIPT='import.sh'
 DROP_SQL_FILE='drop_tables'
 PARSE_FILE='parse_arguments.sh'
 READ_PROPERTIES_FILE='read_properties.sh'
 PROPERTIES_FILE='db.properties'
 
-chmod 774 $IMPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE structure.sh
-chmod 774 $ARCHIVES_DIR/$DROP_SQL_FILE.sql
+chmod 774 $IMPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE mirror_db_structure.sh
+chmod 774 $BACKUP_DIR/$DROP_SQL_FILE.sql
 
 
 expect <<- DONE
@@ -24,13 +24,13 @@ spawn sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}
 
 #check connection and transfer file to pagely server
 expect sftp>
-send "put structure.sh\r"
+send "put mirror_db_structure.sh\r"
 expect sftp>
 send "bye\r"
 expect eof 
 DONE
 
-ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./structure.sh mk ${REMOTE_SCRIPT_DIR} ${ARCHIVES_DIR}"
+ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./mirror_db_structure.sh mk ${REMOTE_SCRIPT_DIR} ${BACKUP_DIR}"
 
 expect <<- DONE
 #establish sftp connection
@@ -49,9 +49,9 @@ send "put ${PROPERTIES_FILE}\r"
 expect sftp>
 send "put ${DROP_SQL_FILE}.sql\r"
 expect sftp>
-send "lcd ${ARCHIVES_DIR}\r"
+send "lcd ${BACKUP_DIR}\r"
 expect sftp>
-send "cd ${ARCHIVES_DIR}\r"
+send "cd ${BACKUP_DIR}\r"
 expect sftp>
 send "put ${DB_FILE_NAME}.sql\r"
 expect sftp>
@@ -76,4 +76,4 @@ else
   exit 1
 fi
 
-ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./structure.sh rm ${REMOTE_SCRIPT_DIR} ${ARCHIVES_DIR}"
+ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./mirror_db_structure.sh rm ${REMOTE_SCRIPT_DIR} ${BACKUP_DIR}"

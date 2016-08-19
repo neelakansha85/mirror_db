@@ -3,7 +3,7 @@
 # Config Options
 ARG1=$1
 REMOTE_DIR=${2:-'mirror_db'}
-ARCHIVES_DIR=${3:-'archives'}
+BACKUP_DIR=${3:-'db_backup'}
 
 # Move mysql.sql to archives with current date
 if [ "$ARG1" == "mk" ]; then
@@ -12,12 +12,12 @@ if [ "$ARG1" == "mk" ]; then
 	  mkdir $REMOTE_DIR
 	fi
 
-	if [ ! -d "$ARCHIVES_DIR" ]; then
+	if [ ! -d "$BACKUP_DIR" ]; then
 	  cd $REMOTE_DIR
-	  mkdir $ARCHIVES_DIR
+	  mkdir $BACKUP_DIR
 	fi
 
-	#chmod 775 $REMOTE_DIR $REMOTE_DIR/$ARCHIVES_DIR
+	#chmod 775 $REMOTE_DIR $REMOTE_DIR/$BACKUP_DIR
 
 elif [ "$ARG1" == "rm" ]; then
 	cd $REMOTE_DIR

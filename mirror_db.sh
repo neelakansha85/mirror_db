@@ -15,7 +15,7 @@ status=0
 
 if [ ! -z $SRC ]; then
 	echo "Executing db export script"
-	#./export.sh -s ${SRC} -bl ${BATCH_LIMIT} -wt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME}
+	./export.sh -s ${SRC} -bl ${BATCH_LIMIT} -wt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME}
 	. read_properties.sh $SRC
 
 	SRC_URL=$URL

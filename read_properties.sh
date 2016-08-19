@@ -11,6 +11,7 @@ if [ "$SRC" == 'prd' ]; then
   DB_SCHEMA=c
   G_ANALYTICS=$prd_g_analytics
   URL=$prd_url
+  SHIB_URL=$prd_shib_url
 
 elif [ "$SRC" == 'nyudev' ]; then
   DB_USER=$dev_db_user
@@ -19,6 +20,7 @@ elif [ "$SRC" == 'nyudev' ]; then
   DB_SCHEMA=$nyuupdates_db_name
   G_ANALYTICS=$dev_g_analytics
   URL=$dev_url
+  SHIB_URL=$dev_shib_url
 
 elif [ "$SRC" == 'nyuupdates' ]; then
   DB_USER=$nyuupdates_db_user
@@ -27,6 +29,7 @@ elif [ "$SRC" == 'nyuupdates' ]; then
   DB_SCHEMA=$sswtest_db_name
   G_ANALYTICS=$nyuupdates_g_analytics
   URL=$nyuupdates_url
+  SHIB_URL=$nyuupdates_shib_url
 
 elif [ "$SRC" == 'sswtest' ]; then
   DB_USER=$sswtest_db_user
@@ -44,6 +47,7 @@ elif [ "$SRC" == 'wptst' ]; then
   DB_SCHEMA=$wptst_db_name
   G_ANALYTICS=$wptst_g_analytics
   URL=$wptst_url
+  SHIB_URL=$wptst_shib_url
 
 elif [ "$SRC" == 'pagely_prd' ]; then
   DB_USER=$pagely_prd_db_user
@@ -75,10 +79,9 @@ elif [ "$SRC" == 'pagely_dev' ]; then
   DB_SCHEMA=$pagely_dev_db_name
 	URL=$pagely_dev_url # Value for URL replacement
   G_ANALYTICS=$pagely_dev_g_analytics
-  
   HOST_NAME=$pagely_dev_host
   DIR=$pagely_dev_db_dir
-  SHIB_URL=$pagely_test_prd_shib_url
+  SHIB_URL=$pagely_dev_shib_url
   SUPERADMIN=$pagely_dev_superadmin
 else
 	echo "Source incorrectly specified"
@@ -102,20 +105,5 @@ export SUPERADMIN
 
 export SSH_KEY_PATH
 export SSH_USERNAME
-
-echo $DB_USER
-echo $DB_PASSWORD
-echo $DB_HOST_NAME
-echo $DB_SCHEMA
-echo $URL
-echo $G_ANALYTICS
-echo $HOST_NAME
-echo $DIR
-echo $SHIB_URL
-echo $SUPERADMIN
-
-echo $SSH_KEY_PATH
-echo $SSH_USERNAME
-
 
 return

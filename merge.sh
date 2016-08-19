@@ -35,4 +35,4 @@ if [ ! -d "$ARCHIVES_DIR" ]; then
   mkdir $ARCHIVES_DIR
 fi
 
-mv db_backup/${DB_FILE_NAME}.sql archives/${DB_FILE_NAME}.sql
+cp ${BACKUP_DIR}/${DB_FILE_NAME}.sql ${ARCHIVES_DIR}/${DB_FILE_NAME}.sql
