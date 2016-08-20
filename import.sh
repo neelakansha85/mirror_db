@@ -4,7 +4,6 @@
 
 BACKUP_DIR='db_backup'
 DROP_SQL_FILE='drop_tables'
-FORCE_IMPORT=""
 
 . parse_arguments.sh
 
@@ -43,7 +42,7 @@ if [ -e $DB_FILE_NAME.sql ]; then
 	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=0"
 
 	#import statement
-	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${FORCE_IMPORT} ${DB_SCHEMA} < ${DB_FILE_NAME}.sql
+	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${DB_FILE_NAME}.sql
 	
 	# Enable foreign key check after importing
 	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=1"

@@ -7,7 +7,6 @@ DB_FILE_NAME="mysql_$(date +"%Y-%m-%d")"
 SRC_URL="''"
 SRC_SHIB_URL="''"
 SRC_G_ANALYTICS="''"
-FORCE_IMPORT=""
 
 . parse_arguments.sh
 
@@ -15,8 +14,10 @@ FORCE_IMPORT=""
 status=0
 
 if [ ! -z $SRC ]; then
-	echo "Executing db export script"
-	./export.sh -s ${SRC} -bl ${BATCH_LIMIT} -wt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME}
+	if [ ! "$SKIP_EXPORT" = true ]; then
+		echo "Executing db export script"
+		./export.sh -s ${SRC} -bl ${BATCH_LIMIT} -wt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME}
+	fi
 	. read_properties.sh $SRC
 
 	SRC_URL=$URL
@@ -29,9 +30,10 @@ fi
 
 if [ ! -z $DEST ]; then
 	if [[ $status == 0 ]]; then
-		echo "Executing db import script"
-
-		./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} -site-url ${SRC_URL} -shib ${SRC_SHIB_URL} -g-analytics ${SRC_G_ANALYTICS}
+		if [ ! "$SKIP_IMPORT" = true ]; then
+			echo "Executing db import script"
+			./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} -site-url ${SRC_URL} -shib ${SRC_SHIB_URL} -g-analytics ${SRC_G_ANALYTICS} ${FORCE_IMPORT}
+		fi
 	else
 		echo "Import process did not complete successfully"
 	fi

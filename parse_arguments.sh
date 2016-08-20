@@ -41,8 +41,14 @@ if [ $# -ge 2 ]; then
             i=`expr ${i}+1`
             SRC_G_ANALYTICS=${myarray[i]}
 
-        elif [ "${myarray[i]}" == "--force-import" ]; then
+        elif [ "${myarray[i]}" == "--force" ]; then
             FORCE_IMPORT='--force'
+
+        elif [ "${myarray[i]}" == "--skip-export" ]; then
+            SKIP_EXPORT=true
+
+        elif [ "${myarray[i]}" == "--skip-import" ]; then
+            SKIP_IMPORT=true
 
         else
             echo "Please select correct option"
@@ -60,6 +66,8 @@ if [ $# -ge 2 ]; then
     export SRC_SHIB_URL
     export SRC_G_ANALYTICS
     export FORCE_IMPORT
+    export SKIP_EXPORT
+    export SKIP_IMPORT
     
     return
 else
