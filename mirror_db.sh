@@ -7,6 +7,7 @@ DB_FILE_NAME="mysql_$(date +"%Y-%m-%d")"
 SRC_URL="''"
 SRC_SHIB_URL="''"
 SRC_G_ANALYTICS="''"
+FORCE_IMPORT=""
 
 . parse_arguments.sh
 
