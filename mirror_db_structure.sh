@@ -25,12 +25,12 @@ if [ "$ARG1" == "mk" ]; then
 	# Remove all bash scripts from previous run if any
 	echo ''
 	echo "Attempting to remove all bash files if exists in ${REMOTE_DIR}"
-	rm $IMPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $DROP_SQL_FILE
+	rm $IMPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $DROP_SQL_FILE.sql
 
 	#chmod 775 $REMOTE_DIR $REMOTE_DIR/$BACKUP_DIR
 
 elif [ "$ARG1" == "rm" ]; then
 	cd $REMOTE_DIR
-	rm $IMPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $DROP_SQL_FILE
+	rm $IMPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $DROP_SQL_FILE.sql
 fi
 
