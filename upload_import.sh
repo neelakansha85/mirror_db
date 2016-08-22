@@ -30,13 +30,13 @@ if [ -e $DB_FILE_NAME.sql ]; then
     sed -i '' 's/'${SRC_URL}'/'${URL}'/g' ${DB_FILE_NAME}.sql
   fi
 
-  if [ ! -z $SRC_SHIB_URL ]; then
+  if [ ! -z $SRC_SHIB_URL ] && [ "$SRC_SHIB_URL" != "''" ]; then
     # Replace Shib Production with Shib QA 
     echo "Replacing Shibboleth URL..."
     sed -i '' 's/'${SRC_SHIB_URL}'/'${SHIB_URL}'/g' ${DB_FILE_NAME}.sql
   fi
 
-  if [ ! -z $SRC_G_ANALYTICS ]; then
+  if [ ! -z $SRC_G_ANALYTICS ] && [ "$SRC_G_ANALYTICS" != "''" ]; then
     echo "Replacing Google Analytics code..."
     sed -i '' 's/'${SRC_G_ANALYTICS}'/'${G_ANALYTICS}'/g' ${DB_FILE_NAME}.sql
   fi
