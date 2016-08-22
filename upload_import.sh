@@ -27,18 +27,18 @@ if [ -e $DB_FILE_NAME.sql ]; then
     # Replace old domain with the new domain
     echo "Replacing Site URL..."
     echo "Running -> sed -i'' 's/'${SRC_URL}'/'${URL}'/g' ${DB_FILE_NAME}.sql"
-    sed -i'' 's/'${SRC_URL}'/'${URL}'/g' ${DB_FILE_NAME}.sql
+    sed -i '' 's/'${SRC_URL}'/'${URL}'/g' ${DB_FILE_NAME}.sql
   fi
 
   if [ ! -z $SRC_SHIB_URL ]; then
     # Replace Shib Production with Shib QA 
     echo "Replacing Shibboleth URL..."
-    sed -i'' 's/'${SRC_SHIB_URL}'/'${SHIB_URL}'/g' ${DB_FILE_NAME}.sql
+    sed -i '' 's/'${SRC_SHIB_URL}'/'${SHIB_URL}'/g' ${DB_FILE_NAME}.sql
   fi
 
   if [ ! -z $SRC_G_ANALYTICS ]; then
     echo "Replacing Google Analytics code..."
-    sed -i'' 's/'${SRC_G_ANALYTICS}'/'${G_ANALYTICS}'/g' ${DB_FILE_NAME}.sql
+    sed -i '' 's/'${SRC_G_ANALYTICS}'/'${G_ANALYTICS}'/g' ${DB_FILE_NAME}.sql
   fi
 fi
 
