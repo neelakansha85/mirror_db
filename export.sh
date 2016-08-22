@@ -24,16 +24,16 @@ now=$(date +"%T")
 echo "Current time : $now "
 
 TOTAL=1
-BATCH_COUNT=0
-POOL_COUNT=0
+BATCH_COUNT=1
+POOL_COUNT=1
 
 for DBTB in `cat ${LIST_FILE_NAME}`
 do
-    if [ ${POOL_COUNT} -eq 0 ]
+    if [ ${POOL_COUNT} -eq 1 ]
     then
         echo "Starting a new pool of downloads... "
     fi
-    if [ ${BATCH_COUNT} -eq 0 ]
+    if [ ${BATCH_COUNT} -eq 1 ]
     then
         echo "Starting new batch of downloads... "
     fi
@@ -46,13 +46,13 @@ do
     (( TOTAL++ ))
     if [ ${BATCH_COUNT} -eq ${BATCH_LIMIT} ]
     then
-        BATCH_COUNT=0
+        BATCH_COUNT=1
         echo "Waiting to start new batch... "
         sleep $WAIT_TIME
     fi
     if [ ${POOL_COUNT} -eq ${POOL_LIMIT} ]
     then
-        POOL_COUNT=0
+        POOL_COUNT=1
         echo "Waiting to start new pool... "
         sleep $POOL_WAIT_TIME
     fi

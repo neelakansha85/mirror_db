@@ -16,12 +16,14 @@ mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SC
 cd ${BACKUP_DIR}
 
 # Disable foreign key check before importing
+echo "Disabling foreign key check before importing db"
 mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=0"
 
 # Import statement
 mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${DB_FILE_NAME}.sql
 
 # Enable foreign key check after importing
+echo "Enabling foreign key check after importing db"
 mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=1"
 
 cd ..
