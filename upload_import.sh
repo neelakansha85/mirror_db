@@ -18,6 +18,25 @@ PROPERTIES_FILE='db.properties'
 chmod 774 $IMPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $STRUCTURE_FILE
 chmod 774 $DROP_SQL_FILE.sql
 
+cd ${BACKUP_DIR}
+
+if [ -e $DB_FILE_NAME.sql ]; then
+  echo "File ${DB_FILE_NAME}.sql found..."
+  echo "Changing environment specific information"
+  # Replace old domain with the new domain
+  echo "Replacing Site URL..."
+  echo "Running -> sed -i'' 's/'${SRC_URL}'/'${URL}'/g' ${DB_FILE_NAME}.sql"
+  sed -i'' 's/'${SRC_URL}'/'${URL}'/g' ${DB_FILE_NAME}.sql
+
+  # Replace Shib Production with Shib QA 
+  echo "Replacing Shibboleth URL..."
+  sed -i'' 's/'${SRC_SHIB_URL}'/'${SHIB_URL}'/g' ${DB_FILE_NAME}.sql
+  
+  echo "Replacing Google Analytics code..."
+  sed -i'' 's/'${SRC_G_ANALYTICS}'/'${G_ANALYTICS}'/g' ${DB_FILE_NAME}.sql
+fi
+
+cd ..
 
 expect <<- DONE
 #establish sftp connection
@@ -63,11 +82,18 @@ DONE
 if [[ $? == 0 ]]; then
   echo "File Transfer complete."
 
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS};"
+  echo "Starting to import database..."
+  now=$(date +"%T")
+  echo "Current time : $now "
 
-  #check status of import script
+  # Execute Import.sh to import database
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME};"
+
+  # Check status of import script
   if [[ $? == 0 ]]; then
-    echo "Closing import script..."
+    echo "Database imported successfully..."
+    now=$(date +"%T")
+    echo "Current time : $now "
   else
     echo "Import Failed Check Log"
   fi
