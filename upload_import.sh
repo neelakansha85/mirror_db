@@ -103,4 +103,8 @@ else
   exit 1
 fi
 
+# Remove all scripts related to mirror_db from server
 ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./${STRUCTURE_FILE} rm ${REMOTE_SCRIPT_DIR} ${BACKUP_DIR}"
+
+# Remove ${STRUCTURE_FILE} from server to avoid permission issues later
+ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; rm ${STRUCTURE_FILE}"
