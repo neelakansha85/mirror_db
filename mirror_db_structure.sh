@@ -17,6 +17,10 @@ if [ "$ARG1" == "mk" ]; then
 	  mkdir $BACKUP_DIR
 	fi
 
+	# Remove all bash scripts from previous run if any
+	echo "Attempting to remove all bash files if exists in ${REMOTE_DIR}"
+	rm *.sh
+
 	#chmod 775 $REMOTE_DIR $REMOTE_DIR/$BACKUP_DIR
 
 elif [ "$ARG1" == "rm" ]; then
