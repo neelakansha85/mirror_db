@@ -63,7 +63,7 @@ DONE
 if [[ $? == 0 ]]; then
   echo "File Transfer complete."
 
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -site-url ${SRC_URL} -shib ${SRC_SHIB_URL} -g-analytics ${SRC_G_ANALYTICS};"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS};"
 
   #check status of import script
   if [[ $? == 0 ]]; then

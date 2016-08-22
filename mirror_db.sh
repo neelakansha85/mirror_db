@@ -32,7 +32,7 @@ if [ ! -z $DEST ]; then
 	if [[ $status == 0 ]]; then
 		if [ ! "$SKIP_IMPORT" = true ]; then
 			echo "Executing db import script"
-			./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} -site-url ${SRC_URL} -shib ${SRC_SHIB_URL} -g-analytics ${SRC_G_ANALYTICS} ${FORCE_IMPORT}
+			./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${FORCE_IMPORT}
 		fi
 	else
 		echo "Import process did not complete successfully"

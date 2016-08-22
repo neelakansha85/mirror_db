@@ -29,15 +29,15 @@ if [ $# -ge 2 ]; then
             i=`expr ${i}+1`
             DB_FILE_NAME=${myarray[i]}
 
-        elif [ "${myarray[i]}" == "-site-url" ]; then
+        elif [ "${myarray[i]}" == "--site-url" ]; then
             i=`expr ${i}+1`
             SRC_URL=${myarray[i]}
 
-        elif [ "${myarray[i]}" == "-shib" ]; then
+        elif [ "${myarray[i]}" == "--shib-url" ]; then
             i=`expr ${i}+1`
             SRC_SHIB_URL=${myarray[i]}
 
-        elif [ "${myarray[i]}" == "-g-analytics" ]; then
+        elif [ "${myarray[i]}" == "--g-analytics" ]; then
             i=`expr ${i}+1`
             SRC_G_ANALYTICS=${myarray[i]}
 
