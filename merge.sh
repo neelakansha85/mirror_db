@@ -22,7 +22,7 @@ do
     TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
     gunzip ${DB}_${TB}.sql.gz
     `cat ${DB}_${TB}.sql >> ${DB_FILE_NAME}_${TOTAL}.sql`
-	echo "" >> ${DB_FILE_NAME}.sql
+	echo "" >> ${DB_FILE_NAME}_${TOTAL}.sql
 	`rm ${DB}_${TB}.sql`
 	(( MERGE_BATCH_COUNT++ ))
     if [ ${MERGE_BATCH_COUNT} -eq ${MERGE_BATCH_LIMIT} ]

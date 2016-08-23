@@ -20,27 +20,30 @@ chmod 774 $DROP_SQL_FILE.sql
 
 cd ${BACKUP_DIR}
 
-if [ -e $DB_FILE_NAME.sql ]; then
-  echo "File ${DB_FILE_NAME}.sql found..."
-  echo "Changing environment specific information"
-  if [ ! -z $SRC_URL ]; then
-    # Replace old domain with the new domain
-    echo "Replacing Site URL..."
-    echo "Running -> sed -i'' 's/'${SRC_URL}'/'${URL}'/g' ${DB_FILE_NAME}.sql"
-    sed -i '' 's/'${SRC_URL}'/'${URL}'/g' ${DB_FILE_NAME}.sql
-  fi
+for MRDB in `ls *.sql`
+do
+  if [ -e ${MRDB} ]; then
+    echo "File ${MRDB} found..."
+    echo "Changing environment specific information"
+    if [ ! -z ${SRC_URL} ]; then
+      # Replace old domain with the new domain
+      echo "Replacing Site URL..."
+      echo "Running -> sed -i'' 's/'${SRC_URL}'/'${URL}'/g' ${MRDB}"
+      sed -i '' 's/'${SRC_URL}'/'${URL}'/g' ${MRDB}
+    fi
 
-  if [ ! -z $SRC_SHIB_URL ] && [ "$SRC_SHIB_URL" != "''" ]; then
-    # Replace Shib Production with Shib QA 
-    echo "Replacing Shibboleth URL..."
-    sed -i '' 's/'${SRC_SHIB_URL}'/'${SHIB_URL}'/g' ${DB_FILE_NAME}.sql
-  fi
+    if [ ! -z ${SRC_SHIB_URL} ] && [ "${SRC_SHIB_URL}" != "''" ]; then
+      # Replace Shib Production with Shib QA 
+      echo "Replacing Shibboleth URL..."
+      sed -i '' 's/'${SRC_SHIB_URL}'/'${SHIB_URL}'/g' ${MRDB}
+    fi
 
-  if [ ! -z $SRC_G_ANALYTICS ] && [ "$SRC_G_ANALYTICS" != "''" ]; then
-    echo "Replacing Google Analytics code..."
-    sed -i '' 's/'${SRC_G_ANALYTICS}'/'${G_ANALYTICS}'/g' ${DB_FILE_NAME}.sql
+    if [ ! -z ${SRC_G_ANALYTICS} ] && [ "${SRC_G_ANALYTICS}" != "''" ]; then
+      echo "Replacing Google Analytics code..."
+      sed -i '' 's/'${SRC_G_ANALYTICS}'/'${G_ANALYTICS}'/g' ${MRDB}
+    fi
   fi
-fi
+done
 
 cd ..
 
