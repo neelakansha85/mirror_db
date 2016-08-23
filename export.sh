@@ -72,4 +72,5 @@ fi
 cd ..
 
 # Merge all tables to one mysql.sql
-./merge.sh ${LIST_FILE_NAME} ${DB_FILE_NAME}
+./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}
+

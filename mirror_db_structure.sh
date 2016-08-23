@@ -17,9 +17,14 @@ if [ "$ARG1" == "mk" ]; then
 	  mkdir $REMOTE_DIR
 	fi
 
-	if [ ! -d "$BACKUP_DIR" ]; then
-	  cd $REMOTE_DIR
+	cd $REMOTE_DIR
+	if [ ! -d "$BACKUP_DIR" ]; then	  
 	  mkdir $BACKUP_DIR
+	else
+		# Remove all .sql files from previous run if any
+		echo ''
+		echo "Attempting to remove all .sql files if exists in ${BACKUP_DIR}"
+		rm *.sql
 	fi
 
 	# Remove all bash scripts from previous run if any

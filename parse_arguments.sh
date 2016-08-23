@@ -17,6 +17,10 @@ if [ $# -ge 2 ]; then
             i=`expr ${i}+1`
             BATCH_LIMIT=${myarray[i]}
 
+        elif [ "${myarray[i]}" == "-mbl" ]; then
+            i=`expr ${i}+1`
+            MERGE_BATCH_LIMIT=${myarray[i]}
+
         elif [ "${myarray[i]}" == "-wt" ]; then
             i=`expr ${i}+1`
             WAIT_TIME=${myarray[i]}
@@ -59,6 +63,7 @@ if [ $# -ge 2 ]; then
     export SRC
     export DEST
     export BATCH_LIMIT
+    export MERGE_BATCH_LIMIT
     export WAIT_TIME
     export LIST_FILE_NAME
     export DB_FILE_NAME

@@ -2,7 +2,7 @@
 
 . parse_arguments.sh
 
-# import instance based environment variables
+# Import instance based environment variables
 . read_properties.sh $DEST
 
 REMOTE_SCRIPT_DIR='mirror_db'
@@ -45,10 +45,10 @@ fi
 cd ..
 
 expect <<- DONE
-#establish sftp connection
+# Establish sftp connection
 spawn sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}
 
-#check connection and transfer file to pagely server
+# Check connection and transfer file to destination server
 expect sftp>
 send "put ${STRUCTURE_FILE}\r"
 expect sftp>
@@ -59,10 +59,10 @@ DONE
 ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./${STRUCTURE_FILE} mk ${REMOTE_SCRIPT_DIR} ${BACKUP_DIR}"
 
 expect <<- DONE
-#establish sftp connection
+# Establish sftp connection
 spawn sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}
 
-#check connection and transfer file to pagely server
+# Check connection and transfer all files to destination server
 
 expect sftp>
 send "put ${IMPORT_SCRIPT}\r"
@@ -79,7 +79,7 @@ send "lcd ${BACKUP_DIR}\r"
 expect sftp>
 send "cd ${BACKUP_DIR}\r"
 expect sftp>
-send "put ${DB_FILE_NAME}.sql\r"
+send "mput *.sql\r"
 expect sftp>
 send "bye\r"
 expect eof 
