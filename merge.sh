@@ -25,10 +25,10 @@ do
 	echo "" >> ${DB_FILE_NAME}.sql
 	`rm ${DB}_${TB}.sql`
 	(( MERGE_BATCH_COUNT++ ))
-	(( TOTAL++ ))
     if [ ${MERGE_BATCH_COUNT} -eq ${MERGE_BATCH_LIMIT} ]
     then
         MERGE_BATCH_COUNT=1
+        (( TOTAL++ ))
         echo "Merged ${MERGE_BATCH_LIMIT} tables, starting new batch for merging... "
     fi
 done
