@@ -9,9 +9,11 @@ DROP_SQL_FILE='drop_tables'
 
 . read_properties.sh $DEST
 
-# Drop all tables before import process
-echo "Emptying Database..."
-mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} < ${DROP_SQL_FILE}.sql
+# Drop all tables using sql procedure before import process
+if [ "$DROP_TABLES_SQL" = true ]; then
+	echo "Emptying Database using sql procedure..."
+	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} < ${DROP_SQL_FILE}.sql
+fi
 
 cd ${BACKUP_DIR}
 
@@ -24,6 +26,7 @@ do
 	# Import statement
 	echo "Starting to import ${MRDB}"
 	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${MRDB}
+	sleep $IMPORT_WAIT_TIME
 done
 
 # Enable foreign key check after importing

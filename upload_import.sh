@@ -15,6 +15,10 @@ READ_PROPERTIES_FILE='read_properties.sh'
 STRUCTURE_FILE='mirror_db_structure.sh'
 PROPERTIES_FILE='db.properties'
 
+if [ "$DROP_TABLES_SQL" = true ]; then
+  DROP_TABLES='--drop-tables-sql'
+fi
+
 chmod 774 $IMPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $STRUCTURE_FILE
 chmod 774 $DROP_SQL_FILE.sql
 
@@ -95,8 +99,14 @@ if [[ $? == 0 ]]; then
   now=$(date +"%T")
   echo "Current time : $now "
 
+  # Drop all tables using wp-cli before import process
+  if [ "$DROP_TABLES" = true ]; then
+    echo "Emptying Database using wp-cli..."
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; wp db reset --yes"
+  fi
+
   # Execute Import.sh to import database
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME};"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${FORCE_IMPORT} ${DROP_TABLES_SQL};"
 
   # Check status of import script
   if [[ $? == 0 ]]; then

@@ -2,6 +2,7 @@
 
 BATCH_LIMIT=10
 WAIT_TIME=3
+IMPORT_WAIT_TIME=180
 LIST_FILE_NAME='table_list.txt'
 DB_FILE_NAME="mysql_$(date +"%Y-%m-%d")"
 SRC_URL="''"
@@ -9,6 +10,14 @@ SRC_SHIB_URL="''"
 SRC_G_ANALYTICS="''"
 
 . parse_arguments.sh
+
+if [ "$DROP_TABLES" = true ]; then
+	DROP_TABLES='--drop-tables'
+fi
+
+if [ "$DROP_TABLES_SQL" = true ]; then
+	DROP_TABLES='--drop-tables-sql'
+fi
 
 #set status to default 0
 status=0
@@ -32,7 +41,7 @@ if [ ! -z $DEST ]; then
 	if [[ $status == 0 ]]; then
 		if [ ! "$SKIP_IMPORT" = true ]; then
 			echo "Executing db import script"
-			./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${FORCE_IMPORT}
+			./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${FORCE_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL}
 		fi
 	else
 		echo "Import process did not complete successfully"
