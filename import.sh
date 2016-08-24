@@ -17,20 +17,23 @@ fi
 
 cd ${BACKUP_DIR}
 
-# Disable foreign key check before importing
-echo "Disabling foreign key check before importing db"
-mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=0"
+if [ ! "$SKIP_IMPORT" = true ]; then
 
-for MRDB in `ls *.sql`
-do
-	# Import statement
-	echo "Starting to import ${MRDB}"
-	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${MRDB}
-	sleep $IMPORT_WAIT_TIME
-done
+	# Disable foreign key check before importing
+	echo "Disabling foreign key check before importing db"
+	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=0"
 
-# Enable foreign key check after importing
-echo "Enabling foreign key check after importing db"
-mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=1"
+	for MRDB in `ls *.sql`
+	do
+		# Import statement
+		echo "Starting to import ${MRDB}"
+		mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${MRDB}
+		sleep $IMPORT_WAIT_TIME
+	done
+
+	# Enable foreign key check after importing
+	echo "Enabling foreign key check after importing db"
+	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=1"
+fi
 
 cd ..

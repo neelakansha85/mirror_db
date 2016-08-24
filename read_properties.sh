@@ -57,7 +57,7 @@ elif [ "$SRC" == 'pagely_prd' ]; then
   G_ANALYTICS=$pagely_prd_g_analytics
   URL=$pagely_prd_url # Value for URL replacement
   HOST_NAME=$pagely_prd_host
-  DIR=$pagely_prd_dir
+  SITE_DIR=$pagely_prd_dir
   SHIB_URL=$pagely_prd_shib_url
 
 elif [ "$SRC" == 'pagely_test_prd' ]; then
@@ -68,7 +68,7 @@ elif [ "$SRC" == 'pagely_test_prd' ]; then
   G_ANALYTICS=$pagely_test_prd_g_analytics
   URL=$pagely_test_prd_url # Value for URL replacement
   HOST_NAME=$pagely_test_prd_host
-  DIR=$pagely_test_prd_dir
+  SITE_DIR=$pagely_test_prd_dir
   SHIB_URL=$pagely_test_prd_shib_url
   SUPERADMIN=$pagely_test_prd_superadmin
 
@@ -80,7 +80,7 @@ elif [ "$SRC" == 'pagely_dev' ]; then
 	URL=$pagely_dev_url # Value for URL replacement
   G_ANALYTICS=$pagely_dev_g_analytics
   HOST_NAME=$pagely_dev_host
-  DIR=$pagely_dev_db_dir
+  SITE_DIR=$pagely_dev_db_dir
   SHIB_URL=$pagely_dev_shib_url
   SUPERADMIN=$pagely_dev_superadmin
 else
@@ -99,7 +99,7 @@ export DB_SCHEMA
 export URL
 export G_ANALYTICS
 export HOST_NAME
-export DIR
+export SITE_DIR
 export SHIB_URL
 export SUPERADMIN
 

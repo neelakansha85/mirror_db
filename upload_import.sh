@@ -14,6 +14,10 @@ READ_PROPERTIES_FILE='read_properties.sh'
 STRUCTURE_FILE='mirror_db_structure.sh'
 PROPERTIES_FILE='db.properties'
 
+if [ "$SKIP_IMPORT" = true ]; then
+  SKIP_IMPORT='--skip-import'
+fi
+
 if [ "$DROP_TABLES_SQL" = true ]; then
   DROP_TABLES='--drop-tables-sql'
 fi
@@ -108,7 +112,7 @@ if [[ $? == 0 ]]; then
   fi
 
   # Execute Import.sh to import database
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${FORCE_IMPORT} ${DROP_TABLES_SQL};"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES_SQL};"
 
   # Check status of import script
   if [[ $? == 0 ]]; then

@@ -11,6 +11,10 @@ SRC_G_ANALYTICS="''"
 
 . parse_arguments.sh
 
+if [ "$SKIP_IMPORT" = true ]; then
+	SKIP_IMPORT='--skip-import'
+fi
+
 if [ "$DROP_TABLES" = true ]; then
 	DROP_TABLES='--drop-tables'
 fi
@@ -39,10 +43,8 @@ fi
 
 if [ ! -z $DEST ]; then
 	if [[ $status == 0 ]]; then
-		if [ ! "$SKIP_IMPORT" = true ]; then
-			echo "Executing db import script"
-			./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${FORCE_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL}
-		fi
+		echo "Executing upload_import script"
+		./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL}
 	else
 		echo "Import process did not complete successfully"
 	fi
