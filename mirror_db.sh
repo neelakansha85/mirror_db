@@ -27,6 +27,7 @@ fi
 status=0
 
 if [ ! -z $SRC ]; then
+	DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d")"
 	if [ ! "$SKIP_EXPORT" = true ]; then
 		echo "Executing db export script"
 		./export.sh -s ${SRC} -ebl ${BATCH_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME}
