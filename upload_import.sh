@@ -6,7 +6,6 @@
 . read_properties.sh $DEST
 
 REMOTE_SCRIPT_DIR='mirror_db'
-SITE_DIR="sites/${DIR}"
 BACKUP_DIR='db_backup'
 IMPORT_SCRIPT='import.sh'
 DROP_SQL_FILE='drop_tables'
@@ -82,15 +81,18 @@ send "put ${PROPERTIES_FILE}\r"
 expect sftp>
 send "put ${DROP_SQL_FILE}.sql\r"
 expect sftp>
-send "lcd ${BACKUP_DIR}\r"
-expect sftp>
-send "cd ${BACKUP_DIR}\r"
-expect sftp>
-send "mput *.sql\r"
-expect sftp>
+#send "lcd ${BACKUP_DIR}\r"
+#expect sftp>
+#send "cd ${BACKUP_DIR}\r"
+#expect sftp>
+#send "mput *.sql\r"
+#expect sftp>
 send "bye\r"
 expect eof 
 DONE
+
+# Upload all *.sql files using rsync
+rsync -rpvzhe ssh --include '*.sql' --exclude '*' ${BACKUP_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
 
 if [[ $? == 0 ]]; then
   echo "File Transfer complete."
