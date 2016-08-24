@@ -13,7 +13,7 @@ if [ $# -ge 2 ]; then
             i=`expr ${i}+1`
             DEST=${myarray[i]}
 
-        elif [ "${myarray[i]}" == "-bl" ]; then
+        elif [ "${myarray[i]}" == "-ebl" ]; then
             i=`expr ${i}+1`
             BATCH_LIMIT=${myarray[i]}
 
@@ -21,7 +21,7 @@ if [ $# -ge 2 ]; then
             i=`expr ${i}+1`
             MERGE_BATCH_LIMIT=${myarray[i]}
 
-        elif [ "${myarray[i]}" == "-wt" ]; then
+        elif [ "${myarray[i]}" == "-ewt" ]; then
             i=`expr ${i}+1`
             WAIT_TIME=${myarray[i]}
 

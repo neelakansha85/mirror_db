@@ -29,7 +29,7 @@ status=0
 if [ ! -z $SRC ]; then
 	if [ ! "$SKIP_EXPORT" = true ]; then
 		echo "Executing db export script"
-		./export.sh -s ${SRC} -bl ${BATCH_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -wt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME}
+		./export.sh -s ${SRC} -ebl ${BATCH_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME}
 	fi
 	. read_properties.sh $SRC
 
