@@ -22,11 +22,9 @@ if [ "$ARG1" == "mk" ]; then
 	  mkdir $BACKUP_DIR
 	else
 		# Remove all .sql files from previous run if any
-		cd $BACKUP_DIR
-		echo ''
-		echo "Attempting to remove all .sql files if exists in ${BACKUP_DIR}"
-		rm *.sql
-		cd ..
+		echo "Emptying ${BACKUP_DIR} dir..."
+		rm -rf $BACKUP_DIR
+		mkdir $BACKUP_DIR		
 	fi
 
 	# Remove all bash scripts from previous run if any

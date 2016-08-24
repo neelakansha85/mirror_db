@@ -96,7 +96,7 @@ expect eof
 DONE
 
 # Upload all *.sql files using rsync
-rsync -rpvzhe ssh --include '*.sql' --exclude '*' ${BACKUP_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
+rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${BACKUP_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
 
 if [[ $? == 0 ]]; then
   echo "File Transfer complete."
