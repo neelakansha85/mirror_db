@@ -5,6 +5,9 @@
 BACKUP_DIR='db_backup'
 POOL_LIMIT=7000
 POOL_WAIT_TIME=300
+NETWORK_LIST="${LIST_FILE_NAME}_network"
+NETWORK_DB="${DB_FILE_NAME}_network"
+LOGS_DIR='log'
 
 . parse_arguments.sh
 
@@ -29,6 +32,52 @@ POOL_COUNT=1
 
 for DBTB in `cat ${LIST_FILE_NAME}`
 do
+    DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`   
+    TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
+    # Export only network tables from source
+    # check for network tables from tables list like ${TB} -eq regex wp_[a-zA-Z]+[a-zA-Z0-9_]*$
+    if [ false ]; then
+        if [ ${POOL_COUNT} -eq 1 ]
+        then
+            echo "Starting a new pool of downloads... "
+        fi
+        if [ ${BATCH_COUNT} -eq 1 ]
+        then
+            echo "Starting new batch of downloads... "
+        fi
+        echo "Dowloading ${TB}.sql ... "
+        mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${DB} ${TB} | gzip > ${DB}_${TB}.sql.gz &
+        (( BATCH_COUNT++ ))
+        (( POOL_COUNT++ ))
+        (( TOTAL++ ))
+        if [ ${BATCH_COUNT} -eq ${BATCH_LIMIT} ]
+        then
+            BATCH_COUNT=1
+            echo "Waiting to start new batch... "
+            sleep $WAIT_TIME
+        fi
+        if [ ${POOL_COUNT} -eq ${POOL_LIMIT} ]
+        then
+            POOL_COUNT=1
+            echo "Waiting to start new pool... "
+            sleep $POOL_WAIT_TIME
+        fi
+        # write ${DB}.{TB} to NETWORK_LIST.txt file
+        # Remove the same values/line from ${LIST_FILE_NAME}.txt
+    fi
+done
+
+# Merge all network tables to one {SRC}_network.sql file
+# Execute ./merge.sh -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} -mbl ${MERGE_BATCH_LIMIT}
+
+if [ ! "$PARALLEL_IMPORT" = true ]
+    # Execute nohup ./mirror_db.sh -s prd -d new_prd -dbf ${NETWORK_DB} --skip-export >> /${LOGS_DIR}/mirror_db_network.log & 
+fi    
+
+for DBTB in `cat ${LIST_FILE_NAME}`
+do
+    DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`   
+    TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
     if [ ${POOL_COUNT} -eq 1 ]
     then
         echo "Starting a new pool of downloads... "
@@ -37,8 +86,6 @@ do
     then
         echo "Starting new batch of downloads... "
     fi
-    DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`   
-    TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
     echo "Dowloading ${TB}.sql ... "
     mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${DB} ${TB} | gzip > ${DB}_${TB}.sql.gz &
     (( BATCH_COUNT++ ))
@@ -53,6 +100,9 @@ do
     if [ ${POOL_COUNT} -eq ${POOL_LIMIT} ]
     then
         POOL_COUNT=1
+        if [ ! "$PARALLEL_IMPORT" = true ]
+            # Execute nohup ./mirror_db.sh -s prd -d new_prd -dbf ${DB_FILE_NAME} --skip-export >> /${LOGS_DIR}/mirror_db_import.log & 
+        fi
         echo "Waiting to start new pool... "
         sleep $POOL_WAIT_TIME
     fi

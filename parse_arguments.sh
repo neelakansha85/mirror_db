@@ -63,6 +63,9 @@ if [ $# -ge 2 ]; then
 
         elif [ "${myarray[i]}" == "--skip-import" ]; then
             SKIP_IMPORT=true
+        
+        elif [ "${myarray[i]}" == "--parallel-import" ]; then
+            PARALLEL_IMPORT=true
 
         else
             echo "Please select correct option"
@@ -86,6 +89,7 @@ if [ $# -ge 2 ]; then
     export DROP_TABLES_SQL
     export SKIP_EXPORT
     export SKIP_IMPORT
+    export PARALLEL_IMPORT
     
     return
 else

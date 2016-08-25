@@ -8,6 +8,11 @@ DB_FILE_NAME="mysql_$(date +"%Y-%m-%d")"
 SRC_URL="''"
 SRC_SHIB_URL="''"
 SRC_G_ANALYTICS="''"
+LOGS_DIR='log'
+
+if [ ! -d "$LOGS_DIR" ]; then
+	mkdir $LOGS_DIR
+fi
 
 . parse_arguments.sh
 
@@ -42,12 +47,14 @@ if [ ! -z $SRC ]; then
 	status=$?
 fi
 
-if [ ! -z $DEST ]; then
-	if [[ $status == 0 ]]; then
-		echo "Executing upload_import script"
-		./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL}
-	else
-		echo "Import process did not complete successfully"
+if [ ! "$PARALLEL_IMPORT" = true ]
+	if [ ! -z $DEST ]; then
+		if [[ $status == 0 ]]; then
+			echo "Executing upload_import script"
+			./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL}
+		else
+			echo "Import process did not complete successfully"
+		fi
 	fi
 fi
 
