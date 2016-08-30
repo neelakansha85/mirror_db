@@ -23,13 +23,22 @@ if [ ! "$SKIP_IMPORT" = true ]; then
 	echo "Disabling foreign key check before importing db"
 	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=0"
 
-	for MRDB in `ls *.sql`
-	do
-		# Import statement
-		echo "Starting to import ${MRDB}"
-		mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${MRDB}
-		sleep $IMPORT_WAIT_TIME
-	done
+	if [ ! -z $DB_FILE_NAME ]; then
+			# Import statement
+			echo "Starting to import ${DB_FILE_NAME}"
+			mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${DB_FILE_NAME}
+			# Remove file to avoid importing it twice
+			rm $DB_FILE_NAME
+	else
+		# Scan for all *.sql files to import 
+		for MRDB in `ls *.sql`
+		do
+			# Import statement
+			echo "Starting to import ${MRDB}"
+			mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${MRDB}
+			sleep $IMPORT_WAIT_TIME
+		done
+	fi
 
 	# Enable foreign key check after importing
 	echo "Enabling foreign key check after importing db"

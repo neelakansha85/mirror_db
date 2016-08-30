@@ -5,11 +5,15 @@
 BACKUP_DIR='db_backup'
 POOL_LIMIT=7000
 POOL_WAIT_TIME=300
-NETWORK_LIST="${LIST_FILE_NAME}_network"
-NETWORK_DB="${DB_FILE_NAME}_network"
 LOGS_DIR='log'
+PI_TOTAL_FILE='pi_total.txt'
 
 . parse_arguments.sh
+
+LIST_FILE_EXT=`echo ${LIST_FILE_NAME} | sed 's/\./ /g' | awk '{print $2}'`
+LIST_FILE_N=`echo ${LIST_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
+NETWORK_LIST="${LIST_FILE_N}_network.${LIST_FILE_EXT}"
+NETWORK_DB="${DB_FILE_NAME}_network"
 
 # import instance environment variables
 . read_properties.sh $SRC
@@ -29,14 +33,15 @@ echo "Current time : $now "
 TOTAL=1
 BATCH_COUNT=1
 POOL_COUNT=1
+PI_TOTAL=1
 
 for DBTB in `cat ${LIST_FILE_NAME}`
 do
     DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`   
     TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
+
     # Export only network tables from source
-    # check for network tables from tables list like ${TB} -eq regex wp_[a-zA-Z]+[a-zA-Z0-9_]*$
-    if [ false ]; then
+    if [[ $TB =~ wp_[a-z|A-z]+[a-zA-Z0-9_]* ]]; then
         if [ ${POOL_COUNT} -eq 1 ]
         then
             echo "Starting a new pool of downloads... "
@@ -50,6 +55,9 @@ do
         (( BATCH_COUNT++ ))
         (( POOL_COUNT++ ))
         (( TOTAL++ ))
+
+        echo "${DB}.{TB}" >> ${NETWORK_LIST}
+        
         if [ ${BATCH_COUNT} -eq ${BATCH_LIMIT} ]
         then
             BATCH_COUNT=1
@@ -62,28 +70,28 @@ do
             echo "Waiting to start new pool... "
             sleep $POOL_WAIT_TIME
         fi
-        # write ${DB}.{TB} to NETWORK_LIST.txt file
-        # Remove the same values/line from ${LIST_FILE_NAME}.txt
+    else
+        echo "${DB}.{TB}" >> temp.txt
     fi
 done
 
-# Merge all network tables to one {SRC}_network.sql file
-# Execute ./merge.sh -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} -mbl ${MERGE_BATCH_LIMIT}
+rm ${LIST_FILE_NAME}
+mv temp.txt ${LIST_FILE_NAME}
 
-if [ ! "$PARALLEL_IMPORT" = true ]
-    # Execute nohup ./mirror_db.sh -s prd -d new_prd -dbf ${NETWORK_DB} --skip-export >> /${LOGS_DIR}/mirror_db_network.log & 
+if [ "$PARALLEL_IMPORT" = true ]; then
+    # Initiate merging and importing all network tables
+    nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} --skip-export --parallel-import >> /${LOGS_DIR}/mirror_db_network.log & 
 fi    
 
 for DBTB in `cat ${LIST_FILE_NAME}`
 do
     DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`   
     TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
-    if [ ${POOL_COUNT} -eq 1 ]
-    then
+    
+    if [ ${POOL_COUNT} -eq 1 ]; then
         echo "Starting a new pool of downloads... "
     fi
-    if [ ${BATCH_COUNT} -eq 1 ]
-    then
+    if [ ${BATCH_COUNT} -eq 1 ]; then
         echo "Starting new batch of downloads... "
     fi
     echo "Dowloading ${TB}.sql ... "
@@ -91,18 +99,22 @@ do
     (( BATCH_COUNT++ ))
     (( POOL_COUNT++ ))
     (( TOTAL++ ))
-    if [ ${BATCH_COUNT} -eq ${BATCH_LIMIT} ]
-    then
-        BATCH_COUNT=1
+
+    if [ "$PARALLEL_IMPORT" = true ]; then
+        echo "${DB}.{TB}" >> ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT}
+    fi
+
+    if [ ${BATCH_COUNT} -eq ${BATCH_LIMIT} ]; then
+            BATCH_COUNT=1
         echo "Waiting to start new batch... "
         sleep $WAIT_TIME
     fi
-    if [ ${POOL_COUNT} -eq ${POOL_LIMIT} ]
-    then
-        POOL_COUNT=1
-        if [ ! "$PARALLEL_IMPORT" = true ]
-            # Execute nohup ./mirror_db.sh -s prd -d new_prd -dbf ${DB_FILE_NAME} --skip-export >> /${LOGS_DIR}/mirror_db_import.log & 
+    if [ ${POOL_COUNT} -eq ${POOL_LIMIT} ]; then
+        if [ "$PARALLEL_IMPORT" = true ]; then
+            nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT} -dbf ${DB_FILE_NAME}_${PI_TOTAL} --skip-export --parallel-import >> /${LOGS_DIR}/mirror_db_pi.log & 
         fi
+        POOL_COUNT=1
+        (( PI_TOTAL++ ))
         echo "Waiting to start new pool... "
         sleep $POOL_WAIT_TIME
     fi
@@ -113,14 +125,17 @@ echo "Total no of tables downloaded = ${TOTAL}"
 now=$(date +"%T")
 echo "Current time : $now "
 
-if [ ${BATCH_COUNT} -gt 0 ]
-then
+if [ ${BATCH_COUNT} -gt 0 ]; then
     sleep 2
 fi
 
 # Get to root dir
 cd ..
 
-# Merge all tables to one mysql.sql
-./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}
-
+if [ ! "$PARALLEL_IMPORT" = true ]; then
+    # Merge all tables to one mysql.sql
+    ./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}
+else
+    # Write PI_TOTAL value in PI_TOTAL_FILE to indicate the last merged sql file
+    echo PI_TOTAL=${PI_TOTAL} > ${PI_TOTAL_FILE}
+fi

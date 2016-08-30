@@ -2,12 +2,18 @@
 
 # Config/Default Options
 BACKUP_DIR='db_backup'
+MERGED_DIR='db_merged'
 ARCHIVES_DIR='archives'
 MERGE_BATCH_LIMIT=10000
+DB_SUFFIX=''
 
 . parse_arguments.sh
 
 cd ${BACKUP_DIR}
+
+if [ ! -d "$MERGED_DIR" ]; then
+    mkdir $MERGED_DIR
+fi
 
 echo "Starting to merge DB to ${DB_FILE_NAME}.sql... "
 now=$(date +"%T")
@@ -21,17 +27,26 @@ do
     DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`
     TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
     gunzip ${DB}_${TB}.sql.gz
-    `cat ${DB}_${TB}.sql >> ${DB_FILE_NAME}_${TOTAL}.sql`
-	echo "" >> ${DB_FILE_NAME}_${TOTAL}.sql
+    
+    if [ ! "$PARALLEL_IMPORT" = true ]; then
+        DB_SUFFIX="_${TOTAL}"
+    fi
+    
+    `cat ${DB}_${TB}.sql >> ${DB_FILE_NAME}${DB_SUFFIX}.sql`
+	echo "" >> ${DB_FILE_NAME}${DB_SUFFIX}.sql
 	`rm ${DB}_${TB}.sql`
 	(( MERGE_BATCH_COUNT++ ))
-    if [ ${MERGE_BATCH_COUNT} -eq ${MERGE_BATCH_LIMIT} ]
-    then
+    if [ ${MERGE_BATCH_COUNT} -eq ${MERGE_BATCH_LIMIT} ]; then
+        mv ${DB_FILE_NAME}${DB_SUFFIX}.sql $MERGED_DIR/${DB_FILE_NAME}${DB_SUFFIX}.sql
         MERGE_BATCH_COUNT=1
         (( TOTAL++ ))
         echo "Merged ${MERGE_BATCH_LIMIT} tables, starting new batch for merging... "
     fi
 done
+
+if [ -e ${DB_FILE_NAME}${DB_SUFFIX}.sql ]; then
+    mv ${DB_FILE_NAME}${DB_SUFFIX}.sql $MERGED_DIR/${DB_FILE_NAME}${DB_SUFFIX}.sql
+fi
 
 echo "Completed merging DB to ${DB_FILE_NAME}.sql... "
 echo "Total no of merged sql files = ${TOTAL}"
@@ -47,7 +62,7 @@ if [ ! -d "$ARCHIVES_DIR" ]; then
 	mkdir $ARCHIVES_DIR
 fi
 
-cd ${BACKUP_DIR}
+cd ${BACKUP_DIR}/${MERGED_DIR}
 for MRDB in `ls *.sql`
 do
 	cp ${MRDB} ../${ARCHIVES_DIR}/${MRDB}
