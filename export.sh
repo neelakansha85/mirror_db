@@ -55,7 +55,7 @@ do
         (( POOL_COUNT++ ))
         (( TOTAL++ ))
 
-        echo "${DB}.{TB}" >> ${NETWORK_LIST}
+        echo "${DB}.${TB}" >> ${NETWORK_LIST}
         
         if [ ${BATCH_COUNT} -eq ${BATCH_LIMIT} ]
         then
@@ -70,7 +70,7 @@ do
             sleep $POOL_WAIT_TIME
         fi
     else
-        echo "${DB}.{TB}" >> temp.txt
+        echo "${DB}.${TB}" >> temp.txt
     fi
 done
 
@@ -100,7 +100,7 @@ do
     (( TOTAL++ ))
 
     if [ "$PARALLEL_IMPORT" = true ]; then
-        echo "${DB}.{TB}" >> ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT}
+        echo "${DB}.${TB}" >> ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT}
     fi
 
     if [ ${BATCH_COUNT} -eq ${BATCH_LIMIT} ]; then
