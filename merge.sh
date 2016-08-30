@@ -4,7 +4,6 @@
 BACKUP_DIR='db_backup'
 MERGED_DIR='db_merged'
 ARCHIVES_DIR='archives'
-MERGE_BATCH_LIMIT=10000
 DB_SUFFIX=''
 
 . parse_arguments.sh

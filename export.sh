@@ -3,7 +3,6 @@
 # Config Options
 
 BACKUP_DIR='db_backup'
-POOL_LIMIT=7000
 POOL_WAIT_TIME=300
 LOGS_DIR='log'
 PI_TOTAL_FILE='pi_total.txt'
