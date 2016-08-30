@@ -39,7 +39,7 @@ if [ ! -z $SRC ]; then
 	if [ ! "$SKIP_EXPORT" = true ]; then
 		DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d")"
 		echo "Executing db export script"
-		./export.sh -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${PARALLEL_IMPORT}
+		./export.sh -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${PARALLEL_IMPORT}
 	fi
 	if [ "$PARALLEL_IMPORT" = true ]; then
 		 # Merge all tables to one mysql.sql

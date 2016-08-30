@@ -17,6 +17,10 @@ if [ $# -ge 2 ]; then
             i=`expr ${i}+1`
             BATCH_LIMIT=${myarray[i]}
 
+        elif [ "${myarray[i]}" == "-pl" ]; then
+            i=`expr ${i}+1`
+            POOL_LIMIT=${myarray[i]}
+
         elif [ "${myarray[i]}" == "-mbl" ]; then
             i=`expr ${i}+1`
             MERGE_BATCH_LIMIT=${myarray[i]}
@@ -76,6 +80,7 @@ if [ $# -ge 2 ]; then
     export SRC
     export DEST
     export BATCH_LIMIT
+    export POOL_LIMIT
     export MERGE_BATCH_LIMIT
     export WAIT_TIME
     export IMPORT_WAIT_TIME
