@@ -64,5 +64,5 @@ fi
 cd ${BACKUP_DIR}/${MERGED_DIR}
 for MRDB in `ls *.sql`
 do
-	cp ${MRDB} ../${ARCHIVES_DIR}/${MRDB}
+	cp ${MRDB} ../../${ARCHIVES_DIR}/${MRDB}
 done

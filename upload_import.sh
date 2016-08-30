@@ -106,7 +106,7 @@ DONE
 
 if [ ! "$PARALLEL_IMPORT" = true ]; then
   # Upload all *.sql files using rsync
-  rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${BACKUP_DIR}/${MERGED_DIR} ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
+  rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${BACKUP_DIR}/${MERGED_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
 
   if [[ $? == 0 ]]; then
     echo "File Transfer complete."
@@ -153,7 +153,7 @@ else
   IS_LAST_IMPORT=false
   
   # Upload one *.sql at a time using rsync
-  rsync -avzhe ssh --include '${DB_FILE_NAME}' --exclude '*' --progress ${BACKUP_DIR}/${MERGED_DIR} ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
+  rsync -avzhe ssh --include '${DB_FILE_NAME}' --exclude '*' --progress ${BACKUP_DIR}/${MERGED_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
   
   # Remove that sql file to avoid imported twice
   rm ${DB_FILE_NAME}
