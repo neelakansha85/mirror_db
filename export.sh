@@ -132,7 +132,10 @@ fi
 cd ..
 
 if [ ! "$PARALLEL_IMPORT" = true ]; then
-    # Merge all tables to one mysql.sql
+    # Merge all network tables to one mysql_network.sql
+    ./merge.sh -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} -mbl ${MERGE_BATCH_LIMIT}
+
+    # Merge all other tables to one mysql.sql
     ./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}
 else
     # Write PI_TOTAL value in PI_TOTAL_FILE to indicate the last merged sql file
