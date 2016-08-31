@@ -78,8 +78,14 @@ rm ${LIST_FILE_NAME}
 mv temp.txt ${LIST_FILE_NAME}
 
 if [ "$PARALLEL_IMPORT" = true ]; then
+    # Get to root dir
+    cd ..
+
     # Initiate merging and importing all network tables
-    nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} --skip-export --parallel-import >> /${LOGS_DIR}/mirror_db_network.log & 
+    nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log & 
+
+    # Continue exporting in BACKUP_DIR
+    cd ${BACKUP_DIR}
 fi    
 
 for DBTB in `cat ${LIST_FILE_NAME}`
@@ -110,7 +116,7 @@ do
     fi
     if [ ${POOL_COUNT} -eq ${POOL_LIMIT} ]; then
         if [ "$PARALLEL_IMPORT" = true ]; then
-            nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT} -dbf ${DB_FILE_NAME}_${PI_TOTAL} --skip-export --parallel-import >> /${LOGS_DIR}/mirror_db_pi.log & 
+            nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT} -dbf ${DB_FILE_NAME}_${PI_TOTAL} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log & 
         fi
         POOL_COUNT=1
         (( PI_TOTAL++ ))
