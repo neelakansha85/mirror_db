@@ -66,11 +66,9 @@ if [ ! -d "$ARCHIVES_DIR" ]; then
 	mkdir $ARCHIVES_DIR
 fi
 
-cd ${BACKUP_DIR}/${MERGED_DIR}
-
 echo "Copying all merged DB files to archives dir... "
 
-for MRDB in `ls *.sql`
+for MRDB in `ls ${BACKUP_DIR}/${MERGED_DIR}/*.sql`
 do
-    cp ${MRDB} ../../${ARCHIVES_DIR}/${MRDB}
+    cp ${MRDB} ${ARCHIVES_DIR}/
 done
