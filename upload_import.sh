@@ -149,8 +149,8 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
 
 else
   # Parallel Import for files that have been merged so far
-  if [ -e $PI_TOTAL_FILE ]; then
-    . $PI_TOTAL_FILE
+  if [ -e ${BACKUP_DIR}/${PI_TOTAL_FILE} ]; then
+    . ${BACKUP_DIR}/${PI_TOTAL_FILE}
   fi
 
   IS_LAST_IMPORT=false

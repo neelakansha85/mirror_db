@@ -34,6 +34,7 @@ if [ "$PARALLEL_IMPORT" = true ]; then
 	PARALLEL_IMPORT='--parallel-import'
 fi
 
+echo ""
 echo "Starting to execute mirror_db."
 echo "##############################"
 echo "Current time: $(date)"

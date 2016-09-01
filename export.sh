@@ -164,5 +164,5 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
     ./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}
 else
     # Write PI_TOTAL value in PI_TOTAL_FILE to indicate the last merged sql file
-    echo PI_TOTAL=${PI_TOTAL} > ${PI_TOTAL_FILE}
+    echo PI_TOTAL=${PI_TOTAL} > ${BACKUP_DIR}/${PI_TOTAL_FILE}
 fi
