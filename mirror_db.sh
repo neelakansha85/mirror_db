@@ -34,6 +34,10 @@ if [ "$PARALLEL_IMPORT" = true ]; then
 	PARALLEL_IMPORT='--parallel-import'
 fi
 
+if [ "$IS_LAST_IMPORT" = true ]; then
+	IS_LAST_IMPORT='--is-last-import'
+fi
+
 echo ""
 echo "Starting to execute mirror_db."
 echo "##############################"
@@ -66,7 +70,7 @@ fi
 if [ ! -z $DEST ]; then
 	if [[ $status == 0 ]]; then
 		echo "Executing upload_import script"
-		./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${PARALLEL_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL}
+		./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${PARALLEL_IMPORT} ${IS_LAST_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL} 
 	else
 		echo "Import process did not complete successfully"
 	fi

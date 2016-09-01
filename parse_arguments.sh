@@ -71,6 +71,9 @@ if [ $# -ge 2 ]; then
         elif [ "${myarray[i]}" == "--parallel-import" ]; then
             PARALLEL_IMPORT=true
 
+        elif [ "${myarray[i]}" == "--is-last-import" ]; then
+            IS_LAST_IMPORT=true
+
         else
             echo "Please select correct option"
             exit 1
@@ -95,6 +98,7 @@ if [ $# -ge 2 ]; then
     export SKIP_EXPORT
     export SKIP_IMPORT
     export PARALLEL_IMPORT
+    export IS_LAST_IMPORT
     
     return
 else

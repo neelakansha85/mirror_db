@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# default values
+IS_LAST_IMPORT=false
+
 . parse_arguments.sh
 
 # Import instance based environment variables
@@ -149,11 +152,6 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
 
 else
   # Parallel Import for files that have been merged so far
-  if [ -e ${BACKUP_DIR}/${PI_TOTAL_FILE} ]; then
-    . ${BACKUP_DIR}/${PI_TOTAL_FILE}
-  fi
-
-  IS_LAST_IMPORT=false
   
   echo "Uploading ${DB_FILE_NAME}... "
   # Upload one sql at a time using rsync
@@ -174,12 +172,6 @@ else
     echo "${DB_FILE_NAME} imported successfully..."
     now=$(date +"%T")
     echo "End time : $now "
-    SQL_TOTAL=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}' | rev | cut -d'_' -f1 | rev`
-    if [ ! -z $PI_TOTAL ]; then
-      if [ $SQL_TOTAL -eq $PI_TOTAL ]; then
-        IS_LAST_IMPORT=true
-      fi
-    fi
   else
     echo "Import Failed for ${DB_FILE_NAME}"
     exit 1
@@ -188,6 +180,7 @@ else
   # Remove all files if this is the last import 
   if [ "$IS_LAST_IMPORT" = true ]; then
     # Remove all scripts related to mirror_db from server
+    echo "Removing all mirror_db scripts from dest... "
     ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./${STRUCTURE_FILE} rm ${REMOTE_SCRIPT_DIR} ${BACKUP_DIR}"
 
     # Remove ${STRUCTURE_FILE} from server to avoid permission issues later
