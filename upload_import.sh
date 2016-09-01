@@ -71,9 +71,11 @@ DONE
 
 if [ "$PARALLEL_IMPORT" = true ]; then
   if [[ $DB_FILE_NAME =~ .*_network.* ]]; then
+    echo "Executing structure script for creating dir on dest server... "
     ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./${STRUCTURE_FILE} mk ${REMOTE_SCRIPT_DIR} ${BACKUP_DIR}"
   fi
 else
+    echo "Executing structure script for creating dir on dest server... "
     ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./${STRUCTURE_FILE} mk ${REMOTE_SCRIPT_DIR} ${BACKUP_DIR}"
 fi
 
@@ -152,6 +154,7 @@ else
 
   IS_LAST_IMPORT=false
   
+  echo "Uploading ${DB_FILE_NAME}... "
   # Upload one *.sql at a time using rsync
   rsync -avzhe ssh --include '${DB_FILE_NAME}' --exclude '*' --progress ${BACKUP_DIR}/${MERGED_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
   

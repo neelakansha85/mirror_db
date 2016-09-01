@@ -9,10 +9,13 @@ PI_TOTAL_FILE='pi_total.txt'
 
 . parse_arguments.sh
 
+DB_FILE_EXT=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $2}'`
+DB_FILE_N=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
+NETWORK_DB="${DB_FILE_N}_network.${DB_FILE_EXT}"
+
 LIST_FILE_EXT=`echo ${LIST_FILE_NAME} | sed 's/\./ /g' | awk '{print $2}'`
 LIST_FILE_N=`echo ${LIST_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
 NETWORK_LIST="${LIST_FILE_N}_network.${LIST_FILE_EXT}"
-NETWORK_DB="${DB_FILE_NAME}_network"
 
 # import instance environment variables
 . read_properties.sh $SRC
@@ -74,10 +77,14 @@ do
     fi
 done
 
+echo "Completed downloading Network tables..."
+
 rm ${LIST_FILE_NAME}
 mv temp.txt ${LIST_FILE_NAME}
 
 if [ "$PARALLEL_IMPORT" = true ]; then
+    echo "Executing parallel-import for network tables... "
+
     # Get to root dir
     cd ..
 
@@ -87,6 +94,8 @@ if [ "$PARALLEL_IMPORT" = true ]; then
     # Continue exporting in BACKUP_DIR
     cd ${BACKUP_DIR}
 fi    
+
+echo "Starting to download all site tables... "
 
 for DBTB in `cat ${LIST_FILE_NAME}`
 do
@@ -116,7 +125,11 @@ do
     fi
     if [ ${POOL_COUNT} -eq ${POOL_LIMIT} ]; then
         if [ "$PARALLEL_IMPORT" = true ]; then
-            nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT} -dbf ${DB_FILE_NAME}_${PI_TOTAL} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log & 
+            
+            PI_DB_FILE_N="${DB_FILE_N}_${PI_TOTAL}.${DB_FILE_EXT}"
+
+            nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT} -dbf ${PI_DB_FILE_N} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log & 
+            
         fi
         POOL_COUNT=1
         (( PI_TOTAL++ ))
@@ -138,9 +151,11 @@ fi
 cd ..
 
 if [ ! "$PARALLEL_IMPORT" = true ]; then
+    echo "Executing merge script for network tables... "
     # Merge all network tables to one mysql_network.sql
     ./merge.sh -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} -mbl ${MERGE_BATCH_LIMIT}
 
+    echo "Executing merge script for all site tables... "
     # Merge all other tables to one mysql.sql
     ./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}
 else
