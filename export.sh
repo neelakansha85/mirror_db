@@ -85,14 +85,8 @@ mv temp.txt ${LIST_FILE_NAME}
 if [ "$PARALLEL_IMPORT" = true ]; then
     echo "Executing parallel-import for network tables... "
 
-    # Get to root dir
-    cd ..
-
     # Initiate merging and importing all network tables
-    nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log & 
-
-    # Continue exporting in BACKUP_DIR
-    cd ${BACKUP_DIR}
+    nohup ../mirror_db.sh -s ${SRC} -d ${DEST} -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} --skip-export --parallel-import >> ../${LOGS_DIR}/mirror_db_network.log 2>&1 
 fi    
 
 echo "Starting to download all site tables... "
@@ -128,8 +122,7 @@ do
             
             PI_DB_FILE_N="${DB_FILE_N}_${PI_TOTAL}.${DB_FILE_EXT}"
 
-            nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT} -dbf ${PI_DB_FILE_N} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log & 
-            
+            nohup ../mirror_db.sh -s ${SRC} -d ${DEST} -lf ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT} -dbf ${PI_DB_FILE_N} --skip-export --parallel-import >> ../${LOGS_DIR}/mirror_db_pi.log 2>&1    
         fi
         POOL_COUNT=1
         (( PI_TOTAL++ ))
