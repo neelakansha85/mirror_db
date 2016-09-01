@@ -34,6 +34,10 @@ if [ "$PARALLEL_IMPORT" = true ]; then
 	PARALLEL_IMPORT='--parallel-import'
 fi
 
+echo "Starting to execute mirror_db."
+echo "##############################"
+echo "Current time: $(date)"
+
 #set status to default 0
 status=0
 
