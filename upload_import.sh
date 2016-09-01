@@ -175,8 +175,10 @@ else
     now=$(date +"%T")
     echo "End time : $now "
     SQL_TOTAL=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}' | rev | cut -d'_' -f1 | rev`
-    if [ $SQL_TOTAL -eq $PI_TOTAL ]; then
-      IS_LAST_IMPORT=true
+    if [ ! -z $PI_TOTAL ]; then
+      if [ $SQL_TOTAL -eq $PI_TOTAL ]; then
+        IS_LAST_IMPORT=true
+      fi
     fi
   else
     echo "Import Failed for ${DB_FILE_NAME}"

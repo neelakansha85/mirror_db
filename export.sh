@@ -97,6 +97,10 @@ fi
 
 echo "Starting to download all site tables... "
 
+# Reset Counter for Batch and Pool limits
+BATCH_COUNT=1
+POOL_COUNT=1
+
 for DBTB in `cat ${LIST_FILE_NAME}`
 do
     DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`   
@@ -163,6 +167,12 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
     # Merge all other tables to one mysql.sql
     ./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}
 else
+    # Execute code related to Parallel Import
+    
+    # Execute merge and upload for the last set of tables downloaded
+    PI_DB_FILE_N="${DB_FILE_N}_${PI_TOTAL}.${DB_FILE_EXT}"
+    nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT} -dbf ${PI_DB_FILE_N} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
+
     # Write PI_TOTAL value in PI_TOTAL_FILE to indicate the last merged sql file
     echo PI_TOTAL=${PI_TOTAL} > ${BACKUP_DIR}/${PI_TOTAL_FILE}
 fi
