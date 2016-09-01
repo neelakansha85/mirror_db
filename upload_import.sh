@@ -55,6 +55,7 @@ do
   fi
 done
 
+# Get to root dir
 cd ../..
 
 expect <<- DONE
@@ -159,7 +160,7 @@ else
   rsync -avzhe ssh --include '${DB_FILE_NAME}' --exclude '*' --progress ${BACKUP_DIR}/${MERGED_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
   
   # Remove that sql file to avoid imported twice
-  rm ${DB_FILE_NAME}
+  rm ${BACKUP_DIR}/${MERGED_DIR}/${DB_FILE_NAME}
 
   echo "Starting to import ${DB_FILE_NAME}..."
   now=$(date +"%T")

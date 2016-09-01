@@ -6,11 +6,10 @@ MERGED_DIR='db_merged'
 ARCHIVES_DIR='archives'
 DB_SUFFIX=''
 
+. parse_arguments.sh
+
 DB_FILE_EXT=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $2}'`
 DB_FILE_N=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
-
-
-. parse_arguments.sh
 
 cd ${BACKUP_DIR}
 
