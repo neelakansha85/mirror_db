@@ -156,8 +156,8 @@ else
   IS_LAST_IMPORT=false
   
   echo "Uploading ${DB_FILE_NAME}... "
-  # Upload one *.sql at a time using rsync
-  rsync -avzhe ssh --include '${DB_FILE_NAME}' --exclude '*' --progress ${BACKUP_DIR}/${MERGED_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
+  # Upload one sql at a time using rsync
+  rsync -avzhe ssh --progress ${BACKUP_DIR}/${MERGED_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
   
   # Remove that sql file to avoid imported twice
   rm ${BACKUP_DIR}/${MERGED_DIR}/${DB_FILE_NAME}
@@ -186,7 +186,7 @@ else
   fi
   
   # Remove all files if this is the last import 
-  if [ $IS_LAST_IMPORT ]; then
+  if [ "$IS_LAST_IMPORT" = true ]; then
     # Remove all scripts related to mirror_db from server
     ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./${STRUCTURE_FILE} rm ${REMOTE_SCRIPT_DIR} ${BACKUP_DIR}"
 
