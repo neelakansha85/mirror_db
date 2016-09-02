@@ -179,6 +179,9 @@ else
   
   # Remove all files if this is the last import 
   if [ "$IS_LAST_IMPORT" = true ]; then
+    echo "Changing permissiosn for structure file before cleanup... "
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; chmod 755 ${STRUCTURE_FILE}"
+
     # Remove all scripts related to mirror_db from server
     echo "Removing all mirror_db scripts from dest... "
     ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./${STRUCTURE_FILE} rm ${REMOTE_SCRIPT_DIR} ${BACKUP_DIR}"
