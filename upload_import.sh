@@ -61,9 +61,15 @@ done
 # Get to root dir
 cd ../..
 
+# Create REMOTE_SCRIPT_DIR on server
+if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ ! -d ${SITE_DIR}/${REMOTE_SCRIPT_DIR} ]" ); then
+  echo "Creating ${REMOTE_SCRIPT_DIR} on ${DEST}..."
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "mkdir ${SITE_DIR}/${REMOTE_SCRIPT_DIR};" 
+fi
+
 expect <<- DONE
 # Establish sftp connection
-spawn sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}
+spawn sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}
 
 # Check connection and transfer file to destination server
 expect sftp>
@@ -76,11 +82,11 @@ DONE
 if [ "$PARALLEL_IMPORT" = true ]; then
   if [[ $DB_FILE_NAME =~ .*_network.* ]]; then
     echo "Executing structure script for creating dir on dest server... "
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./${STRUCTURE_FILE} mk ${REMOTE_SCRIPT_DIR} ${BACKUP_DIR}"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${BACKUP_DIR}"
   fi
 else
     echo "Executing structure script for creating dir on dest server... "
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./${STRUCTURE_FILE} mk ${REMOTE_SCRIPT_DIR} ${BACKUP_DIR}"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${BACKUP_DIR}"
 fi
 
 expect <<- DONE
@@ -145,10 +151,10 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
   fi
 
   # Remove all scripts related to mirror_db from server
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./${STRUCTURE_FILE} rm ${REMOTE_SCRIPT_DIR} ${BACKUP_DIR}"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} rm ${BACKUP_DIR}"
 
   # Remove ${STRUCTURE_FILE} from server to avoid permission issues later
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; rm ${STRUCTURE_FILE}"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; rm ${STRUCTURE_FILE}"
 
 else
   # Parallel Import for files that have been merged so far
@@ -179,15 +185,15 @@ else
   
   # Remove all files if this is the last import 
   if [ "$IS_LAST_IMPORT" = true ]; then
-    echo "Changing permissiosn for structure file before cleanup... "
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; chmod 755 ${STRUCTURE_FILE}"
+    echo "Changing permission for structure file before cleanup... "
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; chmod 755 ${STRUCTURE_FILE}"
 
     # Remove all scripts related to mirror_db from server
     echo "Removing all mirror_db scripts from dest... "
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; ./${STRUCTURE_FILE} rm ${REMOTE_SCRIPT_DIR} ${BACKUP_DIR}"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} rm ${BACKUP_DIR}"
 
     # Remove ${STRUCTURE_FILE} from server to avoid permission issues later
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; rm ${STRUCTURE_FILE}"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; rm ${STRUCTURE_FILE}"
   fi
 fi
 
