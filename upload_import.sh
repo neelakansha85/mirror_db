@@ -8,7 +8,6 @@ IS_LAST_IMPORT=false
 # Import instance based environment variables
 . read_properties.sh $DEST
 
-REMOTE_SCRIPT_DIR='mirror_db'
 BACKUP_DIR='db_backup'
 MERGED_DIR='db_merged'
 IMPORT_SCRIPT='import.sh'
@@ -18,6 +17,10 @@ READ_PROPERTIES_FILE='read_properties.sh'
 STRUCTURE_FILE='mirror_db_structure.sh'
 PROPERTIES_FILE='db.properties'
 PI_TOTAL_FILE='pi_total.txt'
+
+if [ "$REMOTE_SCRIPT_DIR" = '' ]; then
+	REMOTE_SCRIPT_DIR='mirror_db'
+fi
 
 if [ "$SKIP_IMPORT" = true ]; then
   SKIP_IMPORT='--skip-import'
@@ -62,14 +65,14 @@ done
 cd ../..
 
 # Create REMOTE_SCRIPT_DIR on server
-if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ ! -d ${SITE_DIR}/${REMOTE_SCRIPT_DIR} ]" ); then
+if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ ! -d ${REMOTE_SCRIPT_DIR} ]" ); then
   echo "Creating ${REMOTE_SCRIPT_DIR} on ${DEST}..."
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "mkdir ${SITE_DIR}/${REMOTE_SCRIPT_DIR};" 
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "mkdir ${REMOTE_SCRIPT_DIR};" 
 fi
 
 expect <<- DONE
 # Establish sftp connection
-spawn sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}
+spawn sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}
 
 # Check connection and transfer file to destination server
 expect sftp>
@@ -82,16 +85,16 @@ DONE
 if [ "$PARALLEL_IMPORT" = true ]; then
   if [[ $DB_FILE_NAME =~ .*_network.* ]]; then
     echo "Executing structure script for creating dir on dest server... "
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${BACKUP_DIR}"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${BACKUP_DIR}"
   fi
 else
     echo "Executing structure script for creating dir on dest server... "
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${BACKUP_DIR}"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${BACKUP_DIR}"
 fi
 
 expect <<- DONE
 # Establish sftp connection
-spawn sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}
+spawn sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}
 
 # Check connection and transfer all files to destination server
 
@@ -118,7 +121,7 @@ DONE
 
 if [ ! "$PARALLEL_IMPORT" = true ]; then
   # Upload all *.sql files using rsync
-  rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${BACKUP_DIR}/${MERGED_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
+  rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${BACKUP_DIR}/${MERGED_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
 
   if [[ $? == 0 ]]; then
     echo "File Transfer complete."
@@ -134,7 +137,7 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
     fi
 
     # Execute Import.sh to import database
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES_SQL};"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES_SQL};"
 
     # Check status of import script
     if [[ $? == 0 ]]; then
@@ -151,17 +154,17 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
   fi
 
   # Remove all scripts related to mirror_db from server
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} rm ${BACKUP_DIR}"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} rm ${BACKUP_DIR}"
 
   # Remove ${STRUCTURE_FILE} from server to avoid permission issues later
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; rm ${STRUCTURE_FILE}"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; rm ${STRUCTURE_FILE}"
 
 else
   # Parallel Import for files that have been merged so far
   
   echo "Uploading ${DB_FILE_NAME}... "
   # Upload one sql at a time using rsync
-  rsync -avzhe ssh --progress ${BACKUP_DIR}/${MERGED_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${SITE_DIR}/${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
+  rsync -avzhe ssh --progress ${BACKUP_DIR}/${MERGED_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
   
   # Remove that sql file to avoid imported twice
   rm ${BACKUP_DIR}/${MERGED_DIR}/${DB_FILE_NAME}
@@ -171,7 +174,7 @@ else
   echo "Start time : $now "
   
   # Execute Import.sh to import database
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT};"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT};"
 
   # Check status of import script
   if [[ $? == 0 ]]; then
@@ -186,14 +189,14 @@ else
   # Remove all files if this is the last import 
   if [ "$IS_LAST_IMPORT" = true ]; then
     echo "Changing permission for structure file before cleanup... "
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; chmod 755 ${STRUCTURE_FILE}"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; chmod 755 ${STRUCTURE_FILE}"
 
     # Remove all scripts related to mirror_db from server
     echo "Removing all mirror_db scripts from dest... "
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} rm ${BACKUP_DIR}"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} rm ${BACKUP_DIR}"
 
     # Remove ${STRUCTURE_FILE} from server to avoid permission issues later
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}/${REMOTE_SCRIPT_DIR}; rm ${STRUCTURE_FILE}"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; rm ${STRUCTURE_FILE}"
   fi
 fi
 

@@ -59,6 +59,7 @@ elif [ "$SRC" == 'pagely_prd' ]; then
   HOST_NAME=$pagely_prd_host
   SITE_DIR=$pagely_prd_dir
   SHIB_URL=$pagely_prd_shib_url
+  REMOTE_SCRIPT_DIR=$pagely_prd_remote_dir
 
 elif [ "$SRC" == 'pagely_test_prd' ]; then
   DB_USER=$pagely_test_prd_db_user
@@ -71,6 +72,7 @@ elif [ "$SRC" == 'pagely_test_prd' ]; then
   SITE_DIR=$pagely_test_prd_dir
   SHIB_URL=$pagely_test_prd_shib_url
   SUPERADMIN=$pagely_test_prd_superadmin
+  REMOTE_SCRIPT_DIR=$pagely_test_prd_remote_dir
 
 elif [ "$SRC" == 'pagely_dev' ]; then
 	DB_USER=$pagely_dev_db_user
@@ -83,6 +85,7 @@ elif [ "$SRC" == 'pagely_dev' ]; then
   SITE_DIR=$pagely_dev_db_dir
   SHIB_URL=$pagely_dev_shib_url
   SUPERADMIN=$pagely_dev_superadmin
+  REMOTE_SCRIPT_DIR=$pagely_dev_remote_dir
 else
 	echo "Source incorrectly specified"
 	exit 1;
@@ -102,6 +105,7 @@ export HOST_NAME
 export SITE_DIR
 export SHIB_URL
 export SUPERADMIN
+export REMOTE_SCRIPT_DIR
 
 export SSH_KEY_PATH
 export SSH_USERNAME
