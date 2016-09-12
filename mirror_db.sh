@@ -43,6 +43,10 @@ echo "Starting to execute mirror_db."
 echo "##############################"
 echo "Current time: $(date)"
 
+# Changing right permissions for all bash scripts
+echo "Changing right permissions for all bash scripts"
+chmod 774 *.sh
+
 #set status to default 0
 status=0
 
