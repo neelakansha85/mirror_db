@@ -45,7 +45,7 @@ echo "Current time: $(date)"
 
 # Changing right permissions for all bash scripts
 echo "Changing right permissions for all bash scripts"
-chmod 774 *.sh
+chmod 750 *.sh
 
 #set status to default 0
 status=0
