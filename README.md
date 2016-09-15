@@ -33,20 +33,21 @@ Please note this is not the most efficient way of getting a database export sinc
 * --drop-tables-sql - drop tables using sql procedure
 * --skip-export - skip execution of exporting remote database
 * --skip-import - skip execution of mysql command which imports database (it will perform search and replace and uploading of sql files though)
+* --parallel-import - execute export and import process in parallel batches, once a batch of x (default 7000) tables is downloaded, it will merge them and start the process of uploading it to the destination server in a separate process independent from export process. 
+  * The advantage of this flag is that it always exports and imports the network tables for a wordpress multisite before any other tables. This makes the system available for use once network tables are imported with minimal downtime and then continues to export and import remaining site tables. This can be a very useful during production database migration to achieve minimal downtime and make necessary changes to system while it is still being imported.
 
-I will be working on another script soon to import this db to another server soon.
 
 If you have below conditions I would recommend using this script:
-* Do not have SSH access to server
+* Do not have SSH access to source server
 * Have large database with many tables
 * phpMyAdmin is way too slow to work with
 * You can request your hosting provider to allow your static IP to be whitelisted for accessing DB server
 * DB backups provided by hosting provider are not reliable/correct.
 * You would like to periodically get DB backup (for various reasons such as backup storage, mirroring production to dev env, etc)
-* You the least amount of impact to your system during the DB export process
+* You want the least amount of impact to your system during the DB export process
 * You need to automate this process
 
-I have been running this for our Wordpress system hosted at WPEngine which has 1GB to database with approx 68,000 tables in it.
+I have been running this for our Wordpress system hosted at WPEngine which has 1.4GB to database with approx 90,000 tables in it.
 Please note: Reuqest your hosting provider to update mysql open file limit to value greater than the number of tables you have in database in order to avoid database server from crashing. 
 
 Please also test this on your local/dev environment before running on production to avoid any unwanted issues.
