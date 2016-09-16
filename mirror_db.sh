@@ -27,11 +27,14 @@ if [ "$DROP_TABLES" = true ]; then
 fi
 
 if [ "$DROP_TABLES_SQL" = true ]; then
-	DROP_TABLES='--drop-tables-sql'
+	DROP_TABLES_SQL='--drop-tables-sql'
 fi
 
 if [ "$PARALLEL_IMPORT" = true ]; then
 	PARALLEL_IMPORT='--parallel-import'
+	# Cannot drop entire database if running parallel-import
+	DROP_TABLES=false
+	DROP_TABLES_SQL=false
 fi
 
 if [ "$IS_LAST_IMPORT" = true ]; then

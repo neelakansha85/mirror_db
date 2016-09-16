@@ -27,7 +27,7 @@ if [ "$SKIP_IMPORT" = true ]; then
 fi
 
 if [ "$DROP_TABLES_SQL" = true ]; then
-  DROP_TABLES='--drop-tables-sql'
+  DROP_TABLES_SQL='--drop-tables-sql'
 fi
 
 chmod 750 $IMPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $STRUCTURE_FILE
