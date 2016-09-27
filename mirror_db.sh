@@ -33,8 +33,8 @@ fi
 if [ "$PARALLEL_IMPORT" = true ]; then
 	PARALLEL_IMPORT='--parallel-import'
 	# Cannot drop entire database if running parallel-import
-	DROP_TABLES=false
-	DROP_TABLES_SQL=false
+	DROP_TABLES=
+	DROP_TABLES_SQL=
 fi
 
 if [ "$IS_LAST_IMPORT" = true ]; then
