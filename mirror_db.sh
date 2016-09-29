@@ -26,6 +26,14 @@ if [ "$DROP_TABLES" = true ]; then
 	DROP_TABLES='--drop-tables'
 fi
 
+if [ "$SKIP_NETWORK_IMPORT" = true ]; then
+	SKIP_NETWORK_IMPORT='--skip-network-import'
+fi
+
+if [ "$SKIP_REPLACE" = true ]; then
+	SKIP_REPLACE='--skip-replace'
+fi
+
 if [ "$DROP_TABLES_SQL" = true ]; then
 	DROP_TABLES_SQL='--drop-tables-sql'
 fi
@@ -83,7 +91,7 @@ fi
 if [ ! -z $DEST ]; then
 	if [[ $status == 0 ]]; then
 		echo "Executing upload_import script"
-		./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${PARALLEL_IMPORT} ${IS_LAST_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL} 
+		./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${PARALLEL_IMPORT} ${IS_LAST_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL} ${SKIP_NETWORK_IMPORT} ${SKIP_REPLACE}
 	else
 		echo "Import process did not complete successfully"
 	fi

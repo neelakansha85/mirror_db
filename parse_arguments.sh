@@ -67,6 +67,12 @@ if [ $# -ge 2 ]; then
 
         elif [ "${myarray[i]}" == "--skip-import" ]; then
             SKIP_IMPORT=true
+
+        elif [ "${myarray[i]}" == "--skip-network-import" ]; then
+            SKIP_NETWORK_IMPORT=true
+
+        elif [ "${myarray[i]}" == "--skip-replace" ]; then
+            SKIP_REPLACE=true
         
         elif [ "${myarray[i]}" == "--parallel-import" ]; then
             PARALLEL_IMPORT=true
@@ -97,6 +103,8 @@ if [ $# -ge 2 ]; then
     export DROP_TABLES_SQL
     export SKIP_EXPORT
     export SKIP_IMPORT
+    export SKIP_NETWORK_IMPORT
+    export SKIP_REPLACE
     export PARALLEL_IMPORT
     export IS_LAST_IMPORT
     

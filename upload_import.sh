@@ -35,31 +35,32 @@ chmod 754 $DROP_SQL_FILE.sql
 
 cd ${BACKUP_DIR}/${MERGED_DIR}
 
+if [ ! "$SKIP_REPLACE" = true ]; then
+  for MRDB in `ls *.sql`
+  do
+    if [ -e ${MRDB} ]; then
+      echo "File ${MRDB} found..."
+      echo "Changing environment specific information"
+      if [ ! -z ${SRC_URL} ]; then
+        # Replace old domain with the new domain
+        echo "Replacing Site URL..."
+        echo "Running -> sed -i'' 's/'${SRC_URL}'/'${URL}'/g' ${MRDB}"
+        sed -i '' 's/'${SRC_URL}'/'${URL}'/g' ${MRDB}
+      fi
 
-for MRDB in `ls *.sql`
-do
-  if [ -e ${MRDB} ]; then
-    echo "File ${MRDB} found..."
-    echo "Changing environment specific information"
-    if [ ! -z ${SRC_URL} ]; then
-      # Replace old domain with the new domain
-      echo "Replacing Site URL..."
-      echo "Running -> sed -i'' 's/'${SRC_URL}'/'${URL}'/g' ${MRDB}"
-      sed -i '' 's/'${SRC_URL}'/'${URL}'/g' ${MRDB}
-    fi
+      if [ ! -z ${SRC_SHIB_URL} ] && [ "${SRC_SHIB_URL}" != "''" ]; then
+        # Replace Shib Production with Shib QA 
+        echo "Replacing Shibboleth URL..."
+        sed -i '' 's/'${SRC_SHIB_URL}'/'${SHIB_URL}'/g' ${MRDB}
+      fi
 
-    if [ ! -z ${SRC_SHIB_URL} ] && [ "${SRC_SHIB_URL}" != "''" ]; then
-      # Replace Shib Production with Shib QA 
-      echo "Replacing Shibboleth URL..."
-      sed -i '' 's/'${SRC_SHIB_URL}'/'${SHIB_URL}'/g' ${MRDB}
+      if [ ! -z ${SRC_G_ANALYTICS} ] && [ "${SRC_G_ANALYTICS}" != "''" ]; then
+        echo "Replacing Google Analytics code..."
+        sed -i '' 's/'${SRC_G_ANALYTICS}'/'${G_ANALYTICS}'/g' ${MRDB}
+      fi
     fi
-
-    if [ ! -z ${SRC_G_ANALYTICS} ] && [ "${SRC_G_ANALYTICS}" != "''" ]; then
-      echo "Replacing Google Analytics code..."
-      sed -i '' 's/'${SRC_G_ANALYTICS}'/'${G_ANALYTICS}'/g' ${MRDB}
-    fi
-  fi
-done
+  done
+fi
 
 # Get to root dir
 cd ../..
@@ -173,8 +174,16 @@ else
   now=$(date +"%T")
   echo "Start time : $now "
   
-  # Execute Import.sh to import database
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT};"
+  if [ $DB_FILE_NAME =~ .*_network.* ]; then
+    if [ ! "$SKIP_NETWORK_IMPORT" = true ]; then
+      # Execute Import.sh to import network tables
+      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT};"
+    else
+      echo "Skipping importing Network Tables... "
+  else
+    # Execute Import.sh to import all non-network tables
+      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT};"
+  fi
 
   # Check status of import script
   if [[ $? == 0 ]]; then
