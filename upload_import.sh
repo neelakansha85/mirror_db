@@ -174,7 +174,7 @@ else
   now=$(date +"%T")
   echo "Start time : $now "
   
-  if [ $DB_FILE_NAME =~ .*_network.* ]; then
+  if [[ $DB_FILE_NAME =~ .*_network.* ]]; then
     if [ ! "$SKIP_NETWORK_IMPORT" = true ]; then
       # Execute Import.sh to import network tables
       ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT};"
