@@ -18,6 +18,17 @@ STRUCTURE_FILE='mirror_db_structure.sh'
 PROPERTIES_FILE='db.properties'
 PI_TOTAL_FILE='pi_total.txt'
 
+OLD_URL1=",\'${SRC_URL}\'"
+OLD_URL2=",\'http://${SRC_URL}\'"
+OLD_SHIB_URL=",\'${SRC_SHIB_URL}\'"
+OLD_SHIB_LOGOUT_URL=",\'${SRC_SHIB_LOGOUT_URL}\'"
+
+NEW_URL1=",\'${URL}\'"
+NEW_URL2=",\'http://${URL}\'"
+NEW_SHIB_URL=",\'${SHIB_URL}\'"
+NEW_SHIB_LOGOUT_URL=",\'${SHIB_LOGOUT_URL}\'"
+
+
 if [ "$REMOTE_SCRIPT_DIR" = '' ]; then
 	REMOTE_SCRIPT_DIR='mirror_db'
 fi
@@ -44,14 +55,17 @@ if [ ! "$SKIP_REPLACE" = true ]; then
       if [ ! -z ${SRC_URL} ]; then
         # Replace old domain with the new domain
         echo "Replacing Site URL..."
-        echo "Running -> sed -i'' 's/'${SRC_URL}'/'${URL}'/g' ${MRDB}"
-        sed -i '' 's/'${SRC_URL}'/'${URL}'/g' ${MRDB}
+        echo "Running -> sed -i'' 's/'${OLD_URL1}'/'${NEW_URL1}'/g' ${MRDB}"
+        sed -i '' 's/'${OLD_URL1}'/'${NEW_URL1}'/g' ${MRDB}
+        echo "Running -> sed -i'' 's/'${OLD_URL2}'/'${NEW_URL2}'/g' ${MRDB}"
+        sed -i '' 's/'${OLD_URL2}'/'${NEW_URL2}'/g' ${MRDB}
       fi
 
-      if [ ! -z ${SRC_SHIB_URL} ] && [ "${SRC_SHIB_URL}" != "''" ]; then
+      if [ ! -z ${OLD_SHIB_URL} ] && [ "${OLD_SHIB_URL}" != "''" ]; then
         # Replace Shib Production with Shib QA 
         echo "Replacing Shibboleth URL..."
-        sed -i '' 's/'${SRC_SHIB_URL}'/'${SHIB_URL}'/g' ${MRDB}
+        sed -i '' 's/'${OLD_SHIB_URL}'/'${NEW_SHIB_URL}'/g' ${MRDB}
+        sed -i '' 's/'${OLD_SHIB_LOGOUT_URL}'/'${NEW_SHIB_LOGOUT_URL}'/g' ${MRDB}
       fi
 
       if [ ! -z ${SRC_G_ANALYTICS} ] && [ "${SRC_G_ANALYTICS}" != "''" ]; then
