@@ -18,13 +18,13 @@ STRUCTURE_FILE='mirror_db_structure.sh'
 PROPERTIES_FILE='db.properties'
 PI_TOTAL_FILE='pi_total.txt'
 
-OLD_URL1=",\'${SRC_URL}\'"
-OLD_URL2=",\'http://${SRC_URL}\'"
+OLD_URL1=",'${SRC_URL}"
+OLD_URL2=",'(http|https)://${SRC_URL}"
 OLD_SHIB_URL=",\'${SRC_SHIB_URL}\'"
 OLD_SHIB_LOGOUT_URL=",\'${SRC_SHIB_LOGOUT_URL}\'"
 
-NEW_URL1=",\'${URL}\'"
-NEW_URL2=",\'http://${URL}\'"
+NEW_URL1=",'${URL}"
+NEW_URL2=",'\1://${URL}"
 NEW_SHIB_URL=",\'${SHIB_URL}\'"
 NEW_SHIB_LOGOUT_URL=",\'${SHIB_LOGOUT_URL}\'"
 
@@ -55,10 +55,12 @@ if [ ! "$SKIP_REPLACE" = true ]; then
       if [ ! -z ${SRC_URL} ]; then
         # Replace old domain with the new domain
         echo "Replacing Site URL..."
-         echo "Running -> sed -i'' \"s@,'${OLD_URL1}'@,'${NEW_URL1}'@g\" ${MRDB}"
-        sed -i'' "s@,'${OLD_URL1}'@,'${NEW_URL1}'@g" ${MRDB}
-        echo "Running -> ssed -i'' \"s@,'${OLD_URL2}'@,'${NEW_URL2}'@g\" ${MRDB}"
-        sed -i'' "s@,'${OLD_URL2}'@,'${NEW_URL2}'@g" ${MRDB}
+        echo "Running -> sed -i'' \"s@${OLD_URL1}@${NEW_URL1}@g\" ${MRDB} ${MRDB}"
+        sed -i'' "s@${OLD_URL1}@${NEW_URL1}@g" ${MRDB}
+
+        echo "Running -> sed -i'' \"s@${OLD_URL2}@${NEW_URL2}@g\" ${MRDB}"
+        sed -i'' -r "s@${OLD_URL2}@${NEW_URL2}@g" ${MRDB}
+        
       fi
 
       if [ ! -z ${OLD_SHIB_URL} ] && [ "${OLD_SHIB_URL}" != "''" ]; then
