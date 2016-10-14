@@ -55,10 +55,10 @@ if [ ! "$SKIP_REPLACE" = true ]; then
       if [ ! -z ${SRC_URL} ]; then
         # Replace old domain with the new domain
         echo "Replacing Site URL..."
-        echo "Running -> sed -i'' 's/'${OLD_URL1}'/'${NEW_URL1}'/g' ${MRDB}"
-        sed -i '' 's/'${OLD_URL1}'/'${NEW_URL1}'/g' ${MRDB}
-        echo "Running -> sed -i'' 's/'${OLD_URL2}'/'${NEW_URL2}'/g' ${MRDB}"
-        sed -i '' 's/'${OLD_URL2}'/'${NEW_URL2}'/g' ${MRDB}
+         echo "Running -> sed -i'' \"s@,'${OLD_URL1}'@,'${NEW_URL1}'@g\" ${MRDB}"
+        sed -i'' "s@,'${OLD_URL1}'@,'${NEW_URL1}'@g" ${MRDB}
+        echo "Running -> ssed -i'' \"s@,'${OLD_URL2}'@,'${NEW_URL2}'@g\" ${MRDB}"
+        sed -i'' "s@,'${OLD_URL2}'@,'${NEW_URL2}'@g" ${MRDB}
       fi
 
       if [ ! -z ${OLD_SHIB_URL} ] && [ "${OLD_SHIB_URL}" != "''" ]; then
