@@ -1,15 +1,17 @@
 #!/bin/bash
 
 # Config/Default Options
+REMOTE_SCRIPT_DIR='mirror_db'
 BACKUP_DIR='db_backup'
 MERGED_DIR='db_merged'
-ARCHIVES_DIR='archives'
+ARCHIVES_DIR='db_archives'
 DB_SUFFIX=''
 
 . parse_arguments.sh
 
 DB_FILE_EXT=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $2}'`
 DB_FILE_N=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
+
 
 cd ${BACKUP_DIR}
 
@@ -57,18 +59,32 @@ echo "Total no of merged sql files = ${TOTAL}"
 now=$(date +"%T")
 echo "Current time : $now "
 
-# Get to root dir
-cd ..
+# Get to Home Dir
+cd ~
 
 # Move all .sql files to archives dir for future reference
 
-if [ ! -d "$ARCHIVES_DIR" ]; then
-	mkdir $ARCHIVES_DIR
+if [ ! -d "${ARCHIVES_DIR}" ]; then
+	mkdir ${ARCHIVES_DIR}
 fi
+
+cd ${ARCHIVES_DIR}
+echo "inside Archives"
+
+if [[ $DB_FILE_N =~ .*_network.* ]]; then
+     DB_FILE_N=`echo ${DB_FILE_N} | cut -d '_' -f-2`
+fi
+
+if [ ! -d "${DB_FILE_N}" ]; then
+     mkdir ${DB_FILE_N}
+fi
+
+# Get to Home Dir
+cd ..
 
 echo "Copying all merged DB files to archives dir... "
 
-for MRDB in `ls ${BACKUP_DIR}/${MERGED_DIR}/*.sql`
+for MRDB in `ls ${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/${MERGED_DIR}/*.sql`
 do
-    cp ${MRDB} ${ARCHIVES_DIR}/
+    cp ${MRDB} ${ARCHIVES_DIR}/${DB_FILE_N}/
 done
