@@ -11,6 +11,7 @@ IS_LAST_IMPORT=false
 BACKUP_DIR='db_backup'
 MERGED_DIR='db_merged'
 IMPORT_SCRIPT='import.sh'
+GET_DB_SCRIPT='get_db.sh'
 DROP_SQL_FILE='drop_tables'
 PARSE_FILE='parse_arguments.sh'
 READ_PROPERTIES_FILE='read_properties.sh'
@@ -127,6 +128,8 @@ send "put ${PROPERTIES_FILE}\r"
 expect sftp>
 send "put ${DROP_SQL_FILE}.sql\r"
 expect sftp>
+#send "put ${GET_DB_SCRIPT}\r"
+#expect sftp>
 #send "lcd ${BACKUP_DIR}\r"
 #expect sftp>
 #send "cd ${BACKUP_DIR}\r"
@@ -138,6 +141,9 @@ expect eof
 DONE
 
 if [ ! "$PARALLEL_IMPORT" = true ]; then
+  # This rsync will be inside get_db.sh
+  # Execute get_db.sh on dest server from here
+
   # Upload all *.sql files using rsync
   rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${BACKUP_DIR}/${MERGED_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
 
@@ -181,6 +187,10 @@ else
   # Parallel Import for files that have been merged so far
   
   echo "Uploading ${DB_FILE_NAME}... "
+  
+  # This rsync will be inside get_db.sh
+  # Execute get_db.sh on dest server from here
+  
   # Upload one sql at a time using rsync
   rsync -avzhe ssh --progress ${BACKUP_DIR}/${MERGED_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
   
