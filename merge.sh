@@ -69,7 +69,6 @@ if [ ! -d "${ARCHIVES_DIR}" ]; then
 fi
 
 cd ${ARCHIVES_DIR}
-echo "inside Archives"
 
 if [[ $DB_FILE_N =~ .*_network.* ]]; then
      DB_FILE_N=`echo ${DB_FILE_N} | cut -d '_' -f-2`

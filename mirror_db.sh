@@ -11,12 +11,19 @@ SRC_URL="''"
 SRC_SHIB_URL="''"
 SRC_G_ANALYTICS="''"
 LOGS_DIR='log'
-ARCHIVES_DIR_PATH=""
+SOURCE_DB_PATH=""
+export SOURCE_DB_PATH
 
 . parse_arguments.sh
 
 if [ ! -d "$LOGS_DIR" ]; then
 	mkdir $LOGS_DIR
+fi
+
+if [ "$SKIP_EXPORT" = true ]; then
+	SKIP_EXPORT='--skip-export'
+else
+	DB_PATH=''
 fi
 
 if [ "$SKIP_IMPORT" = true ]; then
@@ -63,22 +70,19 @@ chmod 750 *.sh
 status=0
 
 if [ ! -z $SRC ]; then
-	if [ ! "$SKIP_EXPORT" = true ]; then
-		DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
-		echo "Executing db export script"
-		
-		#exporting variable to store archives path.
-		export ARCHIVES_DIR_PATH
+	
+	DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
+	echo "Executing db export script"
 
-		#added . ahead of calling child script to return the values back to parent script
-		. ./upload_export.sh -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${PARALLEL_IMPORT}
-		
-		# Exit if all tables are exported
-		if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
-			echo "No more tables to export. Exiting... "
-			exit
-		fi
+	#added . ahead of calling child script to return the values back to parent script
+	. ./upload_export.sh -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} --db-path ${DB_PATH} ${PARALLEL_IMPORT} ${SKIP_EXPORT} 
+	
+	# Exit if all tables are exported
+	if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
+		echo "No more tables to export. Exiting... "
+		exit
 	fi
+
 	if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
 		# Merge all tables to one mysql.sql
     	echo "Executing merge script"
@@ -97,7 +101,7 @@ fi
 if [ ! -z $DEST ]; then
 	if [[ $status == 0 ]]; then
 		echo "Executing upload_import script"
-		./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${PARALLEL_IMPORT} ${IS_LAST_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL} ${SKIP_NETWORK_IMPORT} ${SKIP_REPLACE}
+		./upload_import.sh -d ${DEST} -dbf ${DB_FILE_NAME} --db-path ${SOURCE_DB_PATH} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${PARALLEL_IMPORT} ${IS_LAST_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL} ${SKIP_NETWORK_IMPORT} ${SKIP_REPLACE}
 	else
 		echo "Import process did not complete successfully"
 	fi
