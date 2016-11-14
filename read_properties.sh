@@ -13,6 +13,7 @@ if [ "$SRC" == 'prd' ]; then
   HOST_NAME=$prd_host
   SITE_DIR=$prd_dir
   REMOTE_SCRIPT_DIR=$prd_remote_dir
+  ARCHIVES_DIR=$prd_archives_dir
   SHIB_URL=$prd_shib_url
   SHIB_LOGOUT_URL=$prd_shib_logout_url
   G_ANALYTICS=$prd_g_analytics
@@ -26,6 +27,7 @@ elif [ "$SRC" == 'dev' ]; then
   HOST_NAME=$dev_host
   SITE_DIR=$dev_db_dir
   REMOTE_SCRIPT_DIR=$dev_remote_dir
+  ARCHIVES_DIR=$dev_archives_dir
   SHIB_URL=$dev_shib_url
   SHIB_LOGOUT_URL=$dev_shib_logout_url
   G_ANALYTICS=$dev_g_analytics
@@ -40,6 +42,7 @@ elif [ "$SRC" == 'dev2' ]; then
   HOST_NAME=$dev2_host
   SITE_DIR=$dev2_db_dir
   REMOTE_SCRIPT_DIR=$dev2_remote_dir
+  ARCHIVES_DIR=$dev2_archives_dir
   SHIB_URL=$dev2_shib_url
   SHIB_LOGOUT_URL=$dev2_shib_logout_url
   G_ANALYTICS=$dev2_g_analytics
@@ -54,6 +57,7 @@ elif [ "$SRC" == 'qa' ]; then
   HOST_NAME=$qa_host
   SITE_DIR=$qa_db_dir
   REMOTE_SCRIPT_DIR=$qa_remote_dir
+  ARCHIVES_DIR=$qa_archives_dir
   SHIB_URL=$qa_shib_url
   SHIB_LOGOUT_URL=$qa_shib_logout_url
   G_ANALYTICS=$qa_g_analytics
@@ -76,6 +80,7 @@ export URL
 export HOST_NAME
 export SITE_DIR
 export REMOTE_SCRIPT_DIR
+export ARCHIVES_DIR
 export SHIB_URL
 export SHIB_LOGOUT_URL
 export G_ANALYTICS

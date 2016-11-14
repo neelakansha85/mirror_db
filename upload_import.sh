@@ -20,17 +20,6 @@ PROPERTIES_FILE='db.properties'
 PI_TOTAL_FILE='pi_total.txt'
 SOURCE_DB_PATH=DB_PATH
 
-OLD_URL1=",'${SRC_URL}"
-OLD_URL2=",'(http|https)://${SRC_URL}"
-OLD_SHIB_URL=",\'${SRC_SHIB_URL}\'"
-OLD_SHIB_LOGOUT_URL=",\'${SRC_SHIB_LOGOUT_URL}\'"
-
-NEW_URL1=",'${URL}"
-NEW_URL2=",'\1://${URL}"
-NEW_SHIB_URL=",\'${SHIB_URL}\'"
-NEW_SHIB_LOGOUT_URL=",\'${SHIB_LOGOUT_URL}\'"
-
-
 if [ "$REMOTE_SCRIPT_DIR" = '' ]; then
 	REMOTE_SCRIPT_DIR='mirror_db'
 fi
@@ -43,45 +32,8 @@ if [ "$DROP_TABLES_SQL" = true ]; then
   DROP_TABLES_SQL='--drop-tables-sql'
 fi
 
-chmod 750 $IMPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $STRUCTURE_FILE
+chmod 750 $IMPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $STRUCTURE_FILE $GET_DB_SCRIPT
 chmod 754 $DROP_SQL_FILE.sql
-
-cd ${BACKUP_DIR}/${MERGED_DIR}
-
-if [ ! "$SKIP_REPLACE" = true ]; then
-  for MRDB in `ls *.sql`
-  do
-    if [ -e ${MRDB} ]; then
-      echo "File ${MRDB} found..."
-      echo "Changing environment specific information"
-      if [ ! -z ${SRC_URL} ]; then
-        # Replace old domain with the new domain
-        echo "Replacing Site URL..."
-        echo "Running -> sed -i'' \"s@${OLD_URL1}@${NEW_URL1}@g\" ${MRDB} ${MRDB}"
-        sed -i'' "s@${OLD_URL1}@${NEW_URL1}@g" ${MRDB}
-
-        echo "Running -> sed -i'' \"s@${OLD_URL2}@${NEW_URL2}@g\" ${MRDB}"
-        sed -i'' -r "s@${OLD_URL2}@${NEW_URL2}@g" ${MRDB}
-        
-      fi
-
-      if [ ! -z ${OLD_SHIB_URL} ] && [ "${OLD_SHIB_URL}" != "''" ]; then
-        # Replace Shib Production with Shib QA 
-        echo "Replacing Shibboleth URL..."
-        sed -i '' 's/'${OLD_SHIB_URL}'/'${NEW_SHIB_URL}'/g' ${MRDB}
-        sed -i '' 's/'${OLD_SHIB_LOGOUT_URL}'/'${NEW_SHIB_LOGOUT_URL}'/g' ${MRDB}
-      fi
-
-      if [ ! -z ${SRC_G_ANALYTICS} ] && [ "${SRC_G_ANALYTICS}" != "''" ]; then
-        echo "Replacing Google Analytics code..."
-        sed -i '' 's/'${SRC_G_ANALYTICS}'/'${G_ANALYTICS}'/g' ${MRDB}
-      fi
-    fi
-  done
-fi
-
-# Get to root dir
-cd ../..
 
 # Create REMOTE_SCRIPT_DIR on server
 if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ ! -d ${REMOTE_SCRIPT_DIR} ]" ); then
@@ -128,14 +80,14 @@ send "put ${PROPERTIES_FILE}\r"
 expect sftp>
 send "put ${DROP_SQL_FILE}.sql\r"
 expect sftp>
-#send "put ${GET_DB_SCRIPT}\r"
+send "put ${GET_DB_SCRIPT}\r"
 #expect sftp>
 #send "lcd ${BACKUP_DIR}\r"
 #expect sftp>
 #send "cd ${BACKUP_DIR}\r"
 #expect sftp>
 #send "mput *.sql\r"
-#expect sftp>
+expect sftp>
 send "exit\r"
 expect eof 
 DONE
@@ -143,9 +95,10 @@ DONE
 if [ ! "$PARALLEL_IMPORT" = true ]; then
   # This rsync will be inside get_db.sh
   # Execute get_db.sh on dest server from here
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${GET_DB_SCRIPT} -s ${SRC} --db-path ${SOURCE_DB_PATH} ${PARALLEL_IMPORT}"
 
   # Upload all *.sql files using rsync
-  rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${BACKUP_DIR}/${MERGED_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
+  #rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${BACKUP_DIR}/${MERGED_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
 
   if [[ $? == 0 ]]; then
     echo "File Transfer complete."
@@ -161,7 +114,7 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
     fi
 
     # Execute Import.sh to import database
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES_SQL};"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES_SQL} ${SKIP_REPLACE};"
 
     # Check status of import script
     if [[ $? == 0 ]]; then
@@ -190,12 +143,13 @@ else
   
   # This rsync will be inside get_db.sh
   # Execute get_db.sh on dest server from here
-  
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${GET_DB_SCRIPT} -s ${SRC} -dbf ${DB_FILE_NAME}  --db-path ${SOURCE_DB_PATH} ${PARALLEL_IMPORT}"
+
   # Upload one sql at a time using rsync
-  rsync -avzhe ssh --progress ${BACKUP_DIR}/${MERGED_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
+  #rsync -avzhe ssh --progress ${BACKUP_DIR}/${MERGED_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
   
   # Remove that sql file to avoid imported twice
-  rm ${BACKUP_DIR}/${MERGED_DIR}/${DB_FILE_NAME}
+  # rm ${BACKUP_DIR}/${MERGED_DIR}/${DB_FILE_NAME}
 
   echo "Starting to import ${DB_FILE_NAME}..."
   now=$(date +"%T")
@@ -204,13 +158,13 @@ else
   if [[ $DB_FILE_NAME =~ .*_network.* ]]; then
     if [ ! "$SKIP_NETWORK_IMPORT" = true ]; then
       # Execute Import.sh to import network tables
-      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT};"
+      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${SKIP_REPLACE};"
     else
       echo "Skipping importing Network Tables... "
     fi
   else
     # Execute Import.sh to import all non-network tables
-      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT};"
+      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${SKIP_REPLACE};"
   fi
 
   # Check status of import script

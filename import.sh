@@ -9,6 +9,59 @@ DROP_SQL_FILE='drop_tables'
 
 . read_properties.sh $DEST
 
+OLD_URL1=",'${SRC_URL}"
+OLD_URL2=",'http://${SRC_URL}"
+OLD_URL2=",'https://${SRC_URL}"
+OLD_SHIB_URL=",\'${SRC_SHIB_URL}\'"
+OLD_SHIB_LOGOUT_URL=",\'${SRC_SHIB_LOGOUT_URL}\'"
+
+NEW_URL1=",'${URL}"
+NEW_URL2=",'http://${URL}"
+NEW_URL3=",'https://${URL}"
+NEW_SHIB_URL=",\'${SHIB_URL}\'"
+NEW_SHIB_LOGOUT_URL=",\'${SHIB_LOGOUT_URL}\'"
+
+#Replacing Values from old domain to new domain
+cd ${BACKUP_DIR}
+
+if [ ! "$SKIP_REPLACE" = true ]; then
+  for MRDB in `ls *.sql`
+  do
+    if [ -e ${MRDB} ]; then
+      echo "File ${MRDB} found..."
+      echo "Changing environment specific information"
+      if [ ! -z ${SRC_URL} ]; then
+        # Replace old domain with the new domain
+        echo "Replacing Site URL..."
+        echo "Running -> sed -i'' \"s@${OLD_URL1}@${NEW_URL1}@g\" ${MRDB} ${MRDB}"
+        sed -i'' "s@${OLD_URL1}@${NEW_URL1}@g" ${MRDB}
+
+        echo "Running -> sed -i'' \"s@${OLD_URL2}@${NEW_URL2}@g\" ${MRDB}"
+        sed -i'' -r "s@${OLD_URL2}@${NEW_URL2}@g" ${MRDB}
+
+		  echo "Running -> sed -i'' \"s@${OLD_URL3}@${NEW_URL3}@g\" ${MRDB}"
+        sed -i'' -r "s@${OLD_URL3}@${NEW_URL3}@g" ${MRDB}
+        
+      fi
+
+      if [ ! -z ${OLD_SHIB_URL} ] && [ "${OLD_SHIB_URL}" != "''" ]; then
+        # Replace Shib Production with Shib QA 
+        echo "Replacing Shibboleth URL..."
+        sed -i '' 's/'${OLD_SHIB_URL}'/'${NEW_SHIB_URL}'/g' ${MRDB}
+        sed -i '' 's/'${OLD_SHIB_LOGOUT_URL}'/'${NEW_SHIB_LOGOUT_URL}'/g' ${MRDB}
+      fi
+
+      if [ ! -z ${SRC_G_ANALYTICS} ] && [ "${SRC_G_ANALYTICS}" != "''" ]; then
+        echo "Replacing Google Analytics code..."
+        sed -i '' 's/'${SRC_G_ANALYTICS}'/'${G_ANALYTICS}'/g' ${MRDB}
+      fi
+    fi
+  done
+fi
+
+# Get to root dir
+cd ..
+
 # Drop all tables using sql procedure before import process
 if [ "$DROP_TABLES_SQL" = true ]; then
 	echo "Emptying Database using sql procedure..."

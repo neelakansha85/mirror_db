@@ -73,7 +73,7 @@ fi
 if [[ $? == 0 ]]; then
 	if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${ARCHIVES_DIR} ]" ); then
 		
-		if [ $DB_PATH == '' ]; then
+		if [ -z $DB_PATH ]; then
 			# Get path for source db relative to ARCHIVES_DIR 
 			DB_FILE_N=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
 			
