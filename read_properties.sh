@@ -2,7 +2,7 @@
 
 SRC=$1
 
-. db.properties
+. wp.properties
 
 if [ "$SRC" == 'prd' ]; then
   DB_USER=$prd_db_user
