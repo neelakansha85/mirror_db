@@ -16,7 +16,6 @@ log
 # Properties File #
 ###################
 db.properties
-wp.properties
 
 # Archives of db #
 ##################
