@@ -37,23 +37,23 @@ if [ ! "$SKIP_REPLACE" = true ]; then
         sed -i'' "s@${OLD_URL1}@${NEW_URL1}@g" ${MRDB}
 
         echo "Running -> sed -i'' \"s@${OLD_URL2}@${NEW_URL2}@g\" ${MRDB}"
-        sed -i'' -r "s@${OLD_URL2}@${NEW_URL2}@g" ${MRDB}
+        sed -i'' "s@${OLD_URL2}@${NEW_URL2}@g" ${MRDB}
 
 		  echo "Running -> sed -i'' \"s@${OLD_URL3}@${NEW_URL3}@g\" ${MRDB}"
-        sed -i'' -r "s@${OLD_URL3}@${NEW_URL3}@g" ${MRDB}
+        sed -i'' "s@${OLD_URL3}@${NEW_URL3}@g" ${MRDB}
         
       fi
 
       if [ ! -z ${OLD_SHIB_URL} ] && [ "${OLD_SHIB_URL}" != "''" ]; then
         # Replace Shib Production with Shib QA 
         echo "Replacing Shibboleth URL..."
-        sed -i '' 's/'${OLD_SHIB_URL}'/'${NEW_SHIB_URL}'/g' ${MRDB}
-        sed -i '' 's/'${OLD_SHIB_LOGOUT_URL}'/'${NEW_SHIB_LOGOUT_URL}'/g' ${MRDB}
+        sed -i'' "s@${OLD_SHIB_URL}@${NEW_SHIB_URL}@g" ${MRDB}
+        sed -i'' "s@${OLD_SHIB_LOGOUT_URL}@${NEW_SHIB_LOGOUT_URL}@g" ${MRDB}
       fi
 
       if [ ! -z ${SRC_G_ANALYTICS} ] && [ "${SRC_G_ANALYTICS}" != "''" ]; then
         echo "Replacing Google Analytics code..."
-        sed -i '' 's/'${SRC_G_ANALYTICS}'/'${G_ANALYTICS}'/g' ${MRDB}
+        sed -i'' "s@${SRC_G_ANALYTICS}@${G_ANALYTICS}@g" ${MRDB}
       fi
     fi
   done
