@@ -82,8 +82,6 @@ if [[ $? == 0 ]]; then
 		else
 			SOURCE_DB_PATH=$DB_PATH
 		fi
-	else
-		SOURCE_DB_PATH=$DB_PATH
 	fi
 
 	# Removing MIRROR_DB from the source
