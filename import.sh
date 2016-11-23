@@ -11,7 +11,7 @@ DROP_SQL_FILE='drop_tables'
 
 OLD_URL1=",'${SRC_URL}"
 OLD_URL2=",'http://${SRC_URL}"
-OLD_URL2=",'https://${SRC_URL}"
+OLD_URL3=",'https://${SRC_URL}"
 OLD_SHIB_URL=",'${SRC_SHIB_URL}'"
 OLD_SHIB_LOGOUT_URL=",'${SRC_SHIB_LOGOUT_URL}'"
 
