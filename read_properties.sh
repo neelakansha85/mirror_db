@@ -1,10 +1,10 @@
 #!/bin/bash
 
-SRC=$1
+DOMAIN_ARG=$1
 
 . db.properties
 
-if [ "$SRC" == 'prd' ]; then
+if [ "$DOMAIN_ARG" == 'prd' ]; then
   DB_USER=$prd_db_user
   DB_PASSWORD=$prd_db_pass
   DB_HOST_NAME=$prd_db_host
@@ -18,7 +18,7 @@ if [ "$SRC" == 'prd' ]; then
   SHIB_LOGOUT_URL=$prd_shib_logout_url
   G_ANALYTICS=$prd_g_analytics
 
-elif [ "$SRC" == 'dev' ]; then
+elif [ "$DOMAIN_ARG" == 'dev' ]; then
   DB_USER=$dev_db_user
   DB_PASSWORD=$dev_db_pass
   DB_HOST_NAME=$dev_db_host
@@ -33,7 +33,7 @@ elif [ "$SRC" == 'dev' ]; then
   G_ANALYTICS=$dev_g_analytics
   SUPERADMIN=$dev_superadmin
 
-elif [ "$SRC" == 'dev2' ]; then
+elif [ "$DOMAIN_ARG" == 'dev2' ]; then
   DB_USER=$dev2_db_user
   DB_PASSWORD=$dev2_db_pass
   DB_HOST_NAME=$dev2_db_host
@@ -48,7 +48,7 @@ elif [ "$SRC" == 'dev2' ]; then
   G_ANALYTICS=$dev2_g_analytics
   SUPERADMIN=$dev2_superadmin
 
-elif [ "$SRC" == 'qa' ]; then
+elif [ "$DOMAIN_ARG" == 'qa' ]; then
   DB_USER=$qa_db_user
   DB_PASSWORD=$qa_db_pass
   DB_HOST_NAME=$qa_db_host
@@ -64,7 +64,7 @@ elif [ "$SRC" == 'qa' ]; then
   SUPERADMIN=$qa_superadmin
 
 else
-  echo "Source incorrectly specified"
+  echo "DOMAIN_ARG incorrectly specified"
   exit 1;
 fi
 
