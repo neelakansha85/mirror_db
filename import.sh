@@ -46,7 +46,7 @@ if [ ! "$SKIP_REPLACE" = true ]; then
         echo "Running -> sed -i'' \"s@${OLD_URL2}@${NEW_URL2}@g\" ${MRDB}"
         sed -i'' "s@${OLD_URL2}@${NEW_URL2}@g" ${MRDB}
 
-		    echo "Running -> sed -i'' \"s@${OLD_URL3}@${NEW_URL3}@g\" ${MRDB}"
+        echo "Running -> sed -i'' \"s@${OLD_URL3}@${NEW_URL3}@g\" ${MRDB}"
         sed -i'' "s@${OLD_URL3}@${NEW_URL3}@g" ${MRDB}
         
       fi

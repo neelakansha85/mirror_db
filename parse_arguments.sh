@@ -56,7 +56,7 @@ while [ "$1" != "" ]; do
         shift
         ;;
       --g-analytics )
-        SRC_G_ANALYTICS=$
+        SRC_G_ANALYTICS=$2
         ;;
       --force )
         FORCE_IMPORT=--force

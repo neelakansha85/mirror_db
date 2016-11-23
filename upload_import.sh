@@ -18,7 +18,7 @@ READ_PROPERTIES_FILE='read_properties.sh'
 STRUCTURE_FILE='mirror_db_structure.sh'
 PROPERTIES_FILE='db.properties'
 PI_TOTAL_FILE='pi_total.txt'
-SOURCE_DB_PATH=DB_PATH
+SOURCE_DB_PATH="${DB_PATH}"
 
 if [ "$REMOTE_SCRIPT_DIR" = '' ]; then
 	REMOTE_SCRIPT_DIR='mirror_db'

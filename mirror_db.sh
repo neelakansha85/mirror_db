@@ -11,7 +11,7 @@ SRC_URL="''"
 SRC_SHIB_URL="''"
 SRC_G_ANALYTICS="''"
 LOGS_DIR='log'
-SOURCE_DB_PATH=""
+SOURCE_DB_PATH="''"
 export SOURCE_DB_PATH
 
 . parse_arguments.sh
@@ -23,7 +23,7 @@ fi
 if [ "$SKIP_EXPORT" = true ]; then
 	SKIP_EXPORT='--skip-export'
 else
-	DB_PATH=''
+	DB_PATH="''"
 fi
 
 if [ "$SKIP_IMPORT" = true ]; then
