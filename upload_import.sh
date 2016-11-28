@@ -8,7 +8,7 @@ IS_LAST_IMPORT=false
 # Import instance based environment variables
 . read_properties.sh $DEST
 
-BACKUP_DIR='db_backup'
+EXPORT_DIR='db_export'
 MERGED_DIR='db_merged'
 IMPORT_SCRIPT='import.sh'
 GET_DB_SCRIPT='get_db.sh'
@@ -18,7 +18,7 @@ READ_PROPERTIES_FILE='read_properties.sh'
 STRUCTURE_FILE='mirror_db_structure.sh'
 PROPERTIES_FILE='db.properties'
 PI_TOTAL_FILE='pi_total.txt'
-SOURCE_DB_PATH="${DB_PATH}"
+SRC_DB_BACKUP="${DB_BACKUP}"
 
 if [ "$REMOTE_SCRIPT_DIR" = '' ]; then
 	REMOTE_SCRIPT_DIR='mirror_db'
@@ -56,11 +56,11 @@ DONE
 if [ "$PARALLEL_IMPORT" = true ]; then
   if [[ $DB_FILE_NAME =~ .*_network.* ]]; then
     echo "Executing structure script for creating dir on dest server... "
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${BACKUP_DIR}"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}"
   fi
 else
     echo "Executing structure script for creating dir on dest server... "
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${BACKUP_DIR}"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}"
 fi
 
 expect <<- DONE
@@ -82,9 +82,9 @@ send "put ${DROP_SQL_FILE}.sql\r"
 expect sftp>
 send "put ${GET_DB_SCRIPT}\r"
 #expect sftp>
-#send "lcd ${BACKUP_DIR}\r"
+#send "lcd ${EXPORT_DIR}\r"
 #expect sftp>
-#send "cd ${BACKUP_DIR}\r"
+#send "cd ${EXPORT_DIR}\r"
 #expect sftp>
 #send "mput *.sql\r"
 expect sftp>
@@ -95,10 +95,10 @@ DONE
 if [ ! "$PARALLEL_IMPORT" = true ]; then
   # This rsync will be inside get_db.sh
   # Execute get_db.sh on dest server from here
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${GET_DB_SCRIPT} -s ${SRC} --db-path ${SOURCE_DB_PATH} ${PARALLEL_IMPORT}"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${GET_DB_SCRIPT} -s ${SRC} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}"
 
   # Upload all *.sql files using rsync
-  #rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${BACKUP_DIR}/${MERGED_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
+  #rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${EXPORT_DIR}/${MERGED_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
 
   if [[ $? == 0 ]]; then
     echo "File Transfer complete."
@@ -131,7 +131,7 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
   fi
 
   # Remove all scripts related to mirror_db from server
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} rm ${BACKUP_DIR}"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} rm ${EXPORT_DIR}"
 
   # Remove ${STRUCTURE_FILE} from server to avoid permission issues later
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; rm ${STRUCTURE_FILE}"
@@ -143,13 +143,13 @@ else
   
   # This rsync will be inside get_db.sh
   # Execute get_db.sh on dest server from here
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${GET_DB_SCRIPT} -s ${SRC} -dbf ${DB_FILE_NAME}  --db-path ${SOURCE_DB_PATH} ${PARALLEL_IMPORT}"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${GET_DB_SCRIPT} -s ${SRC} -dbf ${DB_FILE_NAME}  --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}"
 
   # Upload one sql at a time using rsync
-  #rsync -avzhe ssh --progress ${BACKUP_DIR}/${MERGED_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
+  #rsync -avzhe ssh --progress ${EXPORT_DIR}/${MERGED_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
   
   # Remove that sql file to avoid imported twice
-  # rm ${BACKUP_DIR}/${MERGED_DIR}/${DB_FILE_NAME}
+  # rm ${EXPORT_DIR}/${MERGED_DIR}/${DB_FILE_NAME}
 
   echo "Starting to import ${DB_FILE_NAME}..."
   now=$(date +"%T")
@@ -184,7 +184,7 @@ else
 
     # Remove all scripts related to mirror_db from server
     echo "Removing all mirror_db scripts from dest... "
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} rm ${BACKUP_DIR}"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} rm ${EXPORT_DIR}"
 
     # Remove ${STRUCTURE_FILE} from server to avoid permission issues later
     ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; rm ${STRUCTURE_FILE}"

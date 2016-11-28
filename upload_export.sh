@@ -5,7 +5,7 @@
 # Import instance based environment variables
 . read_properties.sh $SRC
 
-BACKUP_DIR='db_backup'
+EXPORT_DIR='db_export'
 MERGED_DIR='db_merged'
 EXPORT_SCRIPT='export.sh'
 MERGE_SCRIPT='merge.sh'
@@ -38,7 +38,7 @@ expect eof
 DONE
 
 echo "Executing structure script for creating dir on dest server... "
-ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${BACKUP_DIR}" 
+ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}" 
 
 expect <<- DONE
 # Establish sftp connection
@@ -71,17 +71,13 @@ fi
 
 # Check status of export command script
 if [[ $? == 0 ]]; then
-	if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${ARCHIVES_DIR} ]" ); then
+	if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${DB_BACKUP_DIR} ]" ); then
 		
-		if [ -z $DB_PATH ]; then
-			# Get path for source db relative to ARCHIVES_DIR 
-			DB_FILE_N=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
-			
-			# Get absolute path for ARCHIVES_DIR_PATH
-			SOURCE_DB_PATH=`ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${ARCHIVES_DIR}/${DB_FILE_N}; pwd"`
-		else
-			SOURCE_DB_PATH=$DB_PATH
-		fi
+		# Get path for source db relative to DB_BACKUP_DIR 
+		DB_FILE_N=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
+		
+		# Get absolute path for DB_BACKUP_DIR_PATH
+		SRC_DB_BACKUP=`ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${DB_BACKUP_DIR}/${DB_FILE_N}; pwd"`
 	fi
 
 	# Removing MIRROR_DB from the source

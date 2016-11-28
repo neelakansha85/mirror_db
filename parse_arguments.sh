@@ -15,8 +15,8 @@ while [ "$1" != "" ]; do
         DEST=$2
         shift
         ;;
-      --db-path)
-        DB_PATH=$2
+      --db-backup)
+        DB_BACKUP=$2
         shift
         ;;
       -ebl )
@@ -98,7 +98,7 @@ done
 
 export SRC
 export DEST
-export DB_PATH
+export DB_BACKUP
 export BATCH_LIMIT
 export POOL_LIMIT
 export MERGE_BATCH_LIMIT

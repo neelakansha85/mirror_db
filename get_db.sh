@@ -1,15 +1,14 @@
 #!/bin/bash
 
-BACKUP_DIR='db_backup'
+EXPORT_DIR='db_export'
 
 . parse_arguments.sh
 
 . read_properties.sh $SRC
 
 if [ ! "$PARALLEL_IMPORT" = true ]; then
-	rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${SSH_USERNAME}@${HOST_NAME}:${DB_PATH}/ ${BACKUP_DIR}/ 
-	#rsync -avzhe --progress ${DB_PATH}/ ~/${REMOTE_SCRIPT_DIR}/${BACKUP_DIR}/
+	rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/ ${EXPORT_DIR}/ 
 else
-	rsync -avzhe ssh --progress ${DB_PATH}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${DB_PATH}/ ${BACKUP_DIR}/
+	rsync -avzhe ssh --progress ${DB_BACKUP_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/ ${EXPORT_DIR}/
 	
 fi

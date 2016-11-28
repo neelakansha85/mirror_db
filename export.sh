@@ -2,7 +2,7 @@
 
 # Config Options
 
-BACKUP_DIR='db_backup'
+EXPORT_DIR='db_export'
 POOL_WAIT_TIME=300
 LOGS_DIR='log'
 PI_TOTAL_FILE='pi_total.txt'
@@ -20,11 +20,11 @@ NETWORK_LIST="${LIST_FILE_N}_network.${LIST_FILE_EXT}"
 # import instance environment variables
 . read_properties.sh $SRC
 
-# Empty BACKUP_DIR dir to remove any previous data
-rm -rf ${BACKUP_DIR}
-mkdir ${BACKUP_DIR}
+# Empty EXPORT_DIR dir to remove any previous data
+rm -rf ${EXPORT_DIR}
+mkdir ${EXPORT_DIR}
 
-cd ${BACKUP_DIR}
+cd ${EXPORT_DIR}
 
 mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}'" > ${LIST_FILE_NAME}
 
@@ -90,8 +90,8 @@ if [ "$PARALLEL_IMPORT" = true ]; then
     # Initiate merging and importing all network tables
     nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1 
 
-    # Continue exporting in BACKUP_DIR
-    cd ${BACKUP_DIR}
+    # Continue exporting in EXPORT_DIR
+    cd ${EXPORT_DIR}
 
 fi    
 
@@ -136,8 +136,8 @@ do
 
             nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT} -dbf ${PI_DB_FILE_N} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
 
-            # Continue exporting in BACKUP_DIR
-            cd ${BACKUP_DIR}
+            # Continue exporting in EXPORT_DIR
+            cd ${EXPORT_DIR}
         fi
         POOL_COUNT=1
         (( PI_TOTAL++ ))

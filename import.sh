@@ -2,7 +2,7 @@
 
 # Config Options
 
-BACKUP_DIR='db_backup'
+EXPORT_DIR='db_export'
 DROP_SQL_FILE='drop_tables'
 
 . parse_arguments.sh
@@ -15,7 +15,7 @@ if [ "$DROP_TABLES_SQL" = true ]; then
 	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} < ${DROP_SQL_FILE}.sql
 fi
 
-cd ${BACKUP_DIR}
+cd ${EXPORT_DIR}
 
 if [ ! "$SKIP_IMPORT" = true ]; then
 

@@ -2,7 +2,7 @@
 
 # Config Options
 
-BACKUP_DIR='db_backup'
+EXPORT_DIR='db_export'
 
 . parse_arguments.sh
 
@@ -25,7 +25,7 @@ DEST_SHIB_LOGOUT_URL=",'${SHIB_LOGOUT_URL}'"
 DEST_G_ANALYTICS="${G_ANALYTICS}"
 
 #Replacing Values from old domain to new domain
-cd ${BACKUP_DIR}
+cd ${EXPORT_DIR}
 
 if [ ! "$SKIP_REPLACE" = true ]; then
   for MRDB in `ls *.sql`

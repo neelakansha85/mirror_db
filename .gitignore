@@ -21,10 +21,14 @@ db.properties
 ##################
 archives
 
+# Backup of db #
+##################
+db_backup
+
 # Mirror_db temp files #
 ########################
 pi_total.txt
 nohup.out
-table_list*.txt
+
 
 !drop_tables.sql
