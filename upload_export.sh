@@ -64,6 +64,15 @@ DONE
 if [[ $? == 0 ]]; then
 	if [ ! "$SKIP_EXPORT" = true ]; then
 		ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${EXPORT_SCRIPT} -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${PARALLEL_IMPORT};" 
+
+		if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${DB_BACKUP_DIR} ]" ); then
+			
+			# Get path for source db relative to DB_BACKUP_DIR 
+			DB_FILE_N=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
+			
+			# Get absolute path for DB_BACKUP_DIR_PATH
+			SRC_DB_BACKUP=`ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${DB_BACKUP_DIR}/${DB_FILE_N}; pwd"`
+		fi
 	else
 		echo "Skipped Export Process..."
 	fi
@@ -71,14 +80,6 @@ fi
 
 # Check status of export command script
 if [[ $? == 0 ]]; then
-	if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${DB_BACKUP_DIR} ]" ); then
-		
-		# Get path for source db relative to DB_BACKUP_DIR 
-		DB_FILE_N=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
-		
-		# Get absolute path for DB_BACKUP_DIR_PATH
-		SRC_DB_BACKUP=`ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${DB_BACKUP_DIR}/${DB_FILE_N}; pwd"`
-	fi
 
 	# Removing MIRROR_DB from the source
 	if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${REMOTE_SCRIPT_DIR} ]" ); then

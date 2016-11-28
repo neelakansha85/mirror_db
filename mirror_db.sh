@@ -22,8 +22,7 @@ fi
 
 if [ "$SKIP_EXPORT" = true ]; then
 	SKIP_EXPORT='--skip-export'
-else
-	DB_PATH="''"
+	SRC_DB_BACKUP=${DB_BACKUP}
 fi
 
 if [ "$SKIP_IMPORT" = true ]; then
