@@ -11,6 +11,7 @@ IS_LAST_IMPORT=false
 EXPORT_DIR='db_export'
 MERGED_DIR='db_merged'
 IMPORT_SCRIPT='import.sh'
+SEARCH_REPLACE_SCRIPT='search_replace.sh'
 GET_DB_SCRIPT='get_db.sh'
 DROP_SQL_FILE='drop_tables'
 PARSE_FILE='parse_arguments.sh'
@@ -32,7 +33,7 @@ if [ "$DROP_TABLES_SQL" = true ]; then
   DROP_TABLES_SQL='--drop-tables-sql'
 fi
 
-chmod 750 $IMPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $STRUCTURE_FILE $GET_DB_SCRIPT
+chmod 750 $IMPORT_SCRIPT $SEARCH_REPLACE_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $STRUCTURE_FILE $GET_DB_SCRIPT
 chmod 754 $DROP_SQL_FILE.sql
 
 # Create REMOTE_SCRIPT_DIR on server
@@ -71,6 +72,8 @@ spawn sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}
 
 expect sftp>
 send "put ${IMPORT_SCRIPT}\r"
+expect sftp>
+send "put ${SEARCH_REPLACE_SCRIPT}\r"
 expect sftp>
 send "put ${PARSE_FILE}\r"
 expect sftp>
@@ -113,8 +116,11 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
       ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; wp db reset --yes"
     fi
 
+    # Execute search_replace.sh to replace old domains with new domain
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${SEARCH_REPLACE_SCRIPT} -s ${SRC} -d ${DEST} ${SKIP_REPLACE};"
+
     # Execute Import.sh to import database
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES_SQL} ${SKIP_REPLACE};"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES_SQL} ;"
 
     # Check status of import script
     if [[ $? == 0 ]]; then
@@ -155,16 +161,19 @@ else
   now=$(date +"%T")
   echo "Start time : $now "
   
+  # Execute search_replace.sh to replace old domains with new domain
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${SEARCH_REPLACE_SCRIPT} -s ${SRC} -d ${DEST} ${SKIP_REPLACE};"
+
   if [[ $DB_FILE_NAME =~ .*_network.* ]]; then
     if [ ! "$SKIP_NETWORK_IMPORT" = true ]; then
-      # Execute Import.sh to import network tables
-      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${SKIP_REPLACE};"
+    # Execute Import.sh to import network tables
+      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${SKIP_REPLACE};"
     else
       echo "Skipping importing Network Tables... "
     fi
   else
     # Execute Import.sh to import all non-network tables
-      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${SKIP_REPLACE};"
+      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT};"
   fi
 
   # Check status of import script

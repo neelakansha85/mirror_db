@@ -100,7 +100,7 @@ fi
 if [ ! -z $DEST ]; then
 	if [[ $status == 0 ]]; then
 		echo "Executing upload_import script"
-		./upload_import.sh -s ${SRC} -d ${DEST} -dbf ${DB_FILE_NAME} --db-backup ${SRC_DB_BACKUP} -iwt ${IMPORT_WAIT_TIME} --site-url ${SRC_URL} --shib-url ${SRC_SHIB_URL} --g-analytics ${SRC_G_ANALYTICS} ${SKIP_IMPORT} ${FORCE_IMPORT} ${PARALLEL_IMPORT} ${IS_LAST_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL} ${SKIP_NETWORK_IMPORT} ${SKIP_REPLACE}
+		./upload_import.sh -s ${SRC} -d ${DEST} -dbf ${DB_FILE_NAME} --db-backup ${SRC_DB_BACKUP} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${PARALLEL_IMPORT} ${IS_LAST_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL} ${SKIP_NETWORK_IMPORT} ${SKIP_REPLACE}
 	else
 		echo "Import process did not complete successfully"
 	fi
