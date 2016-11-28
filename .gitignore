@@ -29,6 +29,6 @@ db_backup
 ########################
 pi_total.txt
 nohup.out
-
+table_list*.txt
 
 !drop_tables.sql
