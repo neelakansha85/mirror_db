@@ -71,7 +71,7 @@ if [[ $? == 0 ]]; then
 			DB_FILE_N=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
 			
 			# Get absolute path for DB_BACKUP_DIR_PATH
-			SRC_DB_BACKUP=`ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${DB_BACKUP_DIR}/${DB_FILE_N}; pwd"`
+			SRC_DB_BACKUP=`ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${DB_BACKUP_DIR}; cd ${DB_FILE_N}; pwd"`
 		fi
 	else
 		echo "Skipped Export Process..."

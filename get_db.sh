@@ -6,6 +6,10 @@ EXPORT_DIR='db_export'
 
 . read_properties.sh $SRC
 
+if [ ! -z $DB_BACKUP ]; then
+	DB_BACKUP_DIR=${DB_BACKUP}
+fi
+
 if [ ! "$PARALLEL_IMPORT" = true ]; then
 	rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/ ${EXPORT_DIR}/ 
 else
