@@ -43,7 +43,7 @@ do
     TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
 
     # Export only network tables from source
-    if [[ $TB =~ ^wp_[a-z|A-z]+[a-zA-Z0-9_]* ]]; then
+    if [[ $TB =~ ^wp_[a-z|A-Z]+[a-zA-Z0-9_]* ]]; then
         if [ ${POOL_COUNT} -eq 1 ]
         then
             echo "Starting a new pool of downloads... "

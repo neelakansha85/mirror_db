@@ -25,40 +25,26 @@ echo "Start Upload Export Process..."
 now=$(date +"%T")
 echo "Start time : $now "
 
-expect <<- DONE
-# Establish sftp connection
-spawn sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}
 
-# Check connection and transfer file to source server
-expect sftp>
-send "put ${STRUCTURE_FILE}\r"
-expect sftp>
-send "exit\r"
-expect eof 
+# Establish sftp connection
+sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR} << DONE
+put ${STRUCTURE_FILE}
+exit
 DONE
 
 echo "Executing structure script for creating dir on dest server... "
 ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}" 
 
-expect <<- DONE
 # Establish sftp connection
-spawn sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}
-
-# Check connection and transfer all files to source server
-expect sftp>
-send "put ${EXPORT_SCRIPT}\r"
-expect sftp>
-send "put ${MERGE_SCRIPT}\r"
-expect sftp>
-send "put ${PARSE_FILE}\r"
-expect sftp>
-send "put ${READ_PROPERTIES_FILE}\r"
-expect sftp>
-send "put ${PROPERTIES_FILE}\r"
-expect sftp>
-send "exit\r"
-expect eof 
+sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR} << DONE
+put ${EXPORT_SCRIPT}
+put ${MERGE_SCRIPT}
+put ${PARSE_FILE}
+put ${READ_PROPERTIES_FILE}
+put ${PROPERTIES_FILE}
+exit
 DONE
+
 
 # Executing export process at source
 if [[ $? == 0 ]]; then

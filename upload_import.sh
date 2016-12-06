@@ -42,16 +42,10 @@ if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ ! -d ${REMOTE_SCRIPT
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "mkdir ${REMOTE_SCRIPT_DIR};" 
 fi
 
-expect <<- DONE
 # Establish sftp connection
-spawn sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}
-
-# Check connection and transfer file to destination server
-expect sftp>
-send "put ${STRUCTURE_FILE}\r"
-expect sftp>
-send "exit\r"
-expect eof 
+sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR} << DONE
+put ${STRUCTURE_FILE}
+exit
 DONE
 
 if [ "$PARALLEL_IMPORT" = true ]; then
@@ -64,35 +58,19 @@ else
     ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}"
 fi
 
-expect <<- DONE
 # Establish sftp connection
-spawn sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}
-
-# Check connection and transfer all files to destination server
-
-expect sftp>
-send "put ${IMPORT_SCRIPT}\r"
-expect sftp>
-send "put ${SEARCH_REPLACE_SCRIPT}\r"
-expect sftp>
-send "put ${PARSE_FILE}\r"
-expect sftp>
-send "put ${READ_PROPERTIES_FILE}\r"
-expect sftp>
-send "put ${PROPERTIES_FILE}\r"
-expect sftp>
-send "put ${DROP_SQL_FILE}.sql\r"
-expect sftp>
-send "put ${GET_DB_SCRIPT}\r"
-#expect sftp>
-#send "lcd ${EXPORT_DIR}\r"
-#expect sftp>
-#send "cd ${EXPORT_DIR}\r"
-#expect sftp>
-#send "mput *.sql\r"
-expect sftp>
-send "exit\r"
-expect eof 
+sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR} << DONE
+put ${IMPORT_SCRIPT}
+put ${SEARCH_REPLACE_SCRIPT}
+put ${PARSE_FILE}
+put ${READ_PROPERTIES_FILE}
+put ${PROPERTIES_FILE}
+put ${DROP_SQL_FILE}.sql
+put ${GET_DB_SCRIPT}
+#lcd ${EXPORT_DIR}
+#cd ${EXPORT_DIR}
+#mput *.sql
+exit
 DONE
 
 if [ ! "$PARALLEL_IMPORT" = true ]; then
