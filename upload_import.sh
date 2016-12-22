@@ -4,9 +4,17 @@
 IS_LAST_IMPORT=false
 
 . parse_arguments.sh
+if [[ ! $? == 0 ]]; then
+    echo "Parsing arguments failed!"
+    exit 1
+fi
 
 # Import instance based environment variables
 . read_properties.sh $DEST
+if [[ ! $? == 0 ]]; then
+    echo "Read properties script failed!"
+    exit 1
+fi
 
 EXPORT_DIR='db_export'
 MERGED_DIR='db_merged'
@@ -77,6 +85,10 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
   # This rsync will be inside get_db.sh
   # Execute get_db.sh on dest server from here
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${GET_DB_SCRIPT} -s ${SRC} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}"
+  if [[ ! $? == 0 ]]; then
+    echo "Get DB script failed on ${DEST} server!"
+    exit 1
+  fi
 
   # Upload all *.sql files using rsync
   #rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${EXPORT_DIR}/${MERGED_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
@@ -96,9 +108,17 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
 
     # Execute search_replace.sh to replace old domains with new domain
     ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${SEARCH_REPLACE_SCRIPT} -s ${SRC} -d ${DEST} ${SKIP_REPLACE};"
+    if [[ ! $? == 0 ]]; then
+      echo "Search replace script failed on ${DEST} server!"
+      exit 1
+    fi
 
     # Execute Import.sh to import database
     ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES_SQL} ;"
+    if [[ ! $? == 0 ]]; then
+      echo "Import script failed on ${DEST} server!"
+      exit 1
+    fi
 
     # Check status of import script
     if [[ $? == 0 ]]; then
@@ -128,6 +148,10 @@ else
   # This rsync will be inside get_db.sh
   # Execute get_db.sh on dest server from here
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${GET_DB_SCRIPT} -s ${SRC} -dbf ${DB_FILE_NAME}  --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}"
+  if [[ ! $? == 0 ]]; then
+    echo "Get DB script failed on ${DEST} server!"
+    exit 1
+  fi
 
   # Upload one sql at a time using rsync
   #rsync -avzhe ssh --progress ${EXPORT_DIR}/${MERGED_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
@@ -141,17 +165,29 @@ else
   
   # Execute search_replace.sh to replace old domains with new domain
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${SEARCH_REPLACE_SCRIPT} -s ${SRC} -d ${DEST} ${SKIP_REPLACE};"
+  if [[ ! $? == 0 ]]; then
+    echo "Search replace script failed on ${DEST} server!"
+    exit 1
+  fi
 
   if [[ $DB_FILE_NAME =~ .*_network.* ]]; then
     if [ ! "$SKIP_NETWORK_IMPORT" = true ]; then
     # Execute Import.sh to import network tables
       ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${SKIP_REPLACE};"
+      if [[ ! $? == 0 ]]; then
+        echo "Import script failed on ${DEST} server for network tables!"
+        exit 1
+      fi
     else
       echo "Skipping importing Network Tables... "
     fi
   else
     # Execute Import.sh to import all non-network tables
       ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT};"
+      if [[ ! $? == 0 ]]; then
+        echo "Import script failed on ${DEST} server for all site tables!"
+        exit 1
+      fi
   fi
 
   # Check status of import script

@@ -3,8 +3,16 @@
 EXPORT_DIR='db_export'
 
 . parse_arguments.sh
+if [[ ! $? == 0 ]]; then
+    echo "Parse arguments script failed!"
+    exit 1
+fi
 
 . read_properties.sh $SRC
+if [[ ! $? == 0 ]]; then
+    echo "Read properties script failed!"
+    exit 1
+fi
 
 if [ ! -z $DB_BACKUP ]; then
 	DB_BACKUP_DIR=${DB_BACKUP}

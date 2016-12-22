@@ -5,8 +5,16 @@
 EXPORT_DIR='db_export'
 
 . parse_arguments.sh
+if [[ ! $? == 0 ]]; then
+    echo "Parse arguments script failed!"
+    exit 1
+fi
 
 . read_properties.sh $SRC
+if [[ ! $? == 0 ]]; then
+    echo "Read properties script failed!"
+    exit 1
+fi
 
 SRC_URL=",'${URL}"
 SRC_URL2=",'http://${URL}"
@@ -16,6 +24,10 @@ SRC_SHIB_LOGOUT_URL=",'${SHIB_LOGOUT_URL}'"
 SRC_G_ANALYTICS="${G_ANALYTICS}"
 
 . read_properties.sh $DEST
+if [[ ! $? == 0 ]]; then
+    echo "Read properties script failed!"
+    exit 1
+fi
 
 DEST_URL=",'${URL}"
 DEST_URL2=",'http://${URL}"

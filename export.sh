@@ -8,6 +8,10 @@ LOGS_DIR='log'
 PI_TOTAL_FILE='pi_total.txt'
 
 . parse_arguments.sh
+if [[ ! $? == 0 ]]; then
+    echo "Parse arguments script failed!"
+    exit 1
+fi
 
 DB_FILE_EXT=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $2}'`
 DB_FILE_N=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
@@ -19,6 +23,10 @@ NETWORK_LIST="${LIST_FILE_N}_network.${LIST_FILE_EXT}"
 
 # import instance environment variables
 . read_properties.sh $SRC
+if [[ ! $? == 0 ]]; then
+    echo "Read properties script failed!"
+    exit 1
+fi
 
 # Empty EXPORT_DIR dir to remove any previous data
 rm -rf ${EXPORT_DIR}
@@ -162,10 +170,18 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
     echo "Executing merge script for network tables... "
     # Merge all network tables to one mysql_network.sql
     ./merge.sh -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} -mbl ${MERGE_BATCH_LIMIT}
+    if [[ ! $? == 0 ]]; then
+        echo "Merge script failed for network tables in Parallel Import!"
+        exit 1
+    fi
 
     echo "Executing merge script for all site tables... "
     # Merge all other tables to one mysql.sql
     ./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}
+    if [[ ! $? == 0 ]]; then
+        echo "Merge script failed for all site tables in Parallel Import!"
+        exit 1
+    fi
 else
     # Execute merge and upload for the last set of tables downloaded
     PI_DB_FILE_N="${DB_FILE_N}_${PI_TOTAL}.${DB_FILE_EXT}"

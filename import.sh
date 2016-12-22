@@ -6,8 +6,16 @@ EXPORT_DIR='db_export'
 DROP_SQL_FILE='drop_tables'
 
 . parse_arguments.sh
+if [[ ! $? == 0 ]]; then
+    echo "Parse arguments script failed!"
+    exit 1
+fi
 
 . read_properties.sh $DEST
+if [[ ! $? == 0 ]]; then
+    echo "Read properties script failed!"
+    exit 1
+fi
 
 # Drop all tables using sql procedure before import process
 if [ "$DROP_TABLES_SQL" = true ]; then

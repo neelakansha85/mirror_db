@@ -8,6 +8,10 @@ DB_BACKUP_DIR='db_backup'
 DB_SUFFIX=''
 
 . parse_arguments.sh
+if [[ ! $? == 0 ]]; then
+    echo "Parse arguments script failed!"
+    exit 1
+fi
 
 DB_FILE_EXT=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $2}'`
 DB_FILE_N=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
