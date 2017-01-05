@@ -18,6 +18,20 @@ if [ "$DOMAIN_ARG" == 'prd' ]; then
   SHIB_LOGOUT_URL=$prd_shib_logout_url
   G_ANALYTICS=$prd_g_analytics
 
+elif [ "$DOMAIN_ARG" == 'tstprd' ]; then
+  DB_USER=$tstprd_db_user
+  DB_PASSWORD=$tstprd_db_pass
+  DB_HOST_NAME=$tstprd_db_host
+  DB_SCHEMA=$tstprd_db_name
+  URL=$tstprd_url
+  HOST_NAME=$tstprd_host
+  SITE_DIR=$tstprd_dir
+  REMOTE_SCRIPT_DIR=$tstprd_remote_dir
+  DB_BACKUP_DIR=$tstprd_db_backup_dir
+  SHIB_URL=$tstprd_shib_url
+  SHIB_LOGOUT_URL=$tstprd_shib_logout_url
+  G_ANALYTICS=$tstprd_g_analytics
+
 elif [ "$DOMAIN_ARG" == 'dev' ]; then
   DB_USER=$dev_db_user
   DB_PASSWORD=$dev_db_pass
@@ -62,6 +76,21 @@ elif [ "$DOMAIN_ARG" == 'qa' ]; then
   SHIB_LOGOUT_URL=$qa_shib_logout_url
   G_ANALYTICS=$qa_g_analytics
   SUPERADMIN=$qa_superadmin
+
+elif [ "$DOMAIN_ARG" == 'qa2' ]; then
+  DB_USER=$qa2_db_user
+  DB_PASSWORD=$qa2_db_pass
+  DB_HOST_NAME=$qa2_db_host
+  DB_SCHEMA=$qa2_db_name
+  URL=$qa2_url
+  HOST_NAME=$qa2_host
+  SITE_DIR=$qa2_db_dir
+  REMOTE_SCRIPT_DIR=$qa2_remote_dir
+  DB_BACKUP_DIR=$qa2_db_backup_dir
+  SHIB_URL=$qa2_shib_url
+  SHIB_LOGOUT_URL=$qa2_shib_logout_url
+  G_ANALYTICS=$qa2_g_analytics
+  SUPERADMIN=$qa2_superadmin
 
 else
   echo "DOMAIN_ARG incorrectly specified"
