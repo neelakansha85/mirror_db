@@ -21,6 +21,7 @@ MERGED_DIR='db_merged'
 IMPORT_SCRIPT='import.sh'
 SEARCH_REPLACE_SCRIPT='search_replace.sh'
 GET_DB_SCRIPT='get_db.sh'
+PUT_DB_SCRIPT='put_db.sh'
 DROP_SQL_FILE='drop_tables'
 PARSE_FILE='parse_arguments.sh'
 READ_PROPERTIES_FILE='read_properties.sh'
@@ -74,19 +75,15 @@ put ${PARSE_FILE}
 put ${READ_PROPERTIES_FILE}
 put ${PROPERTIES_FILE}
 put ${DROP_SQL_FILE}.sql
-put ${GET_DB_SCRIPT}
-#lcd ${EXPORT_DIR}
-#cd ${EXPORT_DIR}
-#mput *.sql
 exit
 DONE
 
 if [ ! "$PARALLEL_IMPORT" = true ]; then
-  # This rsync will be inside get_db.sh
-  # Execute get_db.sh on dest server from here
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${GET_DB_SCRIPT} -s ${SRC} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}"
+  # Put all SQL files on ${DEST} server from mirror_db server
+  echo "Executing ${PUT_DB_SCRIPT} script"
+  ./${PUT_DB_SCRIPT} -d ${DEST} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
   if [[ ! $? == 0 ]]; then
-    echo "Get DB script failed on ${DEST} server!"
+    echo "Put DB script failed on mirror_db server!"
     exit 1
   fi
 
@@ -145,11 +142,11 @@ else
   
   echo "Uploading ${DB_FILE_NAME}... "
   
-  # This rsync will be inside get_db.sh
-  # Execute get_db.sh on dest server from here
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${GET_DB_SCRIPT} -s ${SRC} -dbf ${DB_FILE_NAME}  --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}"
+  # Put all SQL files on ${DEST} server from mirror_db server
+  echo "Executing ${PUT_DB_SCRIPT} script"
+  ./${PUT_DB_SCRIPT} -d ${DEST} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
   if [[ ! $? == 0 ]]; then
-    echo "Get DB script failed on ${DEST} server!"
+    echo "Put DB script failed on mirror_db server!"
     exit 1
   fi
 

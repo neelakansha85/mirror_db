@@ -8,7 +8,7 @@ if [[ ! $? == 0 ]]; then
     exit 1
 fi
 
-. read_properties.sh $SRC
+. read_properties.sh $DEST
 if [[ ! $? == 0 ]]; then
     echo "Read properties script failed!"
     exit 1
@@ -19,7 +19,7 @@ if [ ! -z $DB_BACKUP ]; then
 fi
 
 if [ ! "$PARALLEL_IMPORT" = true ]; then
-	rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/ ${EXPORT_DIR}/ 
+	rsync -avzhe ssh --include '*.sql' --exclude '*' --progress ${EXPORT_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/
 else
-	rsync -avzhe ssh --progress ${DB_BACKUP_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/ ${EXPORT_DIR}/
+	rsync -avzhe ssh --progress ${EXPORT_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/
 fi

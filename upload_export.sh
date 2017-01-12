@@ -71,6 +71,15 @@ if [[ $? == 0 ]]; then
 			# Get absolute path for DB_BACKUP_DIR_PATH
 			SRC_DB_BACKUP=`ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${DB_BACKUP_DIR}; cd ${DB_FILE_N}; pwd"`
 		fi
+
+		# Get exported db from SRC to mirror_db server
+		echo "Transfering files from SRC to mirror_db server"
+		ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${GET_DB_SCRIPT} -s ${SRC} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}"
+		if [[ ! $? == 0 ]]; then
+			echo "Get DB script failed on mirror_db server!"
+			exit 1
+		fi
+
 	else
 		echo "Skipped Export Process..."
 	fi
