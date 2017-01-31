@@ -39,7 +39,7 @@ elif [ "$DOMAIN_ARG" == 'dev' ]; then
   DB_SCHEMA=$dev_db_name
   URL=$dev_url
   HOST_NAME=$dev_host
-  SITE_DIR=$dev_db_dir
+  SITE_DIR=$dev_dir
   REMOTE_SCRIPT_DIR=$dev_remote_dir
   DB_BACKUP_DIR=$dev_db_backup_dir
   SHIB_URL=$dev_shib_url
@@ -54,7 +54,7 @@ elif [ "$DOMAIN_ARG" == 'dev2' ]; then
   DB_SCHEMA=$dev2_db_name
   URL=$dev2_url
   HOST_NAME=$dev2_host
-  SITE_DIR=$dev2_db_dir
+  SITE_DIR=$dev2_dir
   REMOTE_SCRIPT_DIR=$dev2_remote_dir
   DB_BACKUP_DIR=$dev2_db_backup_dir
   SHIB_URL=$dev2_shib_url
@@ -69,7 +69,7 @@ elif [ "$DOMAIN_ARG" == 'qa' ]; then
   DB_SCHEMA=$qa_db_name
   URL=$qa_url
   HOST_NAME=$qa_host
-  SITE_DIR=$qa_db_dir
+  SITE_DIR=$qa_dir
   REMOTE_SCRIPT_DIR=$qa_remote_dir
   DB_BACKUP_DIR=$qa_db_backup_dir
   SHIB_URL=$qa_shib_url
@@ -84,7 +84,7 @@ elif [ "$DOMAIN_ARG" == 'qa2' ]; then
   DB_SCHEMA=$qa2_db_name
   URL=$qa2_url
   HOST_NAME=$qa2_host
-  SITE_DIR=$qa2_db_dir
+  SITE_DIR=$qa2_dir
   REMOTE_SCRIPT_DIR=$qa2_remote_dir
   DB_BACKUP_DIR=$qa2_db_backup_dir
   SHIB_URL=$qa2_shib_url

@@ -19,7 +19,10 @@ if [ ! -z $DB_BACKUP ]; then
 fi
 
 if [ ! "$PARALLEL_IMPORT" = true ]; then
-	rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${EXPORT_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${EXPORT_DIR}/
+	rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${EXPORT_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
 else
-	rsync -avzhe ssh --progress ${EXPORT_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${EXPORT_DIR}/
+	rsync -avzhe ssh --progress ${EXPORT_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
 fi
+
+echo "DB dir on Dest server: " 
+ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${DB_BACKUP_DIR}; pwd;"
