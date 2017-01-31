@@ -17,6 +17,7 @@ EXPORT_DIR='db_export'
 MERGED_DIR='db_merged'
 EXPORT_SCRIPT='export.sh'
 MERGE_SCRIPT='merge.sh'
+GET_DB_SCRIPT='get_db.sh'
 PARSE_FILE='parse_arguments.sh'
 READ_PROPERTIES_FILE='read_properties.sh'
 STRUCTURE_FILE='mirror_db_structure.sh'
@@ -74,7 +75,8 @@ if [[ $? == 0 ]]; then
 
 		# Get exported db from SRC to mirror_db server
 		echo "Transfering files from SRC to mirror_db server"
-		ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${GET_DB_SCRIPT} -s ${SRC} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}"
+		./${GET_DB_SCRIPT} -s ${SRC} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
+		
 		if [[ ! $? == 0 ]]; then
 			echo "Get DB script failed on mirror_db server!"
 			exit 1
