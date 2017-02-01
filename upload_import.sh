@@ -22,7 +22,9 @@ IMPORT_SCRIPT='import.sh'
 SEARCH_REPLACE_SCRIPT='search_replace.sh'
 GET_DB_SCRIPT='get_db.sh'
 PUT_DB_SCRIPT='put_db.sh'
+AFTER_IMPORT_SCRIPT='after_import.sh'
 DROP_SQL_FILE='drop_tables'
+SUPER_ADMIN_TXT='superadmin_dev.txt'
 PARSE_FILE='parse_arguments.sh'
 READ_PROPERTIES_FILE='read_properties.sh'
 STRUCTURE_FILE='mirror_db_structure.sh'
@@ -42,7 +44,7 @@ if [ "$DROP_TABLES_SQL" = true ]; then
   DROP_TABLES_SQL='--drop-tables-sql'
 fi
 
-chmod 750 $IMPORT_SCRIPT $SEARCH_REPLACE_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $STRUCTURE_FILE $GET_DB_SCRIPT
+chmod 750 $IMPORT_SCRIPT $SEARCH_REPLACE_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $STRUCTURE_FILE $GET_DB_SCRIPT $AFTER_IMPORT_SCRIPT
 chmod 754 $DROP_SQL_FILE.sql
 
 # Create REMOTE_SCRIPT_DIR on server
@@ -71,10 +73,12 @@ fi
 sftp -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR} << DONE
 put ${IMPORT_SCRIPT}
 put ${SEARCH_REPLACE_SCRIPT}
+put ${AFTER_IMPORT_SCRIPT}
 put ${PARSE_FILE}
 put ${READ_PROPERTIES_FILE}
 put ${PROPERTIES_FILE}
 put ${DROP_SQL_FILE}.sql
+put ${SUPER_ADMIN_TXT}
 exit
 DONE
 
@@ -116,6 +120,10 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
       echo "Import script failed on ${DEST} server!"
       exit 1
     fi
+
+    # Execute After_Import script to perform all sql operations
+    echo "Executing SQL commands after import process over the Destination"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${AFTER_IMPORT_SCRIPT} -d ${DEST}"
 
     # Check status of import script
     if [[ $? == 0 ]]; then

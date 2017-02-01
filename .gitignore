@@ -16,6 +16,7 @@ log
 # Properties File #
 ###################
 db.properties
+superadmin_dev.txt
 
 # Archives of db #
 ##################
