@@ -24,6 +24,10 @@ if [ ! -d "$LOGS_DIR" ]; then
 	mkdir $LOGS_DIR
 fi
 
+if [ "$DROP_TABLES" = true ]; then
+	DROP_TABLES='--drop-tables'
+fi
+
 if [ "$SKIP_EXPORT" = true ]; then
 	SKIP_EXPORT='--skip-export'
 	SRC_DB_BACKUP=${DB_BACKUP}
@@ -31,10 +35,9 @@ fi
 
 if [ "$SKIP_IMPORT" = true ]; then
 	SKIP_IMPORT='--skip-import'
-fi
-
-if [ "$DROP_TABLES" = true ]; then
-	DROP_TABLES='--drop-tables'
+	# Cannot drop entire database if skipping import process
+	DROP_TABLES=
+	DROP_TABLES_SQL=
 fi
 
 if [ "$SKIP_NETWORK_IMPORT" = true ]; then
