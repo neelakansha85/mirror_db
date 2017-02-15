@@ -16,6 +16,8 @@ if [ "$DOMAIN_ARG" == 'prd' ]; then
   DB_BACKUP_DIR=$prd_db_backup_dir
   SHIB_URL=$prd_shib_url
   SHIB_LOGOUT_URL=$prd_shib_logout_url
+  CDN_URL=$prd_cdn_url
+  HTTPS_CDN_URL=$prd_https_cdn_url
   G_ANALYTICS=$prd_g_analytics
 
 elif [ "$DOMAIN_ARG" == 'tstprd' ]; then
@@ -30,6 +32,8 @@ elif [ "$DOMAIN_ARG" == 'tstprd' ]; then
   DB_BACKUP_DIR=$tstprd_db_backup_dir
   SHIB_URL=$tstprd_shib_url
   SHIB_LOGOUT_URL=$tstprd_shib_logout_url
+  CDN_URL=$tstprd_cdn_url
+  HTTPS_CDN_URL=$tstprd_https_cdn_url
   G_ANALYTICS=$tstprd_g_analytics
 
 elif [ "$DOMAIN_ARG" == 'dev' ]; then
@@ -44,6 +48,8 @@ elif [ "$DOMAIN_ARG" == 'dev' ]; then
   DB_BACKUP_DIR=$dev_db_backup_dir
   SHIB_URL=$dev_shib_url
   SHIB_LOGOUT_URL=$dev_shib_logout_url
+  CDN_URL=$dev_cdn_url
+  HTTPS_CDN_URL=$dev_https_cdn_url
   G_ANALYTICS=$dev_g_analytics
   SUPERADMIN=$dev_superadmin
 
@@ -59,6 +65,8 @@ elif [ "$DOMAIN_ARG" == 'dev2' ]; then
   DB_BACKUP_DIR=$dev2_db_backup_dir
   SHIB_URL=$dev2_shib_url
   SHIB_LOGOUT_URL=$dev2_shib_logout_url
+  CDN_URL=$dev2_cdn_url
+  HTTPS_CDN_URL=$dev2_https_cdn_url
   G_ANALYTICS=$dev2_g_analytics
   SUPERADMIN=$dev2_superadmin
 
@@ -74,6 +82,8 @@ elif [ "$DOMAIN_ARG" == 'qa' ]; then
   DB_BACKUP_DIR=$qa_db_backup_dir
   SHIB_URL=$qa_shib_url
   SHIB_LOGOUT_URL=$qa_shib_logout_url
+  CDN_URL=$qa_cdn_url
+  HTTPS_CDN_URL=$qa_https_cdn_url
   G_ANALYTICS=$qa_g_analytics
   SUPERADMIN=$qa_superadmin
 
@@ -89,6 +99,8 @@ elif [ "$DOMAIN_ARG" == 'qa2' ]; then
   DB_BACKUP_DIR=$qa2_db_backup_dir
   SHIB_URL=$qa2_shib_url
   SHIB_LOGOUT_URL=$qa2_shib_logout_url
+  CDN_URL=$qa2_cdn_url
+  HTTPS_CDN_URL=$qa2_https_cdn_url
   G_ANALYTICS=$qa2_g_analytics
   SUPERADMIN=$qa2_superadmin
 

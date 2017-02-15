@@ -22,6 +22,8 @@ SRC_URL3=",'https://${URL}"
 SRC_SHIB_URL=",'${SHIB_URL}'"
 SRC_SHIB_LOGOUT_URL=",'${SHIB_LOGOUT_URL}'"
 SRC_G_ANALYTICS="${G_ANALYTICS}"
+SRC_CDN_URL="${CDN_URL}"
+SRC_HTTPS_CDN_URL="${HTTPS_CDN_URL}"
 
 . read_properties.sh $DEST
 if [[ ! $? == 0 ]]; then
@@ -35,6 +37,8 @@ DEST_URL3=",'https://${URL}"
 DEST_SHIB_URL=",'${SHIB_URL}'"
 DEST_SHIB_LOGOUT_URL=",'${SHIB_LOGOUT_URL}'"
 DEST_G_ANALYTICS="${G_ANALYTICS}"
+DEST_CDN_URL="${CDN_URL}"
+DEST_HTTPS_CDN_URL="${HTTPS_CDN_URL}"
 
 #Replacing Values from old domain to new domain
 cd ${EXPORT_DIR}
@@ -69,6 +73,12 @@ if [ ! "$SKIP_REPLACE" = true ]; then
       if [ ! -z ${SRC_G_ANALYTICS} ] && [ "${SRC_G_ANALYTICS}" != "''" ]; then
         echo "Replacing Google Analytics code..."
         sed -i'' "s@${SRC_G_ANALYTICS}@${DEST_G_ANALYTICS}@g" ${MRDB}
+      fi
+
+      if [ ! -z ${SRC_CDN_URL} ] && [ "${SRC_CDN_URL}" != "''" ] && [ ! -z ${SRC_HTTPS_CDN_URL} ] && [ "${SRC_HTTPS_CDN_URL}" != "''" ] ; then
+        echo "Replacing CDN URL..."
+        sed -i'' "s@${SRC_CDN_URL}@${DEST_CDN_URL}@g" ${MRDB}
+        sed -i'' "s@${SRC_HTTPS_CDN_URL}@${DEST_HTTPS_CDN_URL}@g" ${MRDB}
       fi
     fi
   done
