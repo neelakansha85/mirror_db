@@ -2,14 +2,14 @@
 
 . parse_arguments.sh
 if [[ ! $? == 0 ]]; then
-    echo "Parsing arguments failed!"
+    echo "FAILURE: Error parsing arguments!"
     exit 1
 fi
 
 # Import instance based environment variables
 . read_properties.sh $DEST
 if [[ ! $? == 0 ]]; then
-    echo "Read properties script failed!"
+    echo "FAILURE: Error reading properties!"
     exit 1
 fi
 

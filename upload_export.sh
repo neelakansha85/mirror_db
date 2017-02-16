@@ -2,14 +2,14 @@
 
 . parse_arguments.sh
 if [[ ! $? == 0 ]]; then
-	echo "Parsing arguments failed!"
+	echo "FAILURE: Error parsing arguments!"
 	exit 1
 fi
 
 # Import instance based environment variables
 . read_properties.sh $SRC
 if [[ ! $? == 0 ]]; then
-	echo "Read properties script failed!"
+	echo "FAILURE: Error reading properties!"
 	exit 1
 fi
 
@@ -54,12 +54,15 @@ put ${PROPERTIES_FILE}
 exit
 DONE
 
+if [[ ! $? == 0 ]]; then
+	echo "FAILURE: Error uploading mirror_db files on ${SRC} server!"
+	exit 1
+else
 # Executing export process at source
-if [[ $? == 0 ]]; then
 	if [ ! "$SKIP_EXPORT" = true ]; then
 		ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${EXPORT_SCRIPT} -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${PARALLEL_IMPORT};" 
 		if [[ ! $? == 0 ]]; then
-			echo "Export script failed on ${SRC} server!"
+			echo "FAILURE: Error executing export script on ${SRC} server!"
 			exit 1
 		fi
 
@@ -77,21 +80,20 @@ if [[ $? == 0 ]]; then
 		./${GET_DB_SCRIPT} -s ${SRC} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
 		
 		if [[ ! $? == 0 ]]; then
-			echo "Get DB script failed on mirror_db server!"
+			echo "FAILURE: Error executing Get DB script on mirror_db server!"
 			exit 1
 		fi
 
 	else
 		echo "Skipped Export Process..."
-	fi
-else
-	echo "FAILURE: Uploading mirror_db files on ${SRC} server"
-	exit 1
+	fi	
 fi
 
 # Check status of export command script
-if [[ $? == 0 ]]; then
-
+if [[ ! $? == 0 ]]; then
+	echo "FAILURE: Error exporting database on ${SRC}!"
+	exit 1
+else
 	# Removing MIRROR_DB from the source
 	if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${REMOTE_SCRIPT_DIR} ]" ); then
 		echo "Removing ${REMOTE_SCRIPT_DIR} from ${SRC}..."
@@ -101,7 +103,4 @@ if [[ $? == 0 ]]; then
 	echo "Upload Export completed..."
 	now=$(date +"%T")
 	echo "End time : $now "
-else
-	echo "Upload Export Failed Check Log"
-	exit 1
 fi

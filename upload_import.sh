@@ -5,14 +5,14 @@ IS_LAST_IMPORT=false
 
 . parse_arguments.sh
 if [[ ! $? == 0 ]]; then
-    echo "Parsing arguments failed!"
+    echo "FAILURE: Error parsing arguments!"
     exit 1
 fi
 
 # Import instance based environment variables
 . read_properties.sh $DEST
 if [[ ! $? == 0 ]]; then
-    echo "Read properties script failed!"
+    echo "FAILURE: Error reading properties!"
     exit 1
 fi
 
@@ -87,7 +87,7 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
   echo "Executing ${PUT_DB_SCRIPT} script"
   ./${PUT_DB_SCRIPT} -d ${DEST} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
   if [[ ! $? == 0 ]]; then
-    echo "Put DB script failed on mirror_db server!"
+    echo "FAILURE: Error executing put db script on mirror_db server!"
     exit 1
   fi
 
@@ -110,14 +110,14 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
     # Execute search_replace.sh to replace old domains with new domain
     ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${SEARCH_REPLACE_SCRIPT} -s ${SRC} -d ${DEST} ${SKIP_REPLACE};"
     if [[ ! $? == 0 ]]; then
-      echo "Search replace script failed on ${DEST} server!"
+      echo "FAILURE: Error executing search and replace script on ${DEST} server!"
       exit 1
     fi
 
     # Execute Import.sh to import database
     ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES_SQL} ;"
     if [[ ! $? == 0 ]]; then
-      echo "Import script failed on ${DEST} server!"
+      echo "FAILURE: Error executing import script on ${DEST} server!"
       exit 1
     fi
 
@@ -131,11 +131,11 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
       now=$(date +"%T")
       echo "End time : $now "
     else
-      echo "Import Failed Check Log"
+      echo "FAILURE: Error Importing database!"
     fi
 
   else
-    echo "Transfer failed!"
+    echo "FAILURE: Error transferring files!"
     exit 1
   fi
 
@@ -154,7 +154,7 @@ else
   echo "Executing ${PUT_DB_SCRIPT} script"
   ./${PUT_DB_SCRIPT} -d ${DEST} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
   if [[ ! $? == 0 ]]; then
-    echo "Put DB script failed on mirror_db server!"
+    echo "FAILURE: Error executing Put DB script on mirror_db server!"
     exit 1
   fi
 
@@ -171,7 +171,7 @@ else
   # Execute search_replace.sh to replace old domains with new domain
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${SEARCH_REPLACE_SCRIPT} -s ${SRC} -d ${DEST} ${SKIP_REPLACE};"
   if [[ ! $? == 0 ]]; then
-    echo "Search replace script failed on ${DEST} server!"
+    echo "FAILURE: Error executing search and replace script on ${DEST} server!"
     exit 1
   fi
 
@@ -180,7 +180,7 @@ else
     # Execute Import.sh to import network tables
       ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${SKIP_REPLACE};"
       if [[ ! $? == 0 ]]; then
-        echo "Import script failed on ${DEST} server for network tables!"
+        echo "FAILURE: Error executing import script on ${DEST} server for network tables!"
         exit 1
       fi
     else
@@ -190,7 +190,7 @@ else
     # Execute Import.sh to import all non-network tables
       ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT};"
       if [[ ! $? == 0 ]]; then
-        echo "Import script failed on ${DEST} server for all site tables!"
+        echo "FAILURE: Error executing import script on ${DEST} server for all site tables!"
         exit 1
       fi
   fi
@@ -201,7 +201,7 @@ else
     now=$(date +"%T")
     echo "End time : $now "
   else
-    echo "Import Failed for ${DB_FILE_NAME}"
+    echo "FAILURE: Error Importing ${DB_FILE_NAME}!"
     exit 1
   fi
   
