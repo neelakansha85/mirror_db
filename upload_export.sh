@@ -41,7 +41,7 @@ put ${STRUCTURE_FILE}
 exit
 DONE
 
-echo "Executing structure script for creating dir on dest server... "
+echo "Executing structure script for creating dir on ${SRC} server... "
 ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}" 
 
 # Establish sftp connection
@@ -53,7 +53,6 @@ put ${READ_PROPERTIES_FILE}
 put ${PROPERTIES_FILE}
 exit
 DONE
-
 
 # Executing export process at source
 if [[ $? == 0 ]]; then
@@ -85,6 +84,9 @@ if [[ $? == 0 ]]; then
 	else
 		echo "Skipped Export Process..."
 	fi
+else
+	echo "FAILURE: Uploading mirror_db files on ${SRC} server"
+	exit 1
 fi
 
 # Check status of export command script
