@@ -36,7 +36,7 @@ echo "Start time : $now "
 
 
 # Establish sftp connection
-rsync -avzhe ssh ${STRUCTURE_FILE} --delete --progress . ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+rsync -avzhe ssh ${STRUCTURE_FILE} --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
 
 echo "Executing structure script for creating dir on ${SRC} server... "
 ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}" 
