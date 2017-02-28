@@ -36,13 +36,13 @@ echo "Start time : $now "
 
 
 # Establish sftp connection
-rsync -avzhe ssh ${STRUCTURE_FILE} --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+rsync -avzhe ssh --delete --progress ${STRUCTURE_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
 
 echo "Executing structure script for creating dir on ${SRC} server... "
 ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}" 
 
 # Establish sftp connection
-rsync -avzhe ssh ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/  
+rsync -avzhe ssh --delete --progress ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/  
 
 if [[ ! $? == 0 ]]; then
 	echo "FAILURE: Error uploading mirror_db files on ${SRC} server!"

@@ -54,7 +54,7 @@ if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ ! -d ${REMOTE_SCRIPT
 fi
 
 # Establish sftp connection
-rsync -avzhe ssh ${STRUCTURE_FILE} --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+rsync -avzhe ssh --delete --progress ${STRUCTURE_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
 
 if [ "$PARALLEL_IMPORT" = true ]; then
   if [[ $DB_FILE_NAME =~ .*_network.* ]]; then
@@ -67,7 +67,7 @@ else
 fi
 
 # Establish sftp connection
-rsync -avzhe ssh ${IMPORT_SCRIPT} ${SEARCH_REPLACE_SCRIPT} ${AFTER_IMPORT_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${DROP_SQL_FILE}.sql ${SUPER_ADMIN_TXT} --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/  
+rsync -avzhe ssh --delete --progress ${IMPORT_SCRIPT} ${SEARCH_REPLACE_SCRIPT} ${AFTER_IMPORT_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${DROP_SQL_FILE}.sql ${SUPER_ADMIN_TXT} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/  
 
 if [ ! "$PARALLEL_IMPORT" = true ]; then
   # Put all SQL files on ${DEST} server from mirror_db server
