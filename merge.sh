@@ -9,7 +9,7 @@ DB_SUFFIX=''
 
 . parse_arguments.sh
 if [[ ! $? == 0 ]]; then
-    echo "Parse arguments script failed!"
+    echo "FAILURE: Error parsing arguments!"
     exit 1
 fi
 

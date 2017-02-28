@@ -6,13 +6,13 @@ EXPORT_DIR='db_export'
 
 . parse_arguments.sh
 if [[ ! $? == 0 ]]; then
-    echo "Parse arguments script failed!"
+    echo "FAILURE: Error parsing arguments!"
     exit 1
 fi
 
 . read_properties.sh $SRC
 if [[ ! $? == 0 ]]; then
-    echo "Read properties script failed!"
+    echo "FAILURE: Error reading properties!"
     exit 1
 fi
 
@@ -27,7 +27,7 @@ SRC_HTTPS_CDN_URL="${HTTPS_CDN_URL}"
 
 . read_properties.sh $DEST
 if [[ ! $? == 0 ]]; then
-    echo "Read properties script failed!"
+    echo "FAILURE: Error reading properties!"
     exit 1
 fi
 

@@ -7,13 +7,13 @@ DROP_SQL_FILE='drop_tables'
 
 . parse_arguments.sh
 if [[ ! $? == 0 ]]; then
-    echo "Parse arguments script failed!"
+    echo "FAILURE: Error parsing arguments!"
     exit 1
 fi
 
 . read_properties.sh $DEST
 if [[ ! $? == 0 ]]; then
-    echo "Read properties script failed!"
+    echo "FAILURE: Error reading properties!"
     exit 1
 fi
 

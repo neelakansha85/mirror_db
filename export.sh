@@ -9,7 +9,7 @@ PI_TOTAL_FILE='pi_total.txt'
 
 . parse_arguments.sh
 if [[ ! $? == 0 ]]; then
-    echo "Parse arguments script failed!"
+    echo "FAILURE: Error parsing arguments!"
     exit 1
 fi
 
@@ -24,7 +24,7 @@ NETWORK_LIST="${LIST_FILE_N}_network.${LIST_FILE_EXT}"
 # import instance environment variables
 . read_properties.sh $SRC
 if [[ ! $? == 0 ]]; then
-    echo "Read properties script failed!"
+    echo "FAILURE: Error reading properties!"
     exit 1
 fi
 
@@ -171,7 +171,7 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
     # Merge all network tables to one mysql_network.sql
     ./merge.sh -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} -mbl ${MERGE_BATCH_LIMIT}
     if [[ ! $? == 0 ]]; then
-        echo "Merge script failed for network tables in Parallel Import!"
+        echo "FAILURE: Error merging network tables in Parallel Import!"
         exit 1
     fi
 
@@ -179,7 +179,7 @@ if [ ! "$PARALLEL_IMPORT" = true ]; then
     # Merge all other tables to one mysql.sql
     ./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}
     if [[ ! $? == 0 ]]; then
-        echo "Merge script failed for all site tables in Parallel Import!"
+        echo "FAILURE: Error merging all site tables in Parallel Import!"
         exit 1
     fi
 else
