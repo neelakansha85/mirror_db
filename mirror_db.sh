@@ -75,13 +75,20 @@ chmod 750 *.sh
 #set status to default 0
 status=0
 
+if [ -e "$PROPERTIES_FILE" ]; then
+	echo "--properties-file option is set"
+	echo "Copying ${PROPERTIES_FILE} to db.properties file in current dir"
+	cat $PROPERTIES_FILE > db.properties
+fi
+
 if [ ! -z $SRC ]; then
 	
 	DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
 	echo "Executing db export script"
 
 	#added . ahead of calling child script to return the values back to parent script
-	. ./upload_export.sh -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${PARALLEL_IMPORT} ${SKIP_EXPORT} 
+	. ./upload_export.sh -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -pf ${PROPERTIES_FILE} ${PARALLEL_IMPORT} ${SKIP_EXPORT} 
+
 	if [[ ! $? == 0 ]]; then
 		echo "FAILURE: Error executing upload export script!"
 		exit 1
@@ -120,7 +127,7 @@ fi
 if [ ! -z $DEST ]; then
 	if [[ $status == 0 ]]; then
 		echo "Executing upload_import script"
-		./upload_import.sh -s ${SRC} -d ${DEST} -dbf ${DB_FILE_NAME} --db-backup ${SRC_DB_BACKUP} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${PARALLEL_IMPORT} ${IS_LAST_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL} ${SKIP_NETWORK_IMPORT} ${SKIP_REPLACE}
+		./upload_import.sh -s ${SRC} -d ${DEST} -dbf ${DB_FILE_NAME} --db-backup ${SRC_DB_BACKUP} -iwt ${IMPORT_WAIT_TIME} -pf ${PROPERTIES_FILE} ${SKIP_IMPORT} ${FORCE_IMPORT} ${PARALLEL_IMPORT} ${IS_LAST_IMPORT} ${DROP_TABLES} ${DROP_TABLES_SQL} ${SKIP_NETWORK_IMPORT} ${SKIP_REPLACE}
 		if [[ ! $? == 0 ]]; then
 			echo "FAILURE: Error executing upload import script!"
 			exit 1

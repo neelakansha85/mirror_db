@@ -47,6 +47,10 @@ while [ "$1" != "" ]; do
         DB_FILE_NAME=$2
         shift
         ;;
+      -pf | --properties-file )
+        PROPERTIES_FILE=$2
+        shift
+        ;;
       --site-url )
         SRC_URL=$2
         shift
@@ -118,3 +122,28 @@ export SKIP_NETWORK_IMPORT
 export SKIP_REPLACE
 export PARALLEL_IMPORT
 export IS_LAST_IMPORT
+export PROPERTIES_FILE
+
+echo $SRC
+echo $DEST
+echo $DB_BACKUP
+echo $BATCH_LIMIT
+echo $POOL_LIMIT
+echo $MERGE_BATCH_LIMIT
+echo $WAIT_TIME
+echo $IMPORT_WAIT_TIME
+echo $LIST_FILE_NAME
+echo $DB_FILE_NAME
+echo $SRC_URL
+echo $SRC_SHIB_URL
+echo $SRC_G_ANALYTICS
+echo $FORCE_IMPORT
+echo $DROP_TABLES
+echo $DROP_TABLES_SQL
+echo $SKIP_EXPORT
+echo $SKIP_IMPORT
+echo $SKIP_NETWORK_IMPORT
+echo $SKIP_REPLACE
+echo $PARALLEL_IMPORT
+echo $IS_LAST_IMPORT
+echo "prop file = $PROPERTIES_FILE"
