@@ -47,6 +47,10 @@ while [ "$1" != "" ]; do
         DB_FILE_NAME=$2
         shift
         ;;
+      -pf | --properties-file )
+        PROPERTIES_FILE=$2
+        shift
+        ;;
       --site-url )
         SRC_URL=$2
         shift

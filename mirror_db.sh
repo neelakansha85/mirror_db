@@ -75,6 +75,12 @@ chmod 750 *.sh
 #set status to default 0
 status=0
 
+if [ -e "$PROPERTIES_FILE" ]; then
+	echo "--properties-file option is set"
+	echo "Copying ${PROPERTIES_FILE} to db.properties file in current dir"
+	cat $PROPERTIES_FILE > db.properties
+fi
+
 if [ ! -z $SRC ]; then
 	
 	DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
@@ -82,6 +88,7 @@ if [ ! -z $SRC ]; then
 
 	#added . ahead of calling child script to return the values back to parent script
 	. ./upload_export.sh -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${PARALLEL_IMPORT} ${SKIP_EXPORT} 
+
 	if [[ ! $? == 0 ]]; then
 		echo "FAILURE: Error executing upload export script!"
 		exit 1
