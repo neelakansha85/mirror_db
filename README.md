@@ -43,23 +43,6 @@ Please note this is not the most efficient way of getting a database export sinc
 * --is-last-import > used only during import process to take note whether it is the last SQL import.
 
 
-If you have below conditions I would recommend using this script:
-* Do not have SSH access to source server
-* Have large database with many tables
-* phpMyAdmin is way too slow to work with
-* You can request your hosting provider to allow your static IP to be whitelisted for accessing DB server
-* DB backups provided by hosting provider are not reliable/correct.
-* You would like to periodically get DB backup (for various reasons such as backup storage, mirroring production to dev env, etc)
-* You want the least amount of impact to your system during the DB export process
-* You need to automate this process
-
-I have been running this for our Wordpress system hosted at WPEngine which has 1.4GB to database with approx 90,000 tables in it.
-Please note: Reuqest your hosting provider to update mysql open file limit to value greater than the number of tables you have in database in order to avoid database server from crashing. 
-
-Please also test this on your local/dev environment before running on production to avoid any unwanted issues.
-
-Hope this helps you. Please give feedback if you have any.
-
 Workflow: 
 
 Following scripts include the **_parse_arguments.sh and read_properties.sh_** scripts to handle arguments and configuration information_**
@@ -100,4 +83,22 @@ Following scripts include the **_parse_arguments.sh and read_properties.sh_** sc
 
 10. after_import.sh
  	* Creates serialized array for superadmin users and updates in the Wordpress table.
+
+
+###### If you have below conditions I would recommend using this script:
+* Do not have SSH access to source server
+* Have large database with many tables
+* phpMyAdmin is way too slow to work with
+* You can request your hosting provider to allow your static IP to be whitelisted for accessing DB server
+* DB backups provided by hosting provider are not reliable/correct.
+* You would like to periodically get DB backup (for various reasons such as backup storage, mirroring production to dev env, etc)
+* You want the least amount of impact to your system during the DB export process
+* You need to automate this process
+
+I have been running this for our Wordpress system hosted at WPEngine which has 1.4GB to database with approx 90,000 tables in it.
+Please note: Reuqest your hosting provider to update mysql open file limit to value greater than the number of tables you have in database in order to avoid database server from crashing. 
+
+Please also test this on your local/dev environment before running on production to avoid any unwanted issues.
+
+Hope this helps you. Please give feedback if you have any.
     
