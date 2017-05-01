@@ -84,6 +84,65 @@ Following scripts include the **_parse_arguments.sh and read_properties.sh_** sc
 10. after_import.sh
  	* Creates serialized array for superadmin users and updates in the Wordpress table.
 
+##### Directory Structure on mirror_db
+    .
+    ├── ...
+    ├── mirror_db               # All the scripts and configuration files are placed here for file transfer
+    │   ├── db_export           # Merged SQL files are place here from source
+    │   ├── upload_export.sh     
+    │   └── upload_import.sh         
+    │   └── export.sh
+    │   └── import.sh 
+    │   └── mirror_db_structure.sh 
+    │   └── search_replace.sh
+    │   └── get_db.sh.sh 
+    │   └── put_db.sh  
+    │   └── merge.sh
+    │   └── read_properties.sh
+    │   └── parse_arguments.sh
+    │   └── db.properties
+    │   └── after_import.sh
+    └── ...
+        
+##### Directory Structure on Source
+    .
+    ├── ...
+    ├── mirror_db               
+    │   ├── db_export             
+    │       └── db_merged         # Merged SQL files placed here for transfer to mirror_db
+    │       └── table_list.txt
+    │       └── table_list_network.txt
+    │       └── SRC_%Y-%m-%d".sql # SQL files for each table
+    │   ├── upload_export.sh      # End-to-end, integration 
+    │   └── export.sh
+    │   └── import.sh 
+    │   └── mirror_db_structure.sh 
+    │   └── get_db.sh 
+    │   └── merge.sh
+    │   └── read_properties.sh
+    │   └── parse_arguments.sh
+    │   └── db.properties
+    ├── db_backup                 # Archive folder at Source to store all the merged SQL files
+    │       └──  SRC_%Y-%m-%d"    # Archive folder to store files based on timestamp
+    └── ...
+
+##### Directory Structure on Destination
+
+    .
+    ├── ...
+    ├── mirror_db               # Parent Folder
+    │   ├── db_export           
+    │   └── upload_import.sh         
+    │   └── import.sh 
+    │   └── mirror_db_structure.sh 
+    │   └── search_replace.sh
+    │   └── read_properties.sh
+    │   └── parse_arguments.sh
+    │   └── db.properties
+    │   └── after_import.sh
+    └── ...
+
+
 
 ###### If you have below conditions I would recommend using this script:
 * Do not have SSH access to source server
