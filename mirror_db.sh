@@ -28,6 +28,10 @@ if [ "$DROP_TABLES" = true ]; then
 	DROP_TABLES='--drop-tables'
 fi
 
+if [ ! -z $DB_BACKUP ]; then
+    SKIP_EXPORT=true
+fi
+
 if [ "$SKIP_EXPORT" = true ]; then
 	SKIP_EXPORT='--skip-export'
 	SRC_DB_BACKUP=${DB_BACKUP}
