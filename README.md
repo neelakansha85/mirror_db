@@ -57,11 +57,11 @@ Following scripts include the **_parse_arguments.sh and read_properties.sh_** sc
 	* Runs get_db.sh script to transfer the sql files from source environment to mirror_db server.
 	* Cleans source by deleting the structure after the merged sql files have been transferred to mirror_db server.
 3. export.sh
-	* Accepts -pl, -mbl flags etc and runs the export process in groups/batches.
+	* Accepts -pl, -mbl flags etc and runs the mysql export process.
 	* This script opens mysql connection to dump the sql tables from source and runs the merge script.
 	* Creates list of network and non-network tables exported.
 4. merge.sh
-	* This script merges individual sql files into multiple group of sql files based on network tables and non-network tables.
+	* This script merges individual sql files into consolidate files based on network tables and non-network tables.
 5. get_db.sh
 	* Transfers the merged sql files from source to the mirror_db server.
 6. upload_import.sh
