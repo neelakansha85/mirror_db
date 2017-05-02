@@ -45,7 +45,7 @@ Please note this is not the most efficient way of getting a database export sinc
 
 Workflow: 
 
-Following scripts include the **_parse_arguments.sh and read_properties.sh_** scripts to handle arguments and configuration information_**
+Following scripts include the **_parse_arguments.sh or read_properties.sh or BOTH_** scripts to handle arguments and configuration information
 
 1. mirror_db.sh
 	* Minium Requirements: (-s) Source and (-d) Destination flags to run on specific environments
@@ -71,11 +71,11 @@ Following scripts include the **_parse_arguments.sh and read_properties.sh_** sc
 	* Based on the command-line input flags this script looks for --skip-import flag and runs the import.sh script on the destination environment.
 	* Run after_import.sh to add superadmin userrs from the superadmin_dev.txt list.
 	* Cleans destination by deleting the structure after the import process is completed.
-7. search_replace.sh
- 	* Performs search and replace from the values in properties file or optionally specified flag values such as --site-url.
+7. put_db.sh
+    * Transfers file from mirror_db server to destination environment.
     
-8. put_db.sh
- 	* Transfers file from mirror_db server to destination environment.
+8. search_replace.sh
+ 	* Performs search and replace from the values in properties file or optionally specified flag values such as --site-url.
 
 9. import.sh
 	* Optionally accepts directory path for the sql files to be imported.
@@ -88,7 +88,7 @@ Following scripts include the **_parse_arguments.sh and read_properties.sh_** sc
     .
     ├── ...
     ├── mirror_db               # All the scripts and configuration files are placed here for file transfer
-    │   ├── db_export           # Merged SQL files are place here from source
+    │   ├── db_export           # Folder - Merged SQL files are place here from source
     │   ├── upload_export.sh     
     │   └── upload_import.sh         
     │   └── export.sh
