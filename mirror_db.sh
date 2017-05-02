@@ -128,6 +128,11 @@ if [ ! -z $SRC ]; then
 	status=$?
 fi
 
+if [ ! -z $DB_BACKUP ]; then
+    echo "No alternate for database path found"
+    SRC_DB_BACKUP="''"
+fi
+
 if [ ! -z $DEST ]; then
 	if [[ $status == 0 ]]; then
 		echo "Executing upload_import script"

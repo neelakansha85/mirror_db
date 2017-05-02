@@ -14,13 +14,14 @@ if [[ ! $? == 0 ]]; then
     exit 1
 fi
 
-if [ ! -z $DB_BACKUP ]; then
+if [ "$DB_BACKUP" != '""' ]; then
 	DB_BACKUP_DIR=${DB_BACKUP}
 else
     DB_BACKUP_DIR=${EXPORT_DIR}
 fi
 
 if [ ! "$PARALLEL_IMPORT" = true ]; then
+    echo "Database path on mirror_db: $DB_BACKUP_DIR"
 	rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${DB_BACKUP_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
 else
 	rsync -avzhe ssh --progress ${EXPORT_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
