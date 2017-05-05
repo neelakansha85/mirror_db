@@ -14,7 +14,7 @@ if [[ ! $? == 0 ]]; then
     exit 1
 fi
 
-if [ "$DB_BACKUP" != '""' ]; then
+if [ "$DB_BACKUP" != "''" ]; then
 	DB_BACKUP_DIR=${DB_BACKUP}
 else
     DB_BACKUP_DIR=${EXPORT_DIR}

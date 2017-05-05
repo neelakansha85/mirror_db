@@ -128,7 +128,7 @@ if [ ! -z $SRC ]; then
 	status=$?
 fi
 
-if [ ! -z $DB_BACKUP ]; then
+if [ -z $DB_BACKUP ]; then
     echo "No alternate for database path found"
     SRC_DB_BACKUP="''"
 fi
