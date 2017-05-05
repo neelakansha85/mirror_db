@@ -21,12 +21,12 @@ Please note this is not the most efficient way of getting a database export sinc
 * -d | --destination > destination envrionment for importing database eg. dev, qa, prd
 * --db-backup > Used to specify directory path to import the sql files from mirror_db server. Must have --skip-export flag set.
 * -ebl > export batch limit is used to allow exporting tables in groups/batches with given wait time between new batch (default: 10)
-* -pl > defines pool limit to complete exporting given number of tables (deault: 300)
+* -pl > defines pool limit to complete exporting given number of tables (default: 300)
 * -mbl > merge batch limit is used to split large database into several parts with each part consisting of no of tables specified with -mbl (default: 10000)
 * -ewt > export wait time to be used between each new batch of tables being exported using mysqldump (default: 3 seconds)
 * -iwt > import wait time to be used between each mysql import command execution (default: 180 seconods)
 * -lf > specify file name which stores a list of all tables in database (default: table_list.txt)
-* -dbf > specify file name for the final merged database (default: mysql_[current-date].sql)
+* -dbf > specify file name for the final merged database (default: SRC_[current-date].sql)
 * -pf | --properties-file > specify File Path to .properties file
 * --site-url > source site url for search and replace
 * --shib-url > source shibboleth login url for search and replace
@@ -43,7 +43,7 @@ Please note this is not the most efficient way of getting a database export sinc
 * --is-last-import > used only during import process to take note whether it is the last SQL import.
 
 
-Workflow: 
+### Workflow: 
 
 Following scripts include the **_parse_arguments.sh or read_properties.sh or BOTH_** scripts to handle arguments and configuration information
 
@@ -56,40 +56,70 @@ Following scripts include the **_parse_arguments.sh or read_properties.sh or BOT
 	* Based on the command-line input flags this script looks for --skip-export flag and runs the export.sh script on the source environment.
 	* Runs get_db.sh script to transfer the sql files from source environment to mirror_db server.
 	* Cleans source by deleting the structure after the merged sql files have been transferred to mirror_db server.
-3. export.sh
+	
+3. mirror_db_structure.sh
+	* Creates directory structure for the export process
+	* Cleans the folder structure for unwanted scripts
+
+4. export.sh
 	* Accepts -pl, -mbl flags etc and runs the mysql export process.
 	* This script opens mysql connection to dump the sql tables from source and runs the merge script.
 	* Creates list of network and non-network tables exported.
-4. merge.sh
+
+5. merge.sh
 	* This script merges individual sql files into consolidate files based on network tables and non-network tables.
-5. get_db.sh
+	* Removes previous folder to clean sql files if present
+	* Archives the SQL file
+	
+6. get_db.sh
 	* Transfers the merged sql files from source to the mirror_db server.
-6. upload_import.sh
+	
+7. upload_import.sh
 	* It creates the directory structure for the destination environment.
 	*  Runs put_db.sh script to transfer the sql files from mirror_db server to destination environment.
 	*  Performs search and replace on the SQL files to change the domain and environment information within the SQL files.
 	* Based on the command-line input flags this script looks for --skip-import flag and runs the import.sh script on the destination environment.
 	* Run after_import.sh to add superadmin userrs from the superadmin_dev.txt list.
 	* Cleans destination by deleting the structure after the import process is completed.
-7. put_db.sh
+	
+8. put_db.sh
     * Transfers file from mirror_db server to destination environment.
     
-8. search_replace.sh
+9. mirror_db_structure.sh
+    * Creates directory structure for the import process
+    * Cleans the folder structure for unwanted scripts
+
+10. search_replace.sh
  	* Performs search and replace from the values in properties file or optionally specified flag values such as --site-url.
 
-9. import.sh
+11. import.sh
 	* Optionally accepts directory path for the sql files to be imported.
 	* Imports the data from the SQL files.
 
-10. after_import.sh
+12. after_import.sh
  	* Creates serialized array for superadmin users and updates in the Wordpress table.
 
+#### Logic Operation handled within the package
+#### Normal Operation.
+1. Clean Directory Structure at Source
+2. Complete Export Process
+3. Clean Directory Structure at Destination
+4. Complete Import Process
+5. Complete Adding Super Admins
+
+#### Parallel Operation. [Past Logic]
+1. Clean Directory Structure at Source
+2. Export first batch and transfer it to mirror_db server for import process
+3. Continue exporting rest of the batches and continue importing previous batch
+4. Last batch if left will require one spawn of import process.
+
 ##### Directory Structure on mirror_db
+##### Refer Workflow for script functionality.
     .
     ├── ...
-    ├── mirror_db               # All the scripts and configuration files are placed here for file transfer
+    ├── mirror_db               # Folder - All the scripts and configuration files are placed here for file transfer
     │   ├── db_export           # Folder - Merged SQL files are place here from source
-    │   ├── upload_export.sh     
+    │   ├── upload_export.sh    
     │   └── upload_import.sh         
     │   └── export.sh
     │   └── import.sh 
@@ -98,24 +128,26 @@ Following scripts include the **_parse_arguments.sh or read_properties.sh or BOT
     │   └── get_db.sh.sh 
     │   └── put_db.sh  
     │   └── merge.sh
+    │   └── superadmin_dev.txt
     │   └── read_properties.sh
     │   └── parse_arguments.sh
-    │   └── db.properties
+    │   └── db.properties       #  Configuration file
     │   └── after_import.sh
     └── ...
         
 ##### Directory Structure on Source
+###### table_list.txt contains wordpress tables list but after processing ocntains only non-network tables list
+###### eg. tstprd_2017-05-05_1.sql | tstprd_2017-05-05_network_1.sql
     .
     ├── ...
     ├── mirror_db               
     │   ├── db_export             
     │       └── db_merged         # Merged SQL files placed here for transfer to mirror_db
-    │       └── table_list.txt
-    │       └── table_list_network.txt
-    │       └── SRC_%Y-%m-%d".sql # SQL files for each table
-    │   ├── upload_export.sh      # End-to-end, integration 
+    │       └── table_list.txt    # Containes wordpress tables list for the SOURCE SCHEMA
+    │       └── table_list_network.txt # Contains wordpress network tables list for SOURCE SCHEMA
+    │       └── SRC_%Y-%m-%d".sql # Naming Conevntion for SQL files for each table
+    │   ├── upload_export.sh       
     │   └── export.sh
-    │   └── import.sh 
     │   └── mirror_db_structure.sh 
     │   └── get_db.sh 
     │   └── merge.sh
@@ -139,7 +171,8 @@ Following scripts include the **_parse_arguments.sh or read_properties.sh or BOT
     │   └── read_properties.sh
     │   └── parse_arguments.sh
     │   └── db.properties
-    │   └── after_import.sh
+    │   └── superadmin_dev.txt  #list of super admin users for destination
+    │   └── after_import.sh     # Add superadmins to the destination environment
     └── ...
 
 
