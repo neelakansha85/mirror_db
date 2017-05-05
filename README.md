@@ -128,6 +128,7 @@ Following scripts include the **_parse_arguments.sh or read_properties.sh or BOT
     │   └── get_db.sh.sh 
     │   └── put_db.sh  
     │   └── merge.sh
+    │   └── drob_tables.sql
     │   └── superadmin_dev.txt
     │   └── read_properties.sh
     │   └── parse_arguments.sh
@@ -143,9 +144,11 @@ Following scripts include the **_parse_arguments.sh or read_properties.sh or BOT
     ├── mirror_db               
     │   ├── db_export             
     │       └── db_merged         # Merged SQL files placed here for transfer to mirror_db
+    │               └── SRC_%Y-%m-%d"_1.sql  Naming Conevntion for SQL files for each table
+    │               └── SRC_%Y-%m-%d"__network_1.sql
     │       └── table_list.txt    # Containes wordpress tables list for the SOURCE SCHEMA
     │       └── table_list_network.txt # Contains wordpress network tables list for SOURCE SCHEMA
-    │       └── SRC_%Y-%m-%d".sql # Naming Conevntion for SQL files for each table
+    │       └── SRC_%Y-%m-%d".sql # single table sql file
     │   ├── upload_export.sh       
     │   └── export.sh
     │   └── mirror_db_structure.sh 
@@ -155,7 +158,7 @@ Following scripts include the **_parse_arguments.sh or read_properties.sh or BOT
     │   └── parse_arguments.sh
     │   └── db.properties
     ├── db_backup                 # Archive folder at Source to store all the merged SQL files
-    │       └──  SRC_%Y-%m-%d"    # Archive folder to store files based on timestamp
+    │       └──  SRC_%Y-%m-%d"    # Archive folder to store merged files based on timestamp
     └── ...
 
 ##### Directory Structure on Destination
@@ -173,6 +176,7 @@ Following scripts include the **_parse_arguments.sh or read_properties.sh or BOT
     │   └── db.properties
     │   └── superadmin_dev.txt  #list of super admin users for destination
     │   └── after_import.sh     # Add superadmins to the destination environment
+    │   └── drob_tables.sql
     └── ...
 
 
