@@ -28,6 +28,10 @@ if [ "$DROP_TABLES" = true ]; then
 	DROP_TABLES='--drop-tables'
 fi
 
+if [ ! -z $DB_BACKUP ]; then
+    SKIP_EXPORT=true
+fi
+
 if [ "$SKIP_EXPORT" = true ]; then
 	SKIP_EXPORT='--skip-export'
 	SRC_DB_BACKUP=${DB_BACKUP}
@@ -122,6 +126,11 @@ if [ ! -z $SRC ]; then
 	
 	#check execution status of export script
 	status=$?
+fi
+
+if [ -z $DB_BACKUP ]; then
+    echo "No alternate for database path found"
+    SRC_DB_BACKUP="''"
 fi
 
 if [ ! -z $DEST ]; then

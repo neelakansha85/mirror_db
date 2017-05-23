@@ -41,7 +41,7 @@ rsync -avzhe ssh --delete --progress ${STRUCTURE_FILE} ${SSH_USERNAME}@${HOST_NA
 echo "Executing structure script for creating dir on ${SRC} server... "
 ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}" 
 
-# Establish sftp connection
+# Send export process related files to SOURCE
 rsync -avzhe ssh --delete --progress ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/  
 
 if [[ ! $? == 0 ]]; then
