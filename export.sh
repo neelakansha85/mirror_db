@@ -33,9 +33,15 @@ rm -rf ${EXPORT_DIR}
 mkdir ${EXPORT_DIR}
 
 cd ${EXPORT_DIR}
+if [ "$NETWORK_FLAG" = true ]; then
+    mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-z|A-Z]+[a-zA-Z0-9_]*$'" > ${LIST_FILE_NAME}
 
-mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}'" > ${LIST_FILE_NAME}
+elif [ ! -z "$BLOG_ID" ]; then
+    mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_".$BLOG_ID."[a-zA-Z0-9_]*$'" > ${LIST_FILE_NAME}   
 
+else
+    mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}'" > ${LIST_FILE_NAME}
+fi
 echo "Starting to download DB... "
 now=$(date +"%T")
 echo "Current time : $now "

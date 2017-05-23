@@ -12,6 +12,7 @@ SRC_SHIB_URL="''"
 SRC_G_ANALYTICS="''"
 LOGS_DIR='log'
 SRC_DB_BACKUP="''"
+BLOG_ID="''"
 export SRC_DB_BACKUP
 
 . parse_arguments.sh
@@ -67,6 +68,10 @@ if [ "$IS_LAST_IMPORT" = true ]; then
 	IS_LAST_IMPORT='--is-last-import'
 fi
 
+if [ "$NETWORK_FLAG" = true ]; then
+	NETWORK_FLAG='--network-flag'
+fi
+
 echo ""
 echo "Starting to execute mirror_db."
 echo "##############################"
@@ -91,7 +96,7 @@ if [ ! -z $SRC ]; then
 	echo "Executing db export script"
 
 	#added . ahead of calling child script to return the values back to parent script
-	. ./upload_export.sh -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${PARALLEL_IMPORT} ${SKIP_EXPORT} 
+	. ./upload_export.sh -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -blogid ${BLOG_ID} ${PARALLEL_IMPORT} ${SKIP_EXPORT} ${NETWORK_FLAG}
 
 	if [[ ! $? == 0 ]]; then
 		echo "FAILURE: Error executing upload export script!"
