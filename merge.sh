@@ -7,21 +7,35 @@ MERGED_DIR='db_merged'
 DB_BACKUP_DIR='db_backup'
 DB_SUFFIX=''
 
+getFileName() {
+    local file=$1
+    local fileName=$(echo ${file} | sed 's/\./ /g' | awk '{print $1}')
+    echo $fileName
+}
+
+getFileExtension() {
+    local file=$1
+    local fileExtension=$(echo ${file} | sed 's/\./ /g' | awk '{print $2}')
+    echo $fileExtension
+}
+
+createMergeDir() {
+    mkdir -p $MERGED_DIR
+}
+
 . parse_arguments.sh
 if [[ ! $? == 0 ]]; then
     echo "FAILURE: Error parsing arguments!"
     exit 1
 fi
 
-DB_FILE_EXT=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $2}'`
-DB_FILE_N=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
+
+DB_FILE_EXT=$(getFileExtension $DB_FILE_NAME)
+DB_FILE_N=$(getDbFileName $DB_FILE_NAME)
 
 
 cd ${EXPORT_DIR}
-
-if [ ! -d "$MERGED_DIR" ]; then
-    mkdir $MERGED_DIR
-fi
+createMergeDir
 
 echo "Starting to merge DB to ${DB_FILE_NAME}... "
 now=$(date +"%T")
