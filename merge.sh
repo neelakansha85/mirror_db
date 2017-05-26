@@ -40,15 +40,15 @@ createFile_N_Dir(){
 }
 
 getDbName(){
-    local tabledetail=$1
-    local DbName=$(echo ${tabledetail} | sed 's/\./ /g' | awk '{print $1}')
-    echo $DbName
+    local dbtb=$1
+    local dbName=$(echo ${dbtb} | sed 's/\./ /g' | awk '{print $1}')
+    echo $dbName
 }
 
 getTbName(){
-    local tabledetail=$1
-    local TbName=$(echo ${tabledetail} | sed 's/\./ /g' | awk '{print $1}')
-    echo $TbName
+    local dbtb=$1
+    local tbName=$(echo ${dbtb} | sed 's/\./ /g' | awk '{print $1}')
+    echo $tbName
 }
 
 mergeFile(){
@@ -57,26 +57,32 @@ mergeFile(){
     now=$(date +"%T")
     echo "Current time : $now "
 
-    TOTAL=1
-    MERGE_BATCH_COUNT=1
+    total=1
+    mergeBatchCount=1
 
-    for DBTB in `cat ${LIST_FILE_NAME}`
+    for dbtb in $(cat ${LIST_FILE_NAME})
     do
-        DB=$(getDbName $DBTB)
-        TB=$(getTbName $DBTB)
-        gunzip ${DB}_${TB}.sql.gz
+        db=$(getDbName $dbtb)
+        tb=$(getTbName $dbtb)
+        gunzip ${db}_${tb}.sql.gz
 
-        mergedFileName=$(mergeFileName $TOTAL)
+        mergedFileName=$(mergeFileName $total)
 
-        `cat ${DB}_${TB}.sql >> ${mergedFileName}`
+        $(cat ${db}_${tb}.sql >> ${mergedFileName})
 	    echo "" >> ${mergedFileName}
-	    `rm ${DB}_${TB}.sql`
-	    (( MERGE_BATCH_COUNT++ ))
-        checkBatchLimit
+	    $(rm ${db}_${tb}.sql)
+	    (( mergeBatchCount++ ))
+
+        if [ ${mergeBatchCount} -eq ${MERGE_BATCH_LIMIT} ]; then
+               moveFileToDir
+               mergeBatchCount=1
+               (( total++ ))
+               echo "Merged ${MERGE_BATCH_LIMIT} tables, starting new batch for merging... "
+         fi
     done
     moveFileToDir
     echo "Completed merging DB to ${DB_FILE_NAME}... "
-    echo "Total no of merged sql files = ${TOTAL}"
+    echo "Total no of merged sql files = ${total}"
     now=$(date +"%T")
     echo "Current time : $now "
 }
@@ -90,14 +96,6 @@ mergeFileName(){
     mergedName="${DB_FILE_N}${DB_SUFFIX}.${DB_FILE_EXT}"
     echo $mergedName
 }
-checkBatchLimit(){
-         if [ ${MERGE_BATCH_COUNT} -eq ${MERGE_BATCH_LIMIT} ]; then
-               moveFileToDir
-               MERGE_BATCH_COUNT=1
-               (( TOTAL++ ))
-               echo "Merged ${MERGE_BATCH_LIMIT} tables, starting new batch for merging... "
-         fi
-}
 
 moveFileToDir(){
     if [ -e ${mergedFileName} ]; then
@@ -107,14 +105,14 @@ moveFileToDir(){
 
 archiveMergedFiles(){
     echo "Copying all merged DB files to archives dir... "
-    for MRDB in `ls ${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/${MERGED_DIR}/*.sql`
+    for mrdb in $(ls ${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/${MERGED_DIR}/*.sql)
     do
-        cp ${MRDB} ${DB_BACKUP_DIR}/${DB_FILE_N}/
+        cp ${mrdb} ${DB_BACKUP_DIR}/${DB_FILE_N}/
     done
 }
 
 #starts here
-. parse_arguments.sh
+
 checkArguments
 
 DB_FILE_EXT=$(getFileExtension $DB_FILE_NAME)
@@ -124,27 +122,22 @@ cd ${EXPORT_DIR}
 createMergeDir
 mergeFile
 
-
-
-
 # Get to Home Dir
 cd ~
 
 # Move all .sql files to archives dir for future reference
 
 createBackupDir
-
 cd ${DB_BACKUP_DIR}
 
 if [[ $DB_FILE_N =~ .*_network.* ]]; then
-     DB_FILE_N=`echo ${DB_FILE_N} | cut -d '_' -f-2`
+     DB_FILE_N=$(echo ${DB_FILE_N} | cut -d '_' -f-2)
 fi
 
 createFile_N_Dir
 
 # Get to Home Dir
 cd ..
-
 archiveMergedFiles
 
 
