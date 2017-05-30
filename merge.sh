@@ -1,19 +1,15 @@
 #!/bin/bash
 
-# Config/Default Options
-REMOTE_SCRIPT_DIR='mirror_db'
-EXPORT_DIR='db_export'
-MERGED_DIR='db_merged'
-DB_BACKUP_DIR='db_backup'
-DB_SUFFIX=''
+set -x
 
 . parse_arguments.sh
 
-checkArguments(){
-    if [[ ! $? == 0 ]]; then
-        echo "FAILURE: Error parsing arguments!"
-    fi
-}
+# Config/Default Options
+readonly REMOTE_SCRIPT_DIR='mirror_db'
+readonly EXPORT_DIR='db_export'
+readonly MERGED_DIR='db_merged'
+readonly DB_BACKUP_DIR='db_backup'
+readonly DB_SUFFIX=''
 
 getFileName() {
     local file=$1
@@ -112,8 +108,7 @@ archiveMergedFiles(){
 }
 
 #starts here
-
-checkArguments
+parseArgs $@
 
 DB_FILE_EXT=$(getFileExtension $DB_FILE_NAME)
 DB_FILE_N=$(getFileName $DB_FILE_NAME)
