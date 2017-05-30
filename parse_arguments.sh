@@ -1,5 +1,7 @@
 #!/bin/bash
 
+parseArgs() {
+
 if [ ! $# -ge 2 ]; then
     echo "Please enter the source or destination to run"
     exit 1
@@ -107,28 +109,4 @@ while [ "$1" != "" ]; do
     shift
 done
 
-export SRC
-export DEST
-export DB_BACKUP
-export BATCH_LIMIT
-export POOL_LIMIT
-export MERGE_BATCH_LIMIT
-export WAIT_TIME
-export IMPORT_WAIT_TIME
-export LIST_FILE_NAME
-export DB_FILE_NAME
-export SRC_URL
-export SRC_SHIB_URL
-export SRC_G_ANALYTICS
-export FORCE_IMPORT
-export DROP_TABLES
-export DROP_TABLES_SQL
-export SKIP_EXPORT
-export SKIP_IMPORT
-export SKIP_NETWORK_IMPORT
-export SKIP_REPLACE
-export PARALLEL_IMPORT
-export IS_LAST_IMPORT
-export PROPERTIES_FILE
-export NETWORK_FLAG
-export BLOG_ID
+}
