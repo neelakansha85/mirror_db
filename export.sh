@@ -1,32 +1,29 @@
 #!/bin/bash
 
+. parse_arguments.sh
+. read_properties.sh
+. merge.sh
+
 # Config Options
 
-EXPORT_DIR='db_export'
-POOL_WAIT_TIME=300
-LOGS_DIR='log'
-PI_TOTAL_FILE='pi_total.txt'
+readonly EXPORT_DIR='db_export'
+readonly POOL_WAIT_TIME=300
+readonly LOGS_DIR='log'
+readonly PI_TOTAL_FILE='pi_total.txt'
 
-. parse_arguments.sh
-if [[ ! $? == 0 ]]; then
-    echo "FAILURE: Error parsing arguments!"
-    exit 1
-fi
+parseArgs $@
 
-DB_FILE_EXT=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $2}'`
-DB_FILE_N=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
+DB_FILE_EXT=$(getFileExtension $DB_FILE_NAME)
+DB_FILE_N=$(getFileName $DB_FILE_NAME)
 NETWORK_DB="${DB_FILE_N}_network.${DB_FILE_EXT}"
 
-LIST_FILE_EXT=`echo ${LIST_FILE_NAME} | sed 's/\./ /g' | awk '{print $2}'`
-LIST_FILE_N=`echo ${LIST_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
+LIST_FILE_EXT=$(getFileExtension $LIST_FILE_NAME)
+LIST_FILE_N=$(getFileName $LIST_FILE_NAME)
 NETWORK_LIST="${LIST_FILE_N}_network.${LIST_FILE_EXT}"
 
 # import instance environment variables
-. read_properties.sh $SRC
-if [[ ! $? == 0 ]]; then
-    echo "FAILURE: Error reading properties!"
-    exit 1
-fi
+readProperties $SRC
+
 
 # Empty EXPORT_DIR dir to remove any previous data
 rm -rf ${EXPORT_DIR}
@@ -37,7 +34,7 @@ if [ "$NETWORK_FLAG" = true ]; then
     mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-z|A-Z]+[a-zA-Z0-9_]*$'" > ${LIST_FILE_NAME}
 
 elif [ ! -z "$BLOG_ID" ]; then
-    mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_".$BLOG_ID."[a-zA-Z0-9_]*$'" > ${LIST_FILE_NAME}   
+    mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_".$BLOG_ID."+[a-zA-Z0-9_]*$'" > ${LIST_FILE_NAME}   
 
 else
     mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}'" > ${LIST_FILE_NAME}
@@ -50,14 +47,14 @@ TOTAL=1
 BATCH_COUNT=1
 POOL_COUNT=1
 PI_TOTAL=1
-
-for DBTB in `cat ${LIST_FILE_NAME}`
+dwnldNetworkTables() {
+for dbtb in $(cat ${LIST_FILE_NAME})
 do
-    DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`   
-    TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
+     db=$(getDbName $dbtb)
+     tb=$(getTbName $dbtb)
 
     # Export only network tables from source
-    if [[ $TB =~ ^wp_[a-z|A-Z]+[a-zA-Z0-9_]* ]]; then
+    if [[ $tb =~ ^wp_[a-z|A-Z]+[a-zA-Z0-9_]* ]]; then
         if [ ${POOL_COUNT} -eq 1 ]
         then
             echo "Starting a new pool of downloads... "
@@ -66,13 +63,13 @@ do
         then
             echo "Starting new batch of downloads... "
         fi
-        echo "Dowloading ${TB}.sql ... "
-        mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${DB} ${TB} | gzip > ${DB}_${TB}.sql.gz &
+        echo "Downloading ${tb}.sql ... "
+        mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${db} ${tb} | gzip > ${db}_${tb}.sql.gz &
         (( BATCH_COUNT++ ))
         (( POOL_COUNT++ ))
         (( TOTAL++ ))
 
-        echo "${DB}.${TB}" >> ${NETWORK_LIST}
+        echo "${db}.${tb}" >> ${NETWORK_LIST}
         
         if [ ${BATCH_COUNT} -eq ${BATCH_LIMIT} ]
         then
@@ -87,12 +84,12 @@ do
             sleep $POOL_WAIT_TIME
         fi
     else
-        echo "${DB}.${TB}" >> temp.txt
+        echo "${db}.${tb}" >> temp.txt
     fi
 done
 
 echo "Completed downloading Network tables..."
-
+}
 rm ${LIST_FILE_NAME}
 mv temp.txt ${LIST_FILE_NAME}
 
@@ -115,10 +112,10 @@ echo "Starting to download all site tables... "
 BATCH_COUNT=1
 POOL_COUNT=1
 
-for DBTB in `cat ${LIST_FILE_NAME}`
+for dbtb in $(cat ${LIST_FILE_NAME})
 do
-    DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`   
-    TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
+    db=$(echo ${dbtb} | sed 's/\./ /g' | awk '{print $1}')
+    tb=$(echo ${dbtb} | sed 's/\./ /g' | awk '{print $2}')
     
     if [ ${POOL_COUNT} -eq 1 ]; then
         echo "Starting a new pool of downloads... "
@@ -126,14 +123,14 @@ do
     if [ ${BATCH_COUNT} -eq 1 ]; then
         echo "Starting new batch of downloads... "
     fi
-    echo "Dowloading ${TB}.sql ... "
-    mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${DB} ${TB} | gzip > ${DB}_${TB}.sql.gz &
+    echo "Downloading ${tb}.sql ... "
+    mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${db} ${tb} | gzip > ${db}_${tb}.sql.gz &
     (( BATCH_COUNT++ ))
     (( POOL_COUNT++ ))
     (( TOTAL++ ))
 
     if [ "$PARALLEL_IMPORT" = true ]; then
-        echo "${DB}.${TB}" >> ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT}
+        echo "${db}.${tb}" >> ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT}
     fi
 
     if [ ${BATCH_COUNT} -eq ${BATCH_LIMIT} ]; then
