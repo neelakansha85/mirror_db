@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -ex
+
 . parse_arguments.sh
 . read_properties.sh
 . merge.sh
@@ -11,6 +13,70 @@ readonly POOL_WAIT_TIME=300
 readonly LOGS_DIR='log'
 readonly PI_TOTAL_FILE='pi_total.txt'
 
+dwnldNetworkTables() {
+for dbtb in $(cat ${LIST_FILE_NAME})
+do
+     db=$(getDbName $dbtb)
+     tb=$(getTbName $dbtb)
+
+    # Export only network tables from source
+    if [[ $tb =~ ^wp_[a-zA-Z]+[a-zA-Z0-9_]* ]]; then
+        checkPoolCount
+        checkBatchCount
+        downloadTables
+        echo "${db}.${tb}" >> ${NETWORK_LIST}
+        checkBatchLimit
+        checkPoolLimit
+    else
+        echo "${db}.${tb}" >> temp.txt
+    fi
+done
+
+echo "Completed downloading Network tables..."
+}
+
+checkPoolCount(){
+        if [ ${pool_count} -eq 1 ]
+        then
+            echo "Starting a new pool of downloads... "
+        fi
+        }
+checkBatchCount(){
+         if [ ${batch_count} -eq 1 ]
+        then
+            echo "Starting new batch of downloads... "
+        fi
+}
+downloadTables(){
+        echo "Downloading ${tb}.sql ... "
+        mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${db} ${tb} | gzip > ${db}_${tb}.sql.gz &
+        (( batch_count++ ))
+        (( pool_count++ ))
+        (( total++ ))
+}
+
+checkBatchLimit(){
+        if [ ${batch_count} -eq ${BATCH_LIMIT} ]
+        then
+            batch_count=1
+            echo "Waiting to start new batch... "
+            sleep $WAIT_TIME
+        fi
+        }
+
+checkPoolLimit(){
+        if [ ${pool_count} -eq ${POOL_LIMIT} ]
+        then
+            pool_count=1
+            echo "Waiting to start new pool... "
+            sleep $POOL_WAIT_TIME
+        fi
+        }
+
+
+
+
+#starts here
 parseArgs $@
 
 DB_FILE_EXT=$(getFileExtension $DB_FILE_NAME)
@@ -24,17 +90,16 @@ NETWORK_LIST="${LIST_FILE_N}_network.${LIST_FILE_EXT}"
 # import instance environment variables
 readProperties $SRC
 
-
 # Empty EXPORT_DIR dir to remove any previous data
 rm -rf ${EXPORT_DIR}
 mkdir ${EXPORT_DIR}
 
 cd ${EXPORT_DIR}
 if [ "$NETWORK_FLAG" = true ]; then
-    mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-z|A-Z]+[a-zA-Z0-9_]*$'" > ${LIST_FILE_NAME}
+    mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-zA-Z]+[a-zA-Z0-9_]*$'" > ${LIST_FILE_NAME}
 
 elif [ ! -z "$BLOG_ID" ]; then
-    mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_".$BLOG_ID."+[a-zA-Z0-9_]*$'" > ${LIST_FILE_NAME}   
+    mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_${BLOG_ID}+[a-zA-Z0-9_]*$'" > ${LIST_FILE_NAME}
 
 else
     mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}'" > ${LIST_FILE_NAME}
@@ -42,54 +107,13 @@ fi
 echo "Starting to download DB... "
 now=$(date +"%T")
 echo "Current time : $now "
-
-TOTAL=1
-BATCH_COUNT=1
-POOL_COUNT=1
+total=1
+batch_count=1
+pool_count=1
 PI_TOTAL=1
-dwnldNetworkTables() {
-for dbtb in $(cat ${LIST_FILE_NAME})
-do
-     db=$(getDbName $dbtb)
-     tb=$(getTbName $dbtb)
+dwnldNetworkTables
 
-    # Export only network tables from source
-    if [[ $tb =~ ^wp_[a-z|A-Z]+[a-zA-Z0-9_]* ]]; then
-        if [ ${POOL_COUNT} -eq 1 ]
-        then
-            echo "Starting a new pool of downloads... "
-        fi
-        if [ ${BATCH_COUNT} -eq 1 ]
-        then
-            echo "Starting new batch of downloads... "
-        fi
-        echo "Downloading ${tb}.sql ... "
-        mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${db} ${tb} | gzip > ${db}_${tb}.sql.gz &
-        (( BATCH_COUNT++ ))
-        (( POOL_COUNT++ ))
-        (( TOTAL++ ))
 
-        echo "${db}.${tb}" >> ${NETWORK_LIST}
-        
-        if [ ${BATCH_COUNT} -eq ${BATCH_LIMIT} ]
-        then
-            BATCH_COUNT=1
-            echo "Waiting to start new batch... "
-            sleep $WAIT_TIME
-        fi
-        if [ ${POOL_COUNT} -eq ${POOL_LIMIT} ]
-        then
-            POOL_COUNT=1
-            echo "Waiting to start new pool... "
-            sleep $POOL_WAIT_TIME
-        fi
-    else
-        echo "${db}.${tb}" >> temp.txt
-    fi
-done
-
-echo "Completed downloading Network tables..."
-}
 rm ${LIST_FILE_NAME}
 mv temp.txt ${LIST_FILE_NAME}
 
@@ -109,36 +133,24 @@ fi
 echo "Starting to download all site tables... "
 
 # Reset Counter for Batch and Pool limits
-BATCH_COUNT=1
-POOL_COUNT=1
+batch_count=1
+pool_count=1
 
 for dbtb in $(cat ${LIST_FILE_NAME})
 do
-    db=$(echo ${dbtb} | sed 's/\./ /g' | awk '{print $1}')
-    tb=$(echo ${dbtb} | sed 's/\./ /g' | awk '{print $2}')
+     db=$(getDbName $dbtb)
+     tb=$(getTbName $dbtb)
     
-    if [ ${POOL_COUNT} -eq 1 ]; then
-        echo "Starting a new pool of downloads... "
-    fi
-    if [ ${BATCH_COUNT} -eq 1 ]; then
-        echo "Starting new batch of downloads... "
-    fi
-    echo "Downloading ${tb}.sql ... "
-    mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${db} ${tb} | gzip > ${db}_${tb}.sql.gz &
-    (( BATCH_COUNT++ ))
-    (( POOL_COUNT++ ))
-    (( TOTAL++ ))
+     checkPoolCount
+     checkBatchCount
+     downloadTables
 
     if [ "$PARALLEL_IMPORT" = true ]; then
         echo "${db}.${tb}" >> ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT}
     fi
 
-    if [ ${BATCH_COUNT} -eq ${BATCH_LIMIT} ]; then
-            BATCH_COUNT=1
-        echo "Waiting to start new batch... "
-        sleep $WAIT_TIME
-    fi
-    if [ ${POOL_COUNT} -eq ${POOL_LIMIT} ]; then
+     checkBatchLimit
+    if [ ${pool_count} -eq ${POOL_LIMIT} ]; then
         if [ "$PARALLEL_IMPORT" = true ]; then
             # Get to root dir
             cd ..
@@ -150,7 +162,7 @@ do
             # Continue exporting in EXPORT_DIR
             cd ${EXPORT_DIR}
         fi
-        POOL_COUNT=1
+        pool_count=1
         (( PI_TOTAL++ ))
         echo "Waiting to start new pool... "
         sleep $POOL_WAIT_TIME
@@ -158,11 +170,11 @@ do
 done
 
 echo "Completed downloading DB... "
-echo "Total no of tables downloaded = ${TOTAL}"
+echo "Total no of tables downloaded = ${total}"
 now=$(date +"%T")
 echo "Current time : $now "
 
-if [ ${BATCH_COUNT} -gt 0 ]; then
+if [ ${batch_count} -gt 0 ]; then
     sleep 2
 fi
 
