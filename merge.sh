@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -e
 
 . parse_arguments.sh
 
@@ -9,7 +9,7 @@ readonly REMOTE_SCRIPT_DIR='mirror_db'
 readonly EXPORT_DIR='db_export'
 readonly MERGED_DIR='db_merged'
 readonly DB_BACKUP_DIR='db_backup'
-readonly DB_SUFFIX=''
+DB_SUFFIX=''
 
 getFileName() {
     local file=$1
@@ -21,18 +21,6 @@ getFileExtension() {
     local file=$1
     local fileExtension=$(echo ${file} | sed 's/\./ /g' | awk '{print $2}')
     echo $fileExtension
-}
-
-createMergeDir() {
-    mkdir -p $MERGED_DIR
-}
-
-createBackupDir(){
-    mkdir -p $DB_BACKUP_DIR
-}
-
-createFile_N_Dir(){
-    mkdir -p $DB_FILE_N
 }
 
 getDbName(){
@@ -114,7 +102,7 @@ DB_FILE_EXT=$(getFileExtension $DB_FILE_NAME)
 DB_FILE_N=$(getFileName $DB_FILE_NAME)
 
 cd ${EXPORT_DIR}
-createMergeDir
+mkdir -p $MERGED_DIR
 mergeFile
 
 # Get to Home Dir
@@ -122,14 +110,14 @@ cd ~
 
 # Move all .sql files to archives dir for future reference
 
-createBackupDir
+mkdir -p $DB_BACKUP_DIR
 cd ${DB_BACKUP_DIR}
 
 if [[ $DB_FILE_N =~ .*_network.* ]]; then
      DB_FILE_N=$(echo ${DB_FILE_N} | cut -d '_' -f-2)
 fi
 
-createFile_N_Dir
+mkdir -p $DB_FILE_N
 
 # Get to Home Dir
 cd ..
