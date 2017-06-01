@@ -14,40 +14,40 @@ readonly LOGS_DIR='log'
 readonly PI_TOTAL_FILE='pi_total.txt'
 
 dwnldNetworkTables() {
-for dbtb in $(cat ${LIST_FILE_NAME})
-do
-     db=$(getDbName $dbtb)
-     tb=$(getTbName $dbtb)
+     for dbtb in $(cat ${LIST_FILE_NAME})
+     do
+        db=$(getDbName $dbtb)
+        tb=$(getTbName $dbtb)
 
-    # Export only network tables from source
-    if [[ $tb =~ ^wp_[a-zA-Z]+[a-zA-Z0-9_]* ]]; then
-        checkPoolCount
-        checkBatchCount
-        downloadTables
-        echo "${db}.${tb}" >> ${NETWORK_LIST}
-        checkBatchLimit
-        checkPoolLimit
-    else
-        echo "${db}.${tb}" >> temp.txt
-    fi
-done
+         # Export only network tables from source
+        if [[ $tb =~ ^wp_[a-zA-Z]+[a-zA-Z0-9_]* ]]; then
+            checkPoolCount
+            checkBatchCount
+            downloadTables
+            echo "${db}.${tb}" >> ${NETWORK_LIST}
+            checkBatchLimit
+            checkPoolLimit
+        else
+            echo "${db}.${tb}" >> temp.txt
+        fi
+     done
 
-echo "Completed downloading Network tables..."
+     echo "Completed downloading Network tables..."
 }
 
-checkPoolCount(){
+checkPoolCount() {
         if [ ${pool_count} -eq 1 ]
         then
             echo "Starting a new pool of downloads... "
         fi
-        }
-checkBatchCount(){
+}
+checkBatchCount() {
          if [ ${batch_count} -eq 1 ]
         then
             echo "Starting new batch of downloads... "
         fi
 }
-downloadTables(){
+downloadTables() {
         echo "Downloading ${tb}.sql ... "
         mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${db} ${tb} | gzip > ${db}_${tb}.sql.gz &
         (( batch_count++ ))
@@ -55,23 +55,23 @@ downloadTables(){
         (( total++ ))
 }
 
-checkBatchLimit(){
+checkBatchLimit() {
         if [ ${batch_count} -eq ${BATCH_LIMIT} ]
         then
             batch_count=1
             echo "Waiting to start new batch... "
             sleep $WAIT_TIME
         fi
-        }
+}
 
-checkPoolLimit(){
+checkPoolLimit() {
         if [ ${pool_count} -eq ${POOL_LIMIT} ]
         then
             pool_count=1
             echo "Waiting to start new pool... "
             sleep $POOL_WAIT_TIME
         fi
-        }
+}
 
 
 
@@ -104,6 +104,7 @@ elif [ ! -z "$BLOG_ID" ]; then
 else
     mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}'" > ${LIST_FILE_NAME}
 fi
+
 echo "Starting to download DB... "
 now=$(date +"%T")
 echo "Current time : $now "
