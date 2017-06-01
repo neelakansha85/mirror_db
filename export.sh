@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 . parse_arguments.sh
 . read_properties.sh
