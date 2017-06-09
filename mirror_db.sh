@@ -1,5 +1,11 @@
 #!/bin/bash
 
+set -e
+
+. utilityFunctions.sh
+
+readonly WORKSPACE=$(getWorkspace)
+
 BATCH_LIMIT=10
 POOL_LIMIT=7000
 MERGE_BATCH_LIMIT=7000
@@ -15,7 +21,8 @@ SRC_DB_BACKUP="''"
 BLOG_ID="''"
 export SRC_DB_BACKUP
 
-. parse_arguments.sh
+parseArgs $@
+
 if [[ ! $? == 0 ]]; then
     echo "FAILURE: Error parsing arguments!"
     exit 1
@@ -119,7 +126,7 @@ if [ ! -z $SRC ]; then
 		fi
 	fi
 	
-	. read_properties.sh $SRC
+	readProperties $SRC
 	if [[ ! $? == 0 ]]; then
 	    echo "FAILURE: Error reading properties!"
 	    exit 1
