@@ -51,6 +51,10 @@ while [ "$1" != "" ]; do
         PROPERTIES_FILE=$2
         shift
         ;;
+      --blogid )
+        BLOG_ID=$2
+        shift
+        ;;
       --site-url )
         SRC_URL=$2
         shift
@@ -89,6 +93,9 @@ while [ "$1" != "" ]; do
       --is-last-import)
         IS_LAST_IMPORT=true
         ;;
+      --network-flag)
+        NETWORK_FLAG=true
+        ;;
       -- ) 
         shift; 
         break 
@@ -123,3 +130,5 @@ export SKIP_REPLACE
 export PARALLEL_IMPORT
 export IS_LAST_IMPORT
 export PROPERTIES_FILE
+export NETWORK_FLAG
+export BLOG_ID
