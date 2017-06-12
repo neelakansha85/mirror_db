@@ -109,7 +109,7 @@ downloadNetworkTables() {
   local listFileName=${1:-table_list.txt}
   mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-zA-Z]+[a-zA-Z0-9_]*$'" > $listFileName
   downloadTables $listFileName
-  mergeMain -lf $listFileName -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}
+  mergeMain -lf $listFileName -dbf ${NETWORK_DB} -mbl ${MERGE_BATCH_LIMIT}
 }
 
 downloadBlogTables() {
@@ -168,7 +168,7 @@ exportMain() {
   local total=1
   local PI_TOTAL=1
 
-  FILE_EXT=$(getFileExtension $DB_FILE_NAME)
+  DB_FILE_EXT=$(getFileExtension $DB_FILE_NAME)
   DB_FILE_N=$(getFileName $DB_FILE_NAME)
   NETWORK_DB="${DB_FILE_N}_network.${DB_FILE_EXT}"
 
@@ -205,6 +205,9 @@ exportMain() {
   else
     exportParallelMain
   fi
+
+  # Checking back to root dir
+  cd ..
 }
 
 exportMain $@

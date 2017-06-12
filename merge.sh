@@ -66,9 +66,9 @@ mergeFile(){
 archiveMergedFiles(){
   echo "Copying all merged DB files to archives dir... "
   # TODO: Update path based on absolute path of the file using $(pwd)
-  for mrdb in $(ls ${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/${MERGED_DIR}/*.sql)
+  for mrdb in $(ls ~/${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/${MERGED_DIR}/*.sql)
   do
-    cp ${mrdb} ${DB_BACKUP_DIR}/${DB_FILE_N}/
+    cp ${mrdb} ~/${DB_BACKUP_DIR}/${DB_FILE_N}/
   done
 }
 
@@ -78,24 +78,15 @@ mergeMain() {
   DB_FILE_EXT=$(getFileExtension $DB_FILE_NAME)
   DB_FILE_N=$(getFileName $DB_FILE_NAME)
 
-  cd ${EXPORT_DIR}
   mkdir -p $MERGED_DIR
   mergeFile
 
-  # Get to Home Dir
-  cd ~
-
   # Move all .sql files to archives dir for future reference
-  mkdir -p $DB_BACKUP_DIR
-  cd ${DB_BACKUP_DIR}
-
   if [[ $DB_FILE_N =~ .*_network.* ]]; then
     DB_FILE_N=$(echo ${DB_FILE_N} | cut -d '_' -f-2)
   fi
 
-  mkdir -p $DB_FILE_N
-  # TODO: Remove below line if using absolute path for dir
-  # Get to Home Dir
-  cd ..
+  mkdir -p ~/$DB_BACKUP_DIR/$DB_FILE_N
+
   archiveMergedFiles
 }
