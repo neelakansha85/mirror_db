@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 . utilityFunctions.sh
 . merge.sh
@@ -140,7 +140,7 @@ exportParallelMain() {
   # Get to root dir
   cd ..
   # Initiate merging and importing all network tables
-  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1
+  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${networkListFile} -dbf ${NETWORK_DB} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1
   # Continue exporting in EXPORT_DIR
   cd ${EXPORT_DIR}
   # Download all Non Network Tables
@@ -167,9 +167,6 @@ exportMain() {
   # scope of total is limited to exportMain()
   local total=1
   local PI_TOTAL=1
-  local networkListFile="${LIST_FILE_NAME}_network"
-  local blogListFile="${LIST_FILE_NAME}_${BLOG_ID}"
-  local nonNetworkListFile="${LIST_FILE_NAME}_non_network"
 
   FILE_EXT=$(getFileExtension $DB_FILE_NAME)
   DB_FILE_N=$(getFileName $DB_FILE_NAME)
@@ -177,7 +174,10 @@ exportMain() {
 
   LIST_FILE_EXT=$(getFileExtension $LIST_FILE_NAME)
   LIST_FILE_N=$(getFileName $LIST_FILE_NAME)
-  NETWORK_LIST="${LIST_FILE_N}_network.${LIST_FILE_EXT}"
+
+  local networkListFile="${LIST_FILE_N}_network.${LIST_FILE_EXT}"
+  local blogListFile="${LIST_FILE_N}_${BLOG_ID}.${LIST_FILE_EXT}"
+  local nonNetworkListFile="${LIST_FILE_N}_non_network.${LIST_FILE_EXT}"
 
   # import instance environment variables
   readProperties $SRC
