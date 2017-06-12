@@ -6,10 +6,11 @@ set -e
 
 # Config/Default Options
 # TODO: make use of $(pwd) to get absolute path for below variables
-readonly REMOTE_SCRIPT_DIR='mirror_db'
-readonly EXPORT_DIR='db_export'
-readonly MERGED_DIR='db_merged'
-readonly DB_BACKUP_DIR='db_backup'
+# TODO: Need to use readonly keyword for constants
+REMOTE_SCRIPT_DIR='mirror_db'
+EXPORT_DIR='db_export'
+MERGED_DIR='db_merged'
+DB_BACKUP_DIR='db_backup'
 DB_SUFFIX=''
 
 mergeFileName(){

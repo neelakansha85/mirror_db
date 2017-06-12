@@ -5,10 +5,11 @@ set -e
 . utilityFunctions.sh
 . merge.sh
 
-readonly EXPORT_DIR='db_export'
-readonly POOL_WAIT_TIME=300
-readonly LOGS_DIR='log'
-readonly PI_TOTAL_FILE='pi_total.txt'
+# TODO: Need to use readonly keyword for constants
+EXPORT_DIR='db_export'
+POOL_WAIT_TIME=300
+LOGS_DIR='log'
+PI_TOTAL_FILE='pi_total.txt'
 
 checkCount() {
   local count=$1
