@@ -1,192 +1,212 @@
 #!/bin/bash
 
-. parse_arguments.sh
-. read_properties.sh
+set -ex
+
+. utilityFunctions.sh
 . merge.sh
 
-# Config Options
+# TODO: Need to use readonly keyword for constants
+EXPORT_DIR='db_export'
+POOL_WAIT_TIME=300
+LOGS_DIR='log'
+PI_TOTAL_FILE='pi_total.txt'
 
-readonly EXPORT_DIR='db_export'
-readonly POOL_WAIT_TIME=300
-readonly LOGS_DIR='log'
-readonly PI_TOTAL_FILE='pi_total.txt'
-
-parseArgs $@
-
-DB_FILE_EXT=$(getFileExtension $DB_FILE_NAME)
-DB_FILE_N=$(getFileName $DB_FILE_NAME)
-NETWORK_DB="${DB_FILE_N}_network.${DB_FILE_EXT}"
-
-LIST_FILE_EXT=$(getFileExtension $LIST_FILE_NAME)
-LIST_FILE_N=$(getFileName $LIST_FILE_NAME)
-NETWORK_LIST="${LIST_FILE_N}_network.${LIST_FILE_EXT}"
-
-# import instance environment variables
-readProperties $SRC
-
-
-# Empty EXPORT_DIR dir to remove any previous data
-rm -rf ${EXPORT_DIR}
-mkdir ${EXPORT_DIR}
-
-cd ${EXPORT_DIR}
-if [ "$NETWORK_FLAG" = true ]; then
-    mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-z|A-Z]+[a-zA-Z0-9_]*$'" > ${LIST_FILE_NAME}
-
-elif [ ! -z "$BLOG_ID" ]; then
-    mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_".$BLOG_ID."+[a-zA-Z0-9_]*$'" > ${LIST_FILE_NAME}   
-
-else
-    mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}'" > ${LIST_FILE_NAME}
-fi
-echo "Starting to download DB... "
-now=$(date +"%T")
-echo "Current time : $now "
-
-TOTAL=1
-BATCH_COUNT=1
-POOL_COUNT=1
-PI_TOTAL=1
-dwnldNetworkTables() {
-for dbtb in $(cat ${LIST_FILE_NAME})
-do
-     db=$(getDbName $dbtb)
-     tb=$(getTbName $dbtb)
-
-    # Export only network tables from source
-    if [[ $tb =~ ^wp_[a-z|A-Z]+[a-zA-Z0-9_]* ]]; then
-        if [ ${POOL_COUNT} -eq 1 ]
-        then
-            echo "Starting a new pool of downloads... "
-        fi
-        if [ ${BATCH_COUNT} -eq 1 ]
-        then
-            echo "Starting new batch of downloads... "
-        fi
-        echo "Downloading ${tb}.sql ... "
-        mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${db} ${tb} | gzip > ${db}_${tb}.sql.gz &
-        (( BATCH_COUNT++ ))
-        (( POOL_COUNT++ ))
-        (( TOTAL++ ))
-
-        echo "${db}.${tb}" >> ${NETWORK_LIST}
-        
-        if [ ${BATCH_COUNT} -eq ${BATCH_LIMIT} ]
-        then
-            BATCH_COUNT=1
-            echo "Waiting to start new batch... "
-            sleep $WAIT_TIME
-        fi
-        if [ ${POOL_COUNT} -eq ${POOL_LIMIT} ]
-        then
-            POOL_COUNT=1
-            echo "Waiting to start new pool... "
-            sleep $POOL_WAIT_TIME
-        fi
-    else
-        echo "${db}.${tb}" >> temp.txt
-    fi
-done
-
-echo "Completed downloading Network tables..."
+checkCount() {
+  local count=$1
+  local set=$2
+  if [ ${count} -eq 1 ]; then
+    echo "Starting new $set of downloads... "
+  fi
 }
-rm ${LIST_FILE_NAME}
-mv temp.txt ${LIST_FILE_NAME}
 
-if [ "$PARALLEL_IMPORT" = true ]; then
-    echo "Executing parallel-import for network tables... "
-    # Get to root dir
-    cd ..
+checkCountLimit() {
+  local count=$1
+  local limit=$2
+  local waitTime=${3:-3}
+  if [ ${count} -eq ${limit} ]; then
+    sleep $waitTime
+    echo "1"
+  else
+    echo $count
+  fi
+}
 
-    # Initiate merging and importing all network tables
-    nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1 
-
-    # Continue exporting in EXPORT_DIR
-    cd ${EXPORT_DIR}
-
-fi    
-
-echo "Starting to download all site tables... "
-
-# Reset Counter for Batch and Pool limits
-BATCH_COUNT=1
-POOL_COUNT=1
-
-for dbtb in $(cat ${LIST_FILE_NAME})
-do
-    db=$(echo ${dbtb} | sed 's/\./ /g' | awk '{print $1}')
-    tb=$(echo ${dbtb} | sed 's/\./ /g' | awk '{print $2}')
-    
-    if [ ${POOL_COUNT} -eq 1 ]; then
-        echo "Starting a new pool of downloads... "
-    fi
-    if [ ${BATCH_COUNT} -eq 1 ]; then
-        echo "Starting new batch of downloads... "
-    fi
+downloadTables() {
+  local poolCount=1
+  local batchCount=1
+  local listFileName=$1
+  for dbtb in $(cat ${listFileName})
+  do
+    db=$(getDbName $dbtb)
+    tb=$(getTbName $dbtb)
+    checkCount $poolCount "Pool"
+    checkCount $batchCount "Batch"
     echo "Downloading ${tb}.sql ... "
+
     mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${db} ${tb} | gzip > ${db}_${tb}.sql.gz &
-    (( BATCH_COUNT++ ))
-    (( POOL_COUNT++ ))
-    (( TOTAL++ ))
+    (( batchCount++ ))
+    (( poolCount++ ))
+    (( total++ ))
+    batchCount=$(checkCountLimit $batchCount $BATCH_LIMIT)
+    #NOTE: to be changed: sleep pool_wait_time
+    poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $POOL_WAIT_TIME)
+  done
 
-    if [ "$PARALLEL_IMPORT" = true ]; then
-        echo "${db}.${tb}" >> ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT}
-    fi
-
-    if [ ${BATCH_COUNT} -eq ${BATCH_LIMIT} ]; then
-            BATCH_COUNT=1
-        echo "Waiting to start new batch... "
-        sleep $WAIT_TIME
-    fi
-    if [ ${POOL_COUNT} -eq ${POOL_LIMIT} ]; then
-        if [ "$PARALLEL_IMPORT" = true ]; then
-            # Get to root dir
-            cd ..
-            
-            PI_DB_FILE_N="${DB_FILE_N}_${PI_TOTAL}.${DB_FILE_EXT}"
-
-            nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT} -dbf ${PI_DB_FILE_N} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
-
-            # Continue exporting in EXPORT_DIR
-            cd ${EXPORT_DIR}
-        fi
-        POOL_COUNT=1
-        (( PI_TOTAL++ ))
-        echo "Waiting to start new pool... "
-        sleep $POOL_WAIT_TIME
-    fi
-done
-
-echo "Completed downloading DB... "
-echo "Total no of tables downloaded = ${TOTAL}"
-now=$(date +"%T")
-echo "Current time : $now "
-
-if [ ${BATCH_COUNT} -gt 0 ]; then
+  echo "Completed downloading tables from $listFileName ..."
+  echo "Total no of tables downloaded = ${total}"
+  now=$(date +"%T")
+  echo "Current time : $now "
+  if [ ${batchCount} -gt 0 ]; then
     sleep 2
-fi
+  fi
+}
 
-# Get to root dir
-cd ..
+# For downloading Non Network tables if Parallel Import is true
+downloadTablesPI() {
+  local poolCount=1
+  local batchCount=1
+  local listFileName=$1
 
-if [ ! "$PARALLEL_IMPORT" = true ]; then
-    echo "Executing merge script for network tables... "
-    # Merge all network tables to one mysql_network.sql
-    ./merge.sh -lf ${NETWORK_LIST} -dbf ${NETWORK_DB} -mbl ${MERGE_BATCH_LIMIT}
-    if [[ ! $? == 0 ]]; then
-        echo "FAILURE: Error merging network tables in Parallel Import!"
-        exit 1
+  for dbtb in $(cat ${listFileName})
+  do
+    db=$(getDbName $dbtb)
+    tb=$(getTbName $dbtb)
+    checkCount $poolCount "Pool"
+    checkCount $batchCount "Batch"
+    echo "Downloading ${tb}.sql ... "
+
+    mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${db} ${tb} | gzip > ${db}_${tb}.sql.gz &
+    (( batchCount++ ))
+    (( poolCount++ ))
+    (( total++ ))
+
+    # Required for identifying which file needs to be imported
+    echo "${db}.${tb}" >> ${listFileName}_${PI_TOTAL}.${listFileExt}
+
+    batchCount=$(checkCountLimit $batchCount $BATCH_LIMIT)
+    poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $POOL_WAIT_TIME)
+    if [ ${poolCount} -eq 1 ]; then
+      # TODO: Remove below line and cd {EXPORT_DIR} if using absolute path for dir
+      # Get to root dir
+      cd ..
+      dbFileNamePI="${dbFileName}_${PI_TOTAL}.${dbFileExt}"
+      nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
+      # Continue exporting in EXPORT_DIR
+      cd ${EXPORT_DIR}
+      (( PI_TOTAL++ ))
     fi
+  done
+  echo "Completed downloading tables from ${listFileName}..."
+  echo "Total no of tables downloaded = ${total}"
+  now=$(date +"%T")
+  echo "Current time : $now "
+  if [ ${batchCount} -gt 0 ]; then
+    sleep 2
+  fi
+}
 
-    echo "Executing merge script for all site tables... "
-    # Merge all other tables to one mysql.sql
-    ./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}
-    if [[ ! $? == 0 ]]; then
-        echo "FAILURE: Error merging all site tables in Parallel Import!"
-        exit 1
+downloadNetworkTables() {
+  local listFileName=${1:-table_list.txt}
+  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-zA-Z]+[a-zA-Z0-9_]*$'" > $listFileName
+  downloadTables $listFileName
+  mergeMain -lf $listFileName -dbf ${networkDb} -mbl ${MERGE_BATCH_LIMIT}
+}
+
+downloadBlogTables() {
+  local listFileName=${1:-table_list.txt}
+  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_${BLOG_ID}+[a-zA-Z0-9_]*$'" > $listFileName
+  downloadTables $listFileName
+  mergeMain -lf $listFileName -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
+}
+
+downloadNonNetworkTables() {
+  local listFileName=${1:-table_list.txt}
+  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[0-9]+[a-zA-Z0-9_]*$'" > $listFileName
+  downloadTables $listFileName
+  mergeMain -lf $listFileName -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
+}
+
+exportParallelMain() {
+  # Starting Parallel Import
+  # Download Network tables first
+  # TODO: Verify if mergeMain() is required and if so use below function
+  # downloadNetworkTables $networkListFile
+  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-zA-Z]+[a-zA-Z0-9_]*$'" > $networkListFile
+  downloadTables $networkListFile
+  # TODO: Need to verify if mergeMain() is required for Network tables
+  # mergeMain -lf $networkListFile -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
+  echo "Executing parallel-import for network tables... "
+  # TODO: Remove below line and cd {EXPORT_DIR} if using absolute path for dir
+  # Get to root dir
+  cd ..
+  # Initiate merging and importing all network tables
+  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${networkListFile} -dbf ${networkDb} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1
+  # Continue exporting in EXPORT_DIR
+  cd ${EXPORT_DIR}
+  # Download all Non Network Tables
+  # TODO: Verify if mergeMain() is required and if so use below function
+  # downloadNonNetworkTables $nonNetworkListFile
+  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[0-9]+[a-zA-Z0-9_]*$'" > $nonNetworkListFile
+  downloadTablesPI $nonNetworkListFile
+  # TODO: Need to verify if mergeMain() is required for Network tables
+  # mergeMain -lf $nonNetworkListFile -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
+  
+  # TODO: Remove below line and cd {EXPORT_DIR} if using absolute path for dir
+  # Get to root dir
+  cd ..
+
+  # Execute merge and upload for the last set of tables downloaded
+  dbFileNamePI="${dbFileName}_${PI_TOTAL}.${dbFileExt}"
+  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import --is-last-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
+}
+
+#starts here
+exportMain() {
+
+  parseArgs $@
+  # scope of total is limited to exportMain()
+  local total=1
+  local PI_TOTAL=1
+  local dbFile=${DB_FILE_NAME}
+  local listFile=${LIST_FILE_NAME}
+  local dbFileExt=$(getFileExtension $dbFile)
+  local dbFileName=$(getFileName $dbFile)
+  local networkDb="${dbFileName}_network.${dbFileExt}"
+  local listFileExt=$(getFileExtension $listFile)
+  local listFileName=$(getFileName $listFile)
+  local networkListFile="${listFileName}_network.${listFileExt}"
+  local blogListFile="${listFileName}_${BLOG_ID}.${listFileExt}"
+  local nonNetworkListFile="${listFileName}_non_network.${listFileExt}"
+
+  # import instance environment variables
+  readProperties $SRC
+
+  # Empty EXPORT_DIR dir to remove any previous data
+  # TODO: Need to verify if it deletes export dir for 
+  # Parallel Import which shouldn't happen
+  rm -rf ${EXPORT_DIR}
+  mkdir ${EXPORT_DIR}
+  cd ${EXPORT_DIR}
+
+  echo "Starting to download DB... "
+  now=$(date +"%T")
+  echo "Current time : $now "
+
+  if [ ! "$PARALLEL_IMPORT" = true ]; then
+    if [ ! -z "$BLOG_ID" ]; then
+      downloadBlogTables $blogListFile
+    elif [ "$NETWORK_FLAG" = true ]; then
+      downloadNetworkTables $networkListFile
+    else
+      downloadNetworkTables $networkListFile
+      downloadNonNetworkTables $nonNetworkListFile
     fi
-else
-    # Execute merge and upload for the last set of tables downloaded
-    PI_DB_FILE_N="${DB_FILE_N}_${PI_TOTAL}.${DB_FILE_EXT}"
-    nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT} -dbf ${PI_DB_FILE_N} --skip-export --parallel-import --is-last-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
-fi
+  else
+    exportParallelMain
+  fi
+
+  # Checking back to root dir
+  cd ..
+}
+
+exportMain $@

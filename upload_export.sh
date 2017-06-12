@@ -22,8 +22,9 @@ PARSE_FILE='parse_arguments.sh'
 READ_PROPERTIES_FILE='read_properties.sh'
 STRUCTURE_FILE='mirror_db_structure.sh'
 PROPERTIES_FILE='db.properties'
+UTILITY_FILE='utilityFunctions.sh'
 
-chmod 750 $EXPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $STRUCTURE_FILE $MERGE_SCRIPT
+chmod 750 $UTILITY_FILE $EXPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $STRUCTURE_FILE $MERGE_SCRIPT
 
 if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ ! -d ${REMOTE_SCRIPT_DIR} ]" ); then
 	echo "Creating ${REMOTE_SCRIPT_DIR} on ${SRC}..."
@@ -42,7 +43,7 @@ echo "Executing structure script for creating dir on ${SRC} server... "
 ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}" 
 
 # Send export process related files to SOURCE
-rsync -avzhe ssh --delete --progress ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/  
+rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
 
 if [[ ! $? == 0 ]]; then
 	echo "FAILURE: Error uploading mirror_db files on ${SRC} server!"
@@ -50,7 +51,7 @@ if [[ ! $? == 0 ]]; then
 else
 # Executing export process at source
 	if [ ! "$SKIP_EXPORT" = true ]; then
-		ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${EXPORT_SCRIPT} -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -blogid ${BLOG_ID} ${PARALLEL_IMPORT} ${NETWORK_FLAG};" 
+		ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${EXPORT_SCRIPT} -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${PARALLEL_IMPORT} ${NETWORK_FLAG};"
 		if [[ ! $? == 0 ]]; then
 			echo "FAILURE: Error executing export script on ${SRC} server!"
 			exit 1
