@@ -169,8 +169,8 @@ exportMain() {
   local PI_TOTAL=1
   local dbFile=${DB_FILE_NAME}
   local listFile=${LIST_FILE_NAME}
-  local dbFileExt=$(getFileExtension dbFile)
-  local dbFileName=$(getFileName dbFile)
+  local dbFileExt=$(getFileExtension $dbFile)
+  local dbFileName=$(getFileName $dbFile)
   local networkDb="${dbFileName}_network.${dbFileExt}"
   local listFileExt=$(getFileExtension $listFile)
   local listFileName=$(getFileName $listFile)

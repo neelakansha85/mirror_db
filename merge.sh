@@ -76,8 +76,8 @@ mergeMain() {
   parseArgs $@
 
   local dbFile=${DB_FILE_NAME}
-  local dbFileExt=$(getFileExtension dbFile)
-  local dbFileName=$(getFileName dbFile)
+  local dbFileExt=$(getFileExtension $dbFile)
+  local dbFileName=$(getFileName $dbFile)
 
   mkdir -p $MERGED_DIR
   mergeFile
