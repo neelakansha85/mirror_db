@@ -207,4 +207,4 @@ exportMain() {
   fi
 }
 
-exportMain
+exportMain $@

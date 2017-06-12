@@ -51,7 +51,7 @@ if [[ ! $? == 0 ]]; then
 else
 # Executing export process at source
 	if [ ! "$SKIP_EXPORT" = true ]; then
-		ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${EXPORT_SCRIPT} -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -blogid ${BLOG_ID} ${PARALLEL_IMPORT} ${NETWORK_FLAG};" 
+		ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${EXPORT_SCRIPT} -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} --blogid ${BLOG_ID} ${PARALLEL_IMPORT} ${NETWORK_FLAG};"
 		if [[ ! $? == 0 ]]; then
 			echo "FAILURE: Error executing export script on ${SRC} server!"
 			exit 1
