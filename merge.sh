@@ -18,7 +18,7 @@ mergeFileName(){
   if [ ! "$PARALLEL_IMPORT" = true ]; then
     DB_SUFFIX="_${total}"
   fi
-  mergedName="${DB_FILE_N}${DB_SUFFIX}.${DB_FILE_EXT}"
+  mergedName="${dbFileName}${DB_SUFFIX}.${dbFileExt}"
   echo $mergedName
 }
 
@@ -29,7 +29,7 @@ moveFileToMergeDir(){
 }
 
 mergeFile(){
-  echo "Starting to merge DB to ${DB_FILE_NAME}... "
+  echo "Starting to merge DB to ${dbFile}... "
   now=$(date +"%T")
   echo "Current time : $now "
 
@@ -57,7 +57,7 @@ mergeFile(){
     fi
   done
   moveFileToMergeDir
-  echo "Completed merging DB to ${DB_FILE_NAME}... "
+  echo "Completed merging DB to ${dbFile}... "
   echo "Total no of merged sql files = ${total}"
   now=$(date +"%T")
   echo "Current time : $now "
@@ -68,25 +68,25 @@ archiveMergedFiles(){
   # TODO: Update path based on absolute path of the file using $(pwd)
   for mrdb in $(ls ~/${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/${MERGED_DIR}/*.sql)
   do
-    cp ${mrdb} ~/${DB_BACKUP_DIR}/${DB_FILE_N}/
+    cp ${mrdb} ~/${DB_BACKUP_DIR}/${dbFileName}/
   done
 }
 
 mergeMain() {
   parseArgs $@
 
-  DB_FILE_EXT=$(getFileExtension $DB_FILE_NAME)
-  DB_FILE_N=$(getFileName $DB_FILE_NAME)
+  local dbFileExt=$(getFileExtension dbFile)
+  local dbFileName=$(getFileName dbFile)
 
   mkdir -p $MERGED_DIR
   mergeFile
 
   # Move all .sql files to archives dir for future reference
-  if [[ $DB_FILE_N =~ .*_network.* ]]; then
-    DB_FILE_N=$(echo ${DB_FILE_N} | cut -d '_' -f-2)
+  if [[ $dbFileName =~ .*_network.* ]]; then
+    dbFileName=$(echo ${dbFileName} | cut -d '_' -f-2)
   fi
 
-  mkdir -p ~/$DB_BACKUP_DIR/$DB_FILE_N
+  mkdir -p ~/$DB_BACKUP_DIR/$dbFileName
 
   archiveMergedFiles
 }

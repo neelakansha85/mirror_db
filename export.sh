@@ -81,7 +81,7 @@ downloadTablesPI() {
     (( total++ ))
 
     # Required for identifying which file needs to be imported
-    echo "${db}.${tb}" >> ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT}
+    echo "${db}.${tb}" >> ${listFileName}_${PI_TOTAL}.${listFileExt}
 
     batchCount=$(checkCountLimit $batchCount $BATCH_LIMIT)
     poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $POOL_WAIT_TIME)
@@ -89,8 +89,8 @@ downloadTablesPI() {
       # TODO: Remove below line and cd {EXPORT_DIR} if using absolute path for dir
       # Get to root dir
       cd ..
-      PI_DB_FILE_N="${DB_FILE_N}_${PI_TOTAL}.${DB_FILE_EXT}"
-      nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT} -dbf ${PI_DB_FILE_N} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
+      dbFileNamePI="${dbFileName}_${PI_TOTAL}.${dbFileExt}"
+      nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
       # Continue exporting in EXPORT_DIR
       cd ${EXPORT_DIR}
       (( PI_TOTAL++ ))
@@ -109,21 +109,21 @@ downloadNetworkTables() {
   local listFileName=${1:-table_list.txt}
   mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-zA-Z]+[a-zA-Z0-9_]*$'" > $listFileName
   downloadTables $listFileName
-  mergeMain -lf $listFileName -dbf ${NETWORK_DB} -mbl ${MERGE_BATCH_LIMIT}
+  mergeMain -lf $listFileName -dbf ${networkDb} -mbl ${MERGE_BATCH_LIMIT}
 }
 
 downloadBlogTables() {
   local listFileName=${1:-table_list.txt}
   mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_${BLOG_ID}+[a-zA-Z0-9_]*$'" > $listFileName
   downloadTables $listFileName
-  mergeMain -lf $listFileName -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}
+  mergeMain -lf $listFileName -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
 }
 
 downloadNonNetworkTables() {
   local listFileName=${1:-table_list.txt}
   mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[0-9]+[a-zA-Z0-9_]*$'" > $listFileName
   downloadTables $listFileName
-  mergeMain -lf $listFileName -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}
+  mergeMain -lf $listFileName -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
 }
 
 exportParallelMain() {
@@ -134,13 +134,13 @@ exportParallelMain() {
   mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-zA-Z]+[a-zA-Z0-9_]*$'" > $networkListFile
   downloadTables $networkListFile
   # TODO: Need to verify if mergeMain() is required for Network tables
-  # mergeMain -lf $networkListFile -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}
+  # mergeMain -lf $networkListFile -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
   echo "Executing parallel-import for network tables... "
   # TODO: Remove below line and cd {EXPORT_DIR} if using absolute path for dir
   # Get to root dir
   cd ..
   # Initiate merging and importing all network tables
-  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${networkListFile} -dbf ${NETWORK_DB} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1
+  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${networkListFile} -dbf ${networkDb} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1
   # Continue exporting in EXPORT_DIR
   cd ${EXPORT_DIR}
   # Download all Non Network Tables
@@ -149,15 +149,15 @@ exportParallelMain() {
   mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[0-9]+[a-zA-Z0-9_]*$'" > $nonNetworkListFile
   downloadTablesPI $nonNetworkListFile
   # TODO: Need to verify if mergeMain() is required for Network tables
-  # mergeMain -lf $nonNetworkListFile -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT}  
+  # mergeMain -lf $nonNetworkListFile -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
   
   # TODO: Remove below line and cd {EXPORT_DIR} if using absolute path for dir
   # Get to root dir
   cd ..
 
   # Execute merge and upload for the last set of tables downloaded
-  PI_DB_FILE_N="${DB_FILE_N}_${PI_TOTAL}.${DB_FILE_EXT}"
-  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${LIST_FILE_N}_${PI_TOTAL}.${LIST_FILE_EXT} -dbf ${PI_DB_FILE_N} --skip-export --parallel-import --is-last-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
+  dbFileNamePI="${dbFileName}_${PI_TOTAL}.${dbFileExt}"
+  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import --is-last-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
 }
 
 #starts here
@@ -167,17 +167,14 @@ exportMain() {
   # scope of total is limited to exportMain()
   local total=1
   local PI_TOTAL=1
-
-  DB_FILE_EXT=$(getFileExtension $DB_FILE_NAME)
-  DB_FILE_N=$(getFileName $DB_FILE_NAME)
-  NETWORK_DB="${DB_FILE_N}_network.${DB_FILE_EXT}"
-
-  LIST_FILE_EXT=$(getFileExtension $LIST_FILE_NAME)
-  LIST_FILE_N=$(getFileName $LIST_FILE_NAME)
-
-  local networkListFile="${LIST_FILE_N}_network.${LIST_FILE_EXT}"
-  local blogListFile="${LIST_FILE_N}_${BLOG_ID}.${LIST_FILE_EXT}"
-  local nonNetworkListFile="${LIST_FILE_N}_non_network.${LIST_FILE_EXT}"
+  local dbFileExt=$(getFileExtension dbFile)
+  local dbFileName=$(getFileName dbFile)
+  local networkDb="${dbFileName}_network.${dbFileExt}"
+  local listFileExt=$(getFileExtension $listFile)
+  local listFileName=$(getFileName $listFile)
+  local networkListFile="${listFileName}_network.${listFileExt}"
+  local blogListFile="${listFileName}_${BLOG_ID}.${listFileExt}"
+  local nonNetworkListFile="${listFileName}_non_network.${listFileExt}"
 
   # import instance environment variables
   readProperties $SRC
