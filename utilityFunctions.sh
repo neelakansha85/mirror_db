@@ -11,94 +11,94 @@ parseArgs() {
   while [ "$1" != "" ]; do
       case $1 in
         -s | --source)
-          local SRC=$2
+          SRC=$2
           shift
           ;;
         -d | --destination)
-          local DEST=$2
+          DEST=$2
           shift
           ;;
         --db-backup)
-          local DB_BACKUP=$2
+          DB_BACKUP=$2
           shift
           ;;
         -ebl )
-          local BATCH_LIMIT=$2
+          BATCH_LIMIT=$2
           shift
           ;;
         -pl )
-          local POOL_LIMIT=$2
+          POOL_LIMIT=$2
           shift
           ;;
         -mbl )
-          local MERGE_BATCH_LIMIT=$2
+          MERGE_BATCH_LIMIT=$2
           shift
           ;;
         -ewt )
-          local WAIT_TIME=$2
+          WAIT_TIME=$2
           shift
           ;;
         -iwt )
-          local IMPORT_WAIT_TIME=$2
+          IMPORT_WAIT_TIME=$2
           shift
           ;;
         -lf )
-          local listFile=$2
+          LIST_FILE_NAME=$2
           shift
           ;;
         -dbf )
-          local dbFile=$2
+          DB_FILE_NAME=$2
           shift
           ;;
         -pf | --properties-file )
-          local PROPERTIES_FILE=$2
+          PROPERTIES_FILE=$2
           shift
           ;;
         --blogid )
-          local BLOG_ID=$2
+          BLOG_ID=$2
           shift
           ;;
         --site-url )
-          local SRC_URL=$2
+          SRC_URL=$2
           shift
           ;;
         --shib-url )
-          local SRC_SHIB_URL=$2
+          SRC_SHIB_URL=$2
           shift
           ;;
         --g-analytics )
-          local SRC_G_ANALYTICS=$2
+          SRC_G_ANALYTICS=$2
           shift
           ;;
         --force )
-          local FORCE_IMPORT=--force
+          FORCE_IMPORT=--force
           ;;
         --drop-tables)
-          local DROP_TABLES=true
+          DROP_TABLES=true
           ;;
         --drop-tables-sql)
-          local DROP_TABLES_SQL=true
+          DROP_TABLES_SQL=true
           ;;
         --skip-export)
-          local SKIP_EXPORT=true
+          SKIP_EXPORT=true
           ;;
         --skip-import)
-          local SKIP_IMPORT=true
+          SKIP_IMPORT=true
           ;;
         --skip-network-import)
-          local SKIP_NETWORK_IMPORT=true
+          SKIP_NETWORK_IMPORT=true
           ;;
         --skip-replace)
-          local SKIP_REPLACE=true
+          SKIP_REPLACE=true
           ;;
         --parallel-import)
-          local PARALLEL_IMPORT=true
+          PARALLEL_IMPORT=true
           ;;
         --is-last-import)
-          local IS_LAST_IMPORT=true
+          IS_LAST_IMPORT=true
           ;;
         --network-flag)
-          local NETWORK_FLAG=true
+          NETWORK_FLAG=true
           ;;
         -- )
           shift;
