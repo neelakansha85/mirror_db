@@ -51,7 +51,7 @@ downloadTables() {
     #NOTE: to be changed: sleep pool_wait_time
     poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $POOL_WAIT_TIME)
   done
-
+  total=total-1
   echo "Completed downloading tables from $listFileName ..."
   echo "Total no of tables downloaded = ${total}"
   now=$(date +"%T")
@@ -96,6 +96,7 @@ downloadTablesPI() {
       (( PI_TOTAL++ ))
     fi
   done
+  total=total-1
   echo "Completed downloading tables from ${listFileName}..."
   echo "Total no of tables downloaded = ${total}"
   now=$(date +"%T")
@@ -116,7 +117,7 @@ downloadBlogTables() {
   local listFileName=${1:-table_list.txt}
   mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_${BLOG_ID}+[a-zA-Z0-9_]*$'" > $listFileName
   downloadTables $listFileName
-  mergeMain -lf $listFileName -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
+  mergeMain -lf $listFileName -dbf ${blogDb} -mbl ${MERGE_BATCH_LIMIT}
 }
 
 downloadNonNetworkTables() {
@@ -172,6 +173,7 @@ exportMain() {
   local dbFileExt=$(getFileExtension $dbFile)
   local dbFileName=$(getFileName $dbFile)
   local networkDb="${dbFileName}_network.${dbFileExt}"
+  local blogDb="${dbFileName}_${BLOG_ID}.${dbFileExt}"
   local listFileExt=$(getFileExtension $listFile)
   local listFileName=$(getFileName $listFile)
   local networkListFile="${listFileName}_network.${listFileExt}"
@@ -199,6 +201,7 @@ exportMain() {
       downloadNetworkTables $networkListFile
     else
       downloadNetworkTables $networkListFile
+     # total=$(getTotal)
       downloadNonNetworkTables $nonNetworkListFile
     fi
   else
