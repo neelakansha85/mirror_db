@@ -33,17 +33,6 @@ uploadExportMain() {
   parseArgs $@
   readProperties $SRC
 
-  EXPORT_DIR='db_export'
-  MERGED_DIR='db_merged'
-  EXPORT_SCRIPT='export.sh'
-  MERGE_SCRIPT='merge.sh'
-  GET_DB_SCRIPT='get_db.sh'
-  PARSE_FILE='parse_arguments.sh'
-  READ_PROPERTIES_FILE='read_properties.sh'
-  STRUCTURE_FILE='mirror_db_structure.sh'
-  PROPERTIES_FILE='db.properties'
-  UTILITY_FILE='utilityFunctions.sh'
-
   setFilePermissions
   echo "Start Upload Export Process..."
   now=$(date +"%T")

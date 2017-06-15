@@ -84,7 +84,8 @@ echo ""
 echo "Starting to execute mirror_db."
 echo "##############################"
 echo "Current time: $(date)"
-
+#setting reused global variables
+setGlobalVariables
 # Changing right permissions for all bash scripts
 echo "Changing right permissions for all bash scripts"
 chmod 750 *.sh

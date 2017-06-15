@@ -198,3 +198,23 @@ setFilePermissions() {
   echo "Changing right permissions for all bash scripts"
   chmod 750 *.sh
 }
+
+setGlobalVariables() {
+  EXPORT_DIR='db_export'
+  MERGED_DIR='db_merged'
+  IMPORT_SCRIPT='import.sh'
+  EXPORT_SCRIPT='export.sh'
+  MERGE_SCRIPT='merge.sh'
+  SEARCH_REPLACE_SCRIPT='search_replace.sh'
+  GET_DB_SCRIPT='get_db.sh'
+  PUT_DB_SCRIPT='put_db.sh'
+  AFTER_IMPORT_SCRIPT='after_import.sh'
+  DROP_SQL_FILE='drop_tables'
+  SUPER_ADMIN_TXT='superadmin_dev.txt'
+  PARSE_FILE='parse_arguments.sh'
+  READ_PROPERTIES_FILE='read_properties.sh'
+  STRUCTURE_FILE='mirror_db_structure.sh'
+  PROPERTIES_FILE='db.properties'
+  PI_TOTAL_FILE='pi_total.txt'
+  UTILITY_FILE='utilityFunctions.sh'
+}
