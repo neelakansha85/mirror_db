@@ -3,6 +3,7 @@
 set -e
 
 . utilityFunctions.sh
+. upload_export.sh
 
 readonly WORKSPACE=$(getWorkspace)
 
@@ -103,7 +104,8 @@ if [ ! -z $SRC ]; then
 	echo "Executing db export script"
 
 	#added . ahead of calling child script to return the values back to parent script
-	. ./upload_export.sh -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -blogid ${BLOG_ID} ${PARALLEL_IMPORT} ${SKIP_EXPORT} ${NETWORK_FLAG}
+	uploadExportMain $@
+	#. ./upload_export.sh -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${PARALLEL_IMPORT} ${SKIP_EXPORT} ${NETWORK_FLAG} --blog-id ${BLOG_ID}
 
 	if [[ ! $? == 0 ]]; then
 		echo "FAILURE: Error executing upload export script!"
