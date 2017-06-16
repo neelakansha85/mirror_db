@@ -1,5 +1,5 @@
 #!/bin/bash
-
+. get_db.sh
 . parse_arguments.sh
 if [[ ! $? == 0 ]]; then
 	echo "FAILURE: Error parsing arguments!"
@@ -68,7 +68,7 @@ else
 
 		# Get exported db from SRC to mirror_db server
 		echo "Transfering files from SRC to mirror_db server"
-		./${GET_DB_SCRIPT} -s ${SRC} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
+		getDb -s ${SRC} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
 		
 		if [[ ! $? == 0 ]]; then
 			echo "FAILURE: Error executing Get DB script on mirror_db server!"
