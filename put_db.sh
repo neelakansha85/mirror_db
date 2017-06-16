@@ -8,11 +8,11 @@ putDb() {
   parseArgs $@
   readProperties $DEST
 
-  if [ "$DB_BACKUP" != "''" ]; then
-	DB_BACKUP_DIR=${DB_BACKUP}
-  else
-    DB_BACKUP_DIR=${EXPORT_DIR}
-  fi
+#  if [ "$DB_BACKUP" != "''" ]; then
+#	#DB_BACKUP_DIR=${DB_BACKUP}
+#  else
+#    DB_BACKUP_DIR=${EXPORT_DIR}
+#  fi
 
   if [ ! "$PARALLEL_IMPORT" = true ]; then
     echo "Database path on mirror_db: $DB_BACKUP_DIR"
@@ -26,3 +26,4 @@ putDb() {
 
 }
 putDb $@
+

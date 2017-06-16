@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-EXPORT_DIR='db_export'
+#EXPORT_DIR='db_export'
 parseArgs() {
   if [ ! $# -ge 2 ]; then
       echo "Please enter the source or destination to run"
@@ -205,4 +205,7 @@ getDb() {
 	rsync -avzhe ssh --progress ${DB_BACKUP_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/ ${EXPORT_DIR}/
   fi
   #is the space btw backup_dir and export_dir needed
+  DB_BACKUP_DIR=${EXPORT_DIR}
 }
+
+

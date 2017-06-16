@@ -1,5 +1,6 @@
 #!/bin/bash
-
+. utilityFunctions.sh
+. put_db.sh
 # default values
 IS_LAST_IMPORT=false
 
@@ -72,7 +73,8 @@ rsync -avzhe ssh --delete --progress ${IMPORT_SCRIPT} ${SEARCH_REPLACE_SCRIPT} $
 if [ ! "$PARALLEL_IMPORT" = true ]; then
   # Put all SQL files on ${DEST} server from mirror_db server
   echo "Executing ${PUT_DB_SCRIPT} script"
-  ./${PUT_DB_SCRIPT} -d ${DEST} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
+  putDb -d ${DEST} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
+  #./${PUT_DB_SCRIPT}
   if [[ ! $? == 0 ]]; then
     echo "FAILURE: Error executing put db script on mirror_db server!"
     exit 1
