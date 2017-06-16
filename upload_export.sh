@@ -1,5 +1,6 @@
 #!/bin/bash
-. get_db.sh
+#. get_db.sh
+. utilityFunctions.sh
 . parse_arguments.sh
 if [[ ! $? == 0 ]]; then
 	echo "FAILURE: Error parsing arguments!"
