@@ -26,4 +26,3 @@ putDb() {
 
 }
 putDb $@
-
