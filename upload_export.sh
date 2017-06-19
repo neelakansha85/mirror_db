@@ -57,7 +57,7 @@ uploadExportMain() {
 
 	# Get exported db from SRC to mirror_db server
 	echo "Transfering files from SRC to mirror_db server"
-	./${GET_DB_SCRIPT} -s ${SRC} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
+	getDb -s ${SRC} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
 
     removeMirrorDbFiles
     echo "Upload Export completed..."
