@@ -209,4 +209,4 @@ exportMain() {
   cd ..
 }
 
-# exportMain $@
+exportMain $@
