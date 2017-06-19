@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -e
-
+#EXPORT_DIR='db_export'
 parseArgs() {
   if [ ! $# -ge 2 ]; then
       echo "Please enter the source or destination to run"
@@ -191,6 +191,7 @@ getTbName() {
   local tbName=$(echo ${dbtb} | sed 's/\./ /g' | awk '{print $2}')
   echo $tbName
 }
+<<<<<<< HEAD
 
 setFilePermissions() {
   chmod 750 $UTILITY_FILE $EXPORT_SCRIPT $PARSE_FILE $READ_PROPERTIES_FILE $PROPERTIES_FILE $STRUCTURE_FILE $MERGE_SCRIPT $IMPORT_SCRIPT $SEARCH_REPLACE_SCRIPT $GET_DB_SCRIPT $AFTER_IMPORT_SCRIPT
@@ -218,3 +219,23 @@ setGlobalVariables() {
   PI_TOTAL_FILE='pi_total.txt'
   UTILITY_FILE='utilityFunctions.sh'
 }
+=======
+getDb() {
+  parseArgs $@
+  readProperties $SRC
+
+  if [ ! -z $DB_BACKUP ]; then
+	DB_BACKUP_DIR=${DB_BACKUP}
+  fi
+
+  if [ ! "$PARALLEL_IMPORT" = true ]; then
+	rsync -avzhe ssh --include '*.sql' --exclude '*' --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/ ${EXPORT_DIR}/
+  else
+	rsync -avzhe ssh --progress ${DB_BACKUP_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/ ${EXPORT_DIR}/
+  fi
+  #is the space btw backup_dir and export_dir needed
+  DB_BACKUP_DIR=${EXPORT_DIR}
+}
+
+
+>>>>>>> cleanup_get_put
