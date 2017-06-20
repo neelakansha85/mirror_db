@@ -1,31 +1,6 @@
 #!/bin/bash
 
-set -x
-
 . utilityFunctions.sh
-
-createRemoteScriptDir() {
-  local location=$1
-  if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ ! -d ${REMOTE_SCRIPT_DIR} ]" ); then
-	echo "Creating ${REMOTE_SCRIPT_DIR} on ${location}..."
-	ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "mkdir ${REMOTE_SCRIPT_DIR};"
-  fi
-}
-
-uploadMirrorDbFiles() {
-  local location=$1
-  rsync -avzhe ssh --delete --progress ${STRUCTURE_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
-  echo "Executing structure script for creating dir on ${location} server... "
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}"
-  rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
-}
-
-removeMirrorDbFiles() {
-  if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${REMOTE_SCRIPT_DIR} ]" ); then
-    echo "Removing ${REMOTE_SCRIPT_DIR} from ${SRC}..."
-	ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "rm -rf ${REMOTE_SCRIPT_DIR};"
-  fi
-}
 
 #starts here
 uploadExportMain() {

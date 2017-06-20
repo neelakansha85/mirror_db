@@ -1,10 +1,10 @@
 #!/bin/bash
-set -x
+# set -x
+
 # Config Options
 ARG1=$1
 EXPORT_DIR=${2:-'db_export'}
 IMPORT_SCRIPT='import.sh'
-GET_DB_SCRIPT='get_db.sh'
 SEARCH_REPLACE_SCRIPT='search_replace.sh'
 AFTER_IMPORT_SCRIPT='after_import.sh'
 DROP_SQL_FILE='drop_tables'

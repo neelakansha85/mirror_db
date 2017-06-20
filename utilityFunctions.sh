@@ -1,7 +1,24 @@
 #!/bin/bash
 
-set -e
-#EXPORT_DIR='db_export'
+setGlobalVariables() {
+  EXPORT_DIR='db_export'
+  MERGED_DIR='db_merged'
+  IMPORT_SCRIPT='import.sh'
+  EXPORT_SCRIPT='export.sh'
+  MERGE_SCRIPT='merge.sh'
+  SEARCH_REPLACE_SCRIPT='search_replace.sh'
+  PUT_DB_SCRIPT='put_db.sh'
+  AFTER_IMPORT_SCRIPT='after_import.sh'
+  DROP_SQL_FILE='drop_tables'
+  SUPER_ADMIN_TXT='superadmin_dev.txt'
+  PARSE_FILE='parse_arguments.sh'
+  READ_PROPERTIES_FILE='read_properties.sh'
+  STRUCTURE_FILE='mirror_db_structure.sh'
+  PROPERTIES_FILE='db.properties'
+  PI_TOTAL_FILE='pi_total.txt'
+  UTILITY_FILE='utilityFunctions.sh'
+}
+
 parseArgs() {
   if [ ! $# -ge 2 ]; then
       echo "Please enter the source or destination to run"
@@ -199,26 +216,6 @@ setFilePermissions() {
   
 }
 
-setGlobalVariables() {
-  EXPORT_DIR='db_export'
-  MERGED_DIR='db_merged'
-  IMPORT_SCRIPT='import.sh'
-  EXPORT_SCRIPT='export.sh'
-  MERGE_SCRIPT='merge.sh'
-  SEARCH_REPLACE_SCRIPT='search_replace.sh'
-  GET_DB_SCRIPT='get_db.sh'
-  PUT_DB_SCRIPT='put_db.sh'
-  AFTER_IMPORT_SCRIPT='after_import.sh'
-  DROP_SQL_FILE='drop_tables'
-  SUPER_ADMIN_TXT='superadmin_dev.txt'
-  PARSE_FILE='parse_arguments.sh'
-  READ_PROPERTIES_FILE='read_properties.sh'
-  STRUCTURE_FILE='mirror_db_structure.sh'
-  PROPERTIES_FILE='db.properties'
-  PI_TOTAL_FILE='pi_total.txt'
-  UTILITY_FILE='utilityFunctions.sh'
-}
-
 getDb() {
   parseArgs $@
   readProperties $SRC
@@ -235,5 +232,29 @@ getDb() {
   #is the space btw backup_dir and export_dir needed
   DB_BACKUP_DIR=${EXPORT_DIR}
 }
+
+createRemoteScriptDir() {
+  local location=$1
+  if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ ! -d ${REMOTE_SCRIPT_DIR} ]" ); then
+  echo "Creating ${REMOTE_SCRIPT_DIR} on ${location}..."
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "mkdir ${REMOTE_SCRIPT_DIR};"
+  fi
+}
+
+uploadMirrorDbFiles() {
+  local location=$1
+  rsync -avzhe ssh --delete --progress ${STRUCTURE_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+  echo "Executing structure script for creating dir on ${location} server... "
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}"
+  rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+}
+
+removeMirrorDbFiles() {
+  if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${REMOTE_SCRIPT_DIR} ]" ); then
+    echo "Removing ${REMOTE_SCRIPT_DIR} from ${SRC}..."
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "rm -rf ${REMOTE_SCRIPT_DIR};"
+  fi
+}
+
 
 
