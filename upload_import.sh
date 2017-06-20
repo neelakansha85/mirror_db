@@ -1,6 +1,5 @@
 #!/bin/bash
-. utilityFunctions.sh
-. put_db.sh
+
 # default values
 IS_LAST_IMPORT=false
 
@@ -31,7 +30,6 @@ READ_PROPERTIES_FILE='read_properties.sh'
 STRUCTURE_FILE='mirror_db_structure.sh'
 PROPERTIES_FILE='db.properties'
 PI_TOTAL_FILE='pi_total.txt'
-#above variables will be set in mirror_db.sh through function setGlobalVariables
 SRC_DB_BACKUP="${DB_BACKUP}"
 
 if [ "$REMOTE_SCRIPT_DIR" = '' ]; then
@@ -74,8 +72,7 @@ rsync -avzhe ssh --delete --progress ${IMPORT_SCRIPT} ${SEARCH_REPLACE_SCRIPT} $
 if [ ! "$PARALLEL_IMPORT" = true ]; then
   # Put all SQL files on ${DEST} server from mirror_db server
   echo "Executing ${PUT_DB_SCRIPT} script"
-  putDb -d ${DEST} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
-  #./${PUT_DB_SCRIPT}
+  ./${PUT_DB_SCRIPT} -d ${DEST} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
   if [[ ! $? == 0 ]]; then
     echo "FAILURE: Error executing put db script on mirror_db server!"
     exit 1
