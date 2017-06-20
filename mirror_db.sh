@@ -93,7 +93,7 @@ chmod 750 *.sh
 #set status to default 0
 status=0
 
-if [ -e "$PROPERTIES_FILE" ]; then
+if [[ $PROPERTIES_FILE != "db.properties" && -e "$PROPERTIES_FILE" ]]; then
 	echo "--properties-file option is set"
 	echo "Copying ${PROPERTIES_FILE} to db.properties file in current dir"
 	cat $PROPERTIES_FILE > db.properties
