@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 . utilityFunctions.sh
 . merge.sh

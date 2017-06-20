@@ -229,7 +229,7 @@ getDb() {
   else
 	rsync -avzhe ssh --progress ${DB_BACKUP_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/ ${EXPORT_DIR}/
   fi
-  #is the space btw backup_dir and export_dir needed
+  # TODO: Need to fix DB_BACKUP_DIR being passed over to putDb() for syncing over Dest
   DB_BACKUP_DIR=${EXPORT_DIR}
 }
 
