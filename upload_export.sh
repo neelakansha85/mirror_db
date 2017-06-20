@@ -32,7 +32,6 @@ uploadExportMain() {
   parseArgs $@
   readProperties $SRC
 
-  setFilePermissions
   echo "Start Upload Export Process..."
   now=$(date +"%T")
   echo "Start time : $now "
