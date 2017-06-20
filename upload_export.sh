@@ -3,7 +3,6 @@
 set -x
 
 . utilityFunctions.sh
-. export.sh
 
 createRemoteScriptDir() {
   local location=$1
