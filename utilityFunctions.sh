@@ -255,6 +255,3 @@ removeMirrorDbFiles() {
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "rm -rf ${REMOTE_SCRIPT_DIR};"
   fi
 }
-
-
-
