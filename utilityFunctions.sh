@@ -250,11 +250,19 @@ uploadMirrorDbFiles() {
 }
 
 removeMirrorDbFiles() {
-  if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${REMOTE_SCRIPT_DIR} ]" ); then
-    echo "Removing ${REMOTE_SCRIPT_DIR} from ${SRC}..."
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "rm -rf ${REMOTE_SCRIPT_DIR};"
+  local location=$1
+  if [ ! $location -eq $DEST ]; then
+  #is the if condition required : if yes, should it be checked in else also?
+    if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${REMOTE_SCRIPT_DIR} ]" ); then
+      echo "Removing ${REMOTE_SCRIPT_DIR} from ${location}..."
+      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "rm -rf ${REMOTE_SCRIPT_DIR};"
+    fi
+  else
+    # Remove all scripts related to mirror_db from server
+    #TODO: call structure file function when it is created
+
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} rm ${EXPORT_DIR}"
+    # Remove ${STRUCTURE_FILE} from server to avoid permission issues later
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; rm ${STRUCTURE_FILE}"
   fi
 }
-
-
-

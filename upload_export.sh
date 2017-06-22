@@ -33,7 +33,7 @@ uploadExportMain() {
 	getDb -s ${SRC} --db-backup ${SRC_DB_BACKUP} ${PARALLEL_IMPORT}
 
 
-    removeMirrorDbFiles
+    removeMirrorDbFiles $SRC
     echo "Upload Export completed..."
     now=$(date +"%T")
     echo "End time : $now "
