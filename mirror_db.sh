@@ -5,23 +5,7 @@ set -e
 . utilityFunctions.sh
 . upload_export.sh
 
-readonly WORKSPACE=$(getWorkspace)
-
-BATCH_LIMIT=10
-POOL_LIMIT=7000
-MERGE_BATCH_LIMIT=7000
-WAIT_TIME=3
-IMPORT_WAIT_TIME=180
-LIST_FILE_NAME='table_list.txt'
-DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
-SRC_URL="''"
-SRC_SHIB_URL="''"
-SRC_G_ANALYTICS="''"
-LOGS_DIR='log'
-SRC_DB_BACKUP="''"
-BLOG_ID="''"
-export SRC_DB_BACKUP
-
+setGlobalVariables
 parseArgs $@
 
 if [[ ! $? == 0 ]]; then
@@ -85,7 +69,6 @@ echo "Starting to execute mirror_db."
 echo "##############################"
 echo "Current time: $(date)"
 
-setGlobalVariables
 setFilePermissions
 
 #set status to default 0

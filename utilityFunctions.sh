@@ -1,5 +1,10 @@
 #!/bin/bash
 
+getWorkspace() {
+  local workspace=$(pwd)
+  echo $workspace
+}
+
 setGlobalVariables() {
   EXPORT_DIR='db_export'
   MERGED_DIR='db_merged'
@@ -17,6 +22,20 @@ setGlobalVariables() {
   PROPERTIES_FILE='db.properties'
   PI_TOTAL_FILE='pi_total.txt'
   UTILITY_FILE='utilityFunctions.sh'
+  BATCH_LIMIT=10
+  POOL_LIMIT=7000
+  MERGE_BATCH_LIMIT=7000
+  WAIT_TIME=3
+  IMPORT_WAIT_TIME=180
+  LIST_FILE_NAME='table_list.txt'
+  DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
+  SRC_URL="''"
+  SRC_SHIB_URL="''"
+  SRC_G_ANALYTICS="''"
+  LOGS_DIR='log'
+  SRC_DB_BACKUP="''"
+  BLOG_ID="''"
+  readonly WORKSPACE=$(getWorkspace)
 }
 
 parseArgs() {
@@ -180,11 +199,6 @@ readProperties() {
   SSH_USERNAME=$ssh_username
 }
 
-getWorkspace() {
-  local workspace=$(pwd)
-  echo $workspace
-}
-
 getFileName() {
   local file=$1
   local fileName=$(echo ${file} | sed 's/\./ /g' | awk '{print $1}')
@@ -233,12 +247,31 @@ getDb() {
   DB_BACKUP_DIR=${EXPORT_DIR}
 }
 
+putDb() {
+  parseArgs $@
+  readProperties $DEST
+
+  if [ "$DB_BACKUP" != "''" ]; then
+	DB_BACKUP_DIR=${DB_BACKUP}
+  else
+    DB_BACKUP_DIR=${EXPORT_DIR}
+  fi
+
+  if [ ! "$PARALLEL_IMPORT" = true ]; then
+    echo "Database path on mirror_db: $DB_BACKUP_DIR"
+	rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${DB_BACKUP_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
+  else
+	rsync -avzhe ssh --progress ${EXPORT_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
+  fi
+
+  echo "DB dir on Dest server: "
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/; pwd;"
+}
+
 createRemoteScriptDir() {
   local location=$1
-  if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ ! -d ${REMOTE_SCRIPT_DIR} ]" ); then
   echo "Creating ${REMOTE_SCRIPT_DIR} on ${location}..."
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "mkdir ${REMOTE_SCRIPT_DIR};"
-  fi
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "mkdir -p ${REMOTE_SCRIPT_DIR};"
 }
 
 uploadMirrorDbFiles() {
@@ -251,18 +284,6 @@ uploadMirrorDbFiles() {
 
 removeMirrorDbFiles() {
   local location=$1
-  if [ ! $location -eq $DEST ]; then
-  #is the if condition required : if yes, should it be checked in else also?
-    if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${REMOTE_SCRIPT_DIR} ]" ); then
-      echo "Removing ${REMOTE_SCRIPT_DIR} from ${location}..."
-      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "rm -rf ${REMOTE_SCRIPT_DIR};"
-    fi
-  else
-    # Remove all scripts related to mirror_db from server
-    #TODO: call structure file function when it is created
-
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} rm ${EXPORT_DIR}"
-    # Remove ${STRUCTURE_FILE} from server to avoid permission issues later
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; rm ${STRUCTURE_FILE}"
-  fi
+  echo "Removing ${REMOTE_SCRIPT_DIR} from ${location}..."
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "rm -rf ${REMOTE_SCRIPT_DIR};"
 }
