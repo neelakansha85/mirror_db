@@ -6,13 +6,14 @@ IS_LAST_IMPORT=false
 . utilityFunctions.sh
 
 uploadImportMain(){
+  setGlobalVariables
   parseArgs $@
   readProperties $DEST
   #SRC_DB_BACKUP="${DB_BACKUP}" replaced SRC_DB_BACKUP WITH DB_BACKUP
   #TODO: REPLACE all SRC_DB_BACKUP by DB_BACKUP
 
   if [ "$REMOTE_SCRIPT_DIR" = '' ]; then
-	REMOTE_SCRIPT_DIR='mirror_db'
+	  REMOTE_SCRIPT_DIR='mirror_db'
   fi
 
   if [ "$SKIP_IMPORT" = true ]; then
@@ -24,8 +25,6 @@ uploadImportMain(){
   fi
 
   createRemoteScriptDir $DEST
-  echo "Executing structure script for creating dir on dest server... "
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}"
 
   if [ ! "$PARALLEL_IMPORT" = true ]; then
     uploadMirrorDbFiles $DEST
@@ -104,3 +103,4 @@ uploadImportMain(){
     fi
   fi
 }
+uploadImportMain $@

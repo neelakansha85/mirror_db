@@ -244,24 +244,24 @@ getDb() {
 	rsync -avzhe ssh --progress ${DB_BACKUP_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/ ${EXPORT_DIR}/
   fi
   # TODO: Need to fix DB_BACKUP_DIR being passed over to putDb() for syncing over Dest
-  DB_BACKUP_DIR=${EXPORT_DIR}
+  #DB_BACKUP_DIR=${EXPORT_DIR}
 }
 
 putDb() {
   parseArgs $@
   readProperties $DEST
 
-  if [ "$DB_BACKUP" != "''" ]; then
-	DB_BACKUP_DIR=${DB_BACKUP}
-  else
+  #if [ "$DB_BACKUP" != "''" ]; then
+	#  DB_BACKUP_DIR=${DB_BACKUP}
+  #else
     DB_BACKUP_DIR=${EXPORT_DIR}
-  fi
+  #fi
 
   if [ ! "$PARALLEL_IMPORT" = true ]; then
     echo "Database path on mirror_db: $DB_BACKUP_DIR"
-	rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${DB_BACKUP_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
+	  rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${DB_BACKUP_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
   else
-	rsync -avzhe ssh --progress ${EXPORT_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
+	  rsync -avzhe ssh --progress ${EXPORT_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
   fi
 
   echo "DB dir on Dest server: "
@@ -279,7 +279,11 @@ uploadMirrorDbFiles() {
   rsync -avzhe ssh --delete --progress ${STRUCTURE_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   echo "Executing structure script for creating dir on ${location} server... "
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}"
-  rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+  if [ $location="$DEST" ];then
+    rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${SEARCH_REPLACE_SCRIPT} ${AFTER_IMPORT_SCRIPT} ${IMPORT_SCRIPT} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+  else
+    rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+  fi
 }
 
 removeMirrorDbFiles() {
