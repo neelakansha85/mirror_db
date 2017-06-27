@@ -89,9 +89,12 @@ parseArgs() {
           PROPERTIES_FILE=$2
           shift
           ;;
-        --blogid )
-          BLOG_ID=$2
-          shift
+        --blog-id )
+          # TODO: Need to remove below condition once all files are cleaned
+          if [ ! -z $2 ]; then
+            BLOG_ID=$2
+            shift
+          fi
           ;;
         --site-url )
           SRC_URL=$2
