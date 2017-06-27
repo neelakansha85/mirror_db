@@ -1,5 +1,10 @@
 #!/bin/bash
 
+getWorkspace() {
+  local workspace=$(pwd)
+  echo $workspace
+}
+
 setGlobalVariables() {
   EXPORT_DIR='db_export'
   MERGED_DIR='db_merged'
@@ -17,6 +22,19 @@ setGlobalVariables() {
   PROPERTIES_FILE='db.properties'
   PI_TOTAL_FILE='pi_total.txt'
   UTILITY_FILE='utilityFunctions.sh'
+  BATCH_LIMIT=10
+  POOL_LIMIT=7000
+  MERGE_BATCH_LIMIT=7000
+  WAIT_TIME=3
+  IMPORT_WAIT_TIME=180
+  LIST_FILE_NAME='table_list.txt'
+  DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
+  SRC_URL="''"
+  SRC_SHIB_URL="''"
+  SRC_G_ANALYTICS="''"
+  LOGS_DIR='log'
+  BLOG_ID="''"
+  readonly WORKSPACE=$(getWorkspace)
 }
 
 parseArgs() {
@@ -71,9 +89,12 @@ parseArgs() {
           PROPERTIES_FILE=$2
           shift
           ;;
-        --blogid )
-          BLOG_ID=$2
-          shift
+        --blog-id )
+          # TODO: Need to remove below condition once all files are cleaned
+          if [ ! -z $2 ]; then
+            BLOG_ID=$2
+            shift
+          fi
           ;;
         --site-url )
           SRC_URL=$2
@@ -180,11 +201,6 @@ readProperties() {
   SSH_USERNAME=$ssh_username
 }
 
-getWorkspace() {
-  local workspace=$(pwd)
-  echo $workspace
-}
-
 getFileName() {
   local file=$1
   local fileName=$(echo ${file} | sed 's/\./ /g' | awk '{print $1}')
@@ -217,28 +233,31 @@ setFilePermissions() {
 }
 
 getDb() {
-  parseArgs $@
-  readProperties $SRC
-
-  if [ ! -z $DB_BACKUP ]; then
-	DB_BACKUP_DIR=${DB_BACKUP}
-  fi
-
+  local dbBackDir=$1
   if [ ! "$PARALLEL_IMPORT" = true ]; then
-	rsync -avzhe ssh --include '*.sql' --exclude '*' --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/ ${EXPORT_DIR}/
+	rsync -avzhe ssh --include '*.sql' --exclude '*' --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${EXPORT_DIR}/
   else
-	rsync -avzhe ssh --progress ${DB_BACKUP_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/ ${EXPORT_DIR}/
+	rsync -avzhe ssh --progress ${dbBackDir}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${EXPORT_DIR}/
   fi
-  # TODO: Need to fix DB_BACKUP_DIR being passed over to putDb() for syncing over Dest
-  DB_BACKUP_DIR=${EXPORT_DIR}
+}
+
+putDb() {
+  local dbBackDir=$1
+  if [ ! "$PARALLEL_IMPORT" = true ]; then
+    echo "Database path on mirror_db: $dbBackDir"
+	  rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${dbBackDir}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
+  else
+	  rsync -avzhe ssh --progress ${EXPORT_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
+  fi
+
+  echo "DB dir on Dest server: "
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/; pwd;"
 }
 
 createRemoteScriptDir() {
   local location=$1
-  if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ ! -d ${REMOTE_SCRIPT_DIR} ]" ); then
   echo "Creating ${REMOTE_SCRIPT_DIR} on ${location}..."
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "mkdir ${REMOTE_SCRIPT_DIR};"
-  fi
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "mkdir -p ${REMOTE_SCRIPT_DIR};"
 }
 
 uploadMirrorDbFiles() {
@@ -246,69 +265,15 @@ uploadMirrorDbFiles() {
   rsync -avzhe ssh --delete --progress ${STRUCTURE_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   echo "Executing structure script for creating dir on ${location} server... "
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}"
-  rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+  if [ $location="$DEST" ];then
+    rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${IMPORT_SCRIPT} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+  else
+    rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+  fi
 }
 
 removeMirrorDbFiles() {
-  if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${REMOTE_SCRIPT_DIR} ]" ); then
-    echo "Removing ${REMOTE_SCRIPT_DIR} from ${SRC}..."
+  local location=$1
+  echo "Removing ${REMOTE_SCRIPT_DIR} from ${location}..."
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "rm -rf ${REMOTE_SCRIPT_DIR};"
-  fi
-}
-
-#functions for search & replace
-changeEnvInfo() {
-  local MRDB=$1
-  local SRC_SHIB_URL=$2
-  local DEST_SHIB_URL=$3
-  local SRC_SHIB_LOGOUT_URL=$4
-  local DEST_SHIB_LOGOUT_URL=$5
-  echo "File ${MRDB} found..."
-  echo "Changing environment specific information"
-  if [ ! -z ${SRC_SHIB_URL} ] && [ "${SRC_SHIB_URL}" != "''" ]; then
-    # Replace Shib Production with Shib QA
-    echo "Replacing Shibboleth URL..."
-    sed -i'' "s@${SRC_SHIB_URL}@${DEST_SHIB_URL}@g" ${MRDB}
-    sed -i'' "s@${SRC_SHIB_LOGOUT_URL}@${DEST_SHIB_LOGOUT_URL}@g" ${MRDB}
-  fi
-}
-
-replaceDomain() {
-  local MRDB=$1
-  local SRC_URL=$2
-  local SRC_URL2=$3
-  local SRC_URL3=$4
-
-  local DEST_URL=$5
-  local DEST_URL2=$6
-  local DEST_URL3=$7
-  # Replace old domain with the new domain
-  echo "Replacing Site URL..."
-  echo "Running -> sed -i'' \"s@${SRC_URL}@${DEST_URL}@g\" ${MRDB}"
-  sed -i'' "s@${SRC_URL}@${DEST_URL}@g" ${MRDB}
-
-  echo "Running -> sed -i'' \"s@${SRC_URL2}@${DEST_URL2}@g\" ${MRDB}"
-  sed -i'' "s@${SRC_URL2}@${DEST_URL2}@g" ${MRDB}
-
-  echo "Running -> sed -i'' \"s@${SRC_URL3}@${DEST_URL3}@g\" ${MRDB}"
-  sed -i'' "s@${SRC_URL3}@${DEST_URL3}@g" ${MRDB}
-}
-
-replaceCDNUrl() {
-  local MRDB=$1
-  local SRC_CDN_URL=$2
-  local DEST_CDN_URL=$3
-  local SRC_HTTPS_CDN_URL=$4
-  local DEST_HTTPS_CDN_URL=$5
-  echo "Replacing CDN URL..."
-  sed -i'' "s@${SRC_CDN_URL}@${DEST_CDN_URL}@g" ${MRDB}
-  sed -i'' "s@${SRC_HTTPS_CDN_URL}@${DEST_HTTPS_CDN_URL}@g" ${MRDB}
-}
-
-replaceGoogleAnalytics() {
-  local MRDB=$1
-  local SRC_G_ANALYTICS=$2
-  local DEST_G_ANALYTICS=$3
-  echo "Replacing Google Analytics code..."
-  sed -i'' "s@${SRC_G_ANALYTICS}@${DEST_G_ANALYTICS}@g" ${MRDB}
 }

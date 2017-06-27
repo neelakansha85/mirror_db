@@ -51,7 +51,7 @@ while [ "$1" != "" ]; do
         PROPERTIES_FILE=$2
         shift
         ;;
-      --blogid )
+      --blog-id )
         BLOG_ID=$2
         shift
         ;;
