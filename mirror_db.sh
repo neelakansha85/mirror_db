@@ -115,12 +115,8 @@ if [ -z $DB_BACKUP ]; then
 fi
 
 if [ ! -z $DEST ]; then
-	if [[ $status == 0 ]]; then
 		echo "Executing upload_import script"
 		uploadImportMain
-	else
-		echo "Import process did not complete successfully"
-	fi
 fi
 
 exit

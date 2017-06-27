@@ -51,7 +51,7 @@ downloadTables() {
     #NOTE: to be changed: sleep pool_wait_time
     poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $POOL_WAIT_TIME)
   done
-  total=total-1
+  (( total-- ))
   echo "Completed downloading tables from $listFileName ..."
   echo "Total no of tables downloaded = ${total}"
   now=$(date +"%T")
