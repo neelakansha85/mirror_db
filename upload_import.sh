@@ -42,16 +42,8 @@ uploadImportMain(){
       ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; wp db reset --yes"
     fi
 
-    # Execute search_replace.sh to replace old domains with new domain
-    #TODO: call searchReplaceMain() in place of script
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${SEARCH_REPLACE_SCRIPT} -s ${SRC} -d ${DEST} ${SKIP_REPLACE};"
-
     # Execute Import.sh to import database
     ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES_SQL} ;"
-
-    # Execute After_Import script to perform all sql operations
-    echo "Executing SQL commands after import process over the Destination"
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${AFTER_IMPORT_SCRIPT} -d ${DEST}"
 
     echo "Database imported successfully..."
     now=$(date +"%T")
