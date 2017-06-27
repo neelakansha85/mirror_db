@@ -6,11 +6,7 @@ IS_LAST_IMPORT=false
 . utilityFunctions.sh
 
 uploadImportMain(){
-  setGlobalVariables
-  parseArgs $@
   readProperties $DEST
-  #SRC_DB_BACKUP="${DB_BACKUP}" replaced SRC_DB_BACKUP WITH DB_BACKUP
-  #TODO: REPLACE all SRC_DB_BACKUP by DB_BACKUP
 
   if [ "$REMOTE_SCRIPT_DIR" = '' ]; then
 	  REMOTE_SCRIPT_DIR='mirror_db'
@@ -29,9 +25,11 @@ uploadImportMain(){
   if [ ! "$PARALLEL_IMPORT" = true ]; then
     uploadMirrorDbFiles $DEST
 
+    if [[ "$DB_BACKUP" == "''" ]]; then
+      DB_BACKUP=${EXPORT_DIR}      
+    fi
     echo "Executing ${PUT_DB_SCRIPT} script"
-    # TODO: check if parameters are necessary , if not remove parseArgs frm get n put
-    putDb -d ${DEST} --db-backup ${DB_BACKUP} ${PARALLEL_IMPORT}
+    putDb ${DB_BACKUP}
     echo "File Transfer complete."
 
     echo "Starting to import database..."
@@ -70,7 +68,7 @@ uploadImportMain(){
     echo "Uploading ${DB_FILE_NAME}... "
     # Put all SQL files on ${DEST} server from mirror_db server
     echo "Executing ${PUT_DB_SCRIPT} script"
-    putDb -d ${DEST} --db-backup ${DB_BACKUP} ${PARALLEL_IMPORT}
+    putDb ${DB_BACKUP}
 
     echo "Starting to import ${DB_FILE_NAME}..."
     now=$(date +"%T")
@@ -103,4 +101,3 @@ uploadImportMain(){
     fi
   fi
 }
-uploadImportMain $@

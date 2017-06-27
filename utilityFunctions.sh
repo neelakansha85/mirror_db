@@ -33,7 +33,6 @@ setGlobalVariables() {
   SRC_SHIB_URL="''"
   SRC_G_ANALYTICS="''"
   LOGS_DIR='log'
-  SRC_DB_BACKUP="''"
   BLOG_ID="''"
   readonly WORKSPACE=$(getWorkspace)
 }
@@ -231,35 +230,19 @@ setFilePermissions() {
 }
 
 getDb() {
-  parseArgs $@
-  readProperties $SRC
-
-  if [ ! -z $DB_BACKUP ]; then
-	DB_BACKUP_DIR=${DB_BACKUP}
-  fi
-
+  local dbBackDir=$1
   if [ ! "$PARALLEL_IMPORT" = true ]; then
-	rsync -avzhe ssh --include '*.sql' --exclude '*' --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/ ${EXPORT_DIR}/
+	rsync -avzhe ssh --include '*.sql' --exclude '*' --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${EXPORT_DIR}/
   else
-	rsync -avzhe ssh --progress ${DB_BACKUP_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${DB_BACKUP_DIR}/ ${EXPORT_DIR}/
+	rsync -avzhe ssh --progress ${dbBackDir}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${EXPORT_DIR}/
   fi
-  # TODO: Need to fix DB_BACKUP_DIR being passed over to putDb() for syncing over Dest
-  #DB_BACKUP_DIR=${EXPORT_DIR}
 }
 
 putDb() {
-  parseArgs $@
-  readProperties $DEST
-
-  #if [ "$DB_BACKUP" != "''" ]; then
-	#  DB_BACKUP_DIR=${DB_BACKUP}
-  #else
-    DB_BACKUP_DIR=${EXPORT_DIR}
-  #fi
-
+  local dbBackDir=$1
   if [ ! "$PARALLEL_IMPORT" = true ]; then
-    echo "Database path on mirror_db: $DB_BACKUP_DIR"
-	  rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${DB_BACKUP_DIR}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
+    echo "Database path on mirror_db: $dbBackDir"
+	  rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${dbBackDir}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
   else
 	  rsync -avzhe ssh --progress ${EXPORT_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
   fi
@@ -280,7 +263,7 @@ uploadMirrorDbFiles() {
   echo "Executing structure script for creating dir on ${location} server... "
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}"
   if [ $location="$DEST" ];then
-    rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${SEARCH_REPLACE_SCRIPT} ${AFTER_IMPORT_SCRIPT} ${IMPORT_SCRIPT} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+    rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${IMPORT_SCRIPT} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   else
     rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   fi
