@@ -266,7 +266,7 @@ uploadMirrorDbFiles() {
   echo "Executing structure script for creating dir on ${location} server... "
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}"
   if [ $location="$DEST" ];then
-    rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${IMPORT_SCRIPT} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+    rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${IMPORT_SCRIPT} ${SUPER_ADMIN_TXT} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   else
     rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PARSE_FILE} ${READ_PROPERTIES_FILE} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   fi

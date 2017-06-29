@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# Config Options
-
-#below variable assignment may not be needed as setGlobalVariables is called in upload_import
-EXPORT_DIR='db_export'
-DROP_SQL_FILE='drop_tables'
-
 . utilityFunctions.sh
 
 replaceShibUrl() {
@@ -86,8 +80,7 @@ searchReplace() {
   DEST_CDN_URL="${CDN_URL}"
   DEST_HTTPS_CDN_URL="${HTTPS_CDN_URL}"
 
-  #Replacing Values from old domain to new domain
-  cd ${EXPORT_DIR}
+  cd ${exportDir}
 
   if [ ! "$SKIP_REPLACE" = true ]; then
     for MRDB in `ls *.sql`
@@ -114,8 +107,33 @@ searchReplace() {
   cd ..
 }
 
+importTables() {
+  echo "Disabling foreign key check before importing db"
+	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=0"
+
+	if [ ! -z $DB_FILE_NAME ]; then
+	  # Import statement
+		echo "Starting to import ${DB_FILE_NAME}"
+		mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${DB_FILE_NAME}
+		# Remove file to avoid importing it twice
+		rm $DB_FILE_NAME
+	else
+		# Scan for all *.sql files to import
+		for MRDB in $(ls *.sql)
+		do
+			# Import statement
+			echo "Starting to import ${MRDB}"
+			mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${MRDB}
+			sleep $IMPORT_WAIT_TIME
+		done
+	fi
+
+	echo "Enabling foreign key check after importing db"
+	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=1"
+}
+
 afterImport() {
-  SUPER_ADMIN_TXT="`cat superadmin_dev.txt`"
+  SUPER_ADMIN_TXT="$(cat superadmin_dev.txt)"
   SUPER_ADMIN=$(php -r "print_r(serialize(array(${SUPER_ADMIN_TXT})));")
 
   # Setting pwd to wordpress installation dir
@@ -126,41 +144,20 @@ afterImport() {
 }
 
 importMain() {
+  local exportDir='db_export'
+  local dropSqlFile='drop_tables'
+
   parseArgs $@
   readProperties $DEST
-
   searchReplace
-  cd ${EXPORT_DIR}
 
+  cd ${exportDir}
   if [ ! "$SKIP_IMPORT" = true ]; then
-
-	  # Disable foreign key check before importing
-	  echo "Disabling foreign key check before importing db"
-	  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=0"
-
-	  if [ ! -z $DB_FILE_NAME ]; then
-			# Import statement
-			echo "Starting to import ${DB_FILE_NAME}"
-			mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${DB_FILE_NAME}
-			# Remove file to avoid importing it twice
-			rm $DB_FILE_NAME
-	  else
-		  # Scan for all *.sql files to import
-		  for MRDB in `ls *.sql`
-		  do
-			  # Import statement
-			  echo "Starting to import ${MRDB}"
-			  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${MRDB}
-			  sleep $IMPORT_WAIT_TIME
-		  done
-	  fi
-
-	  # Enable foreign key check after importing
-	  echo "Enabling foreign key check after importing db"
-	  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=1"
+    importTables
   fi
-
   cd ..
 
   afterImport
 }
+
+importMain $@

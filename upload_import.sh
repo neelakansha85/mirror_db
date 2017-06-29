@@ -1,11 +1,9 @@
 #!/bin/bash
 
-# default values
-IS_LAST_IMPORT=false
-
 . utilityFunctions.sh
 
 uploadImportMain(){
+  local isLastImport=false
   readProperties $DEST
 
   if [ "$REMOTE_SCRIPT_DIR" = '' ]; then
@@ -85,7 +83,7 @@ uploadImportMain(){
     now=$(date +"%T")
     echo "End time : $now "
 
-    if [ "$IS_LAST_IMPORT" = true ]; then
+    if [ "$isLastImport" = true ]; then
       echo "Changing permission for structure file before cleanup... "
       ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; chmod 755 ${STRUCTURE_FILE}"
 
