@@ -22,13 +22,8 @@ if [ "$DROP_TABLES" = true ]; then
 	DROP_TABLES='--drop-tables'
 fi
 
-if [ ! -z $DB_BACKUP ]; then
+if [ ! -z $DB_BACKUP_DIR ]; then
     SKIP_EXPORT=true
-fi
-
-if [ "$SKIP_EXPORT" = true ]; then
-	SKIP_EXPORT='--skip-export'
-	DB_BACKUP_DIR=${DB_BACKUP}
 fi
 
 if [ "$SKIP_IMPORT" = true ]; then

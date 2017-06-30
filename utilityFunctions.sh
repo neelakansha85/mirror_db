@@ -53,8 +53,8 @@ parseArgs() {
           DEST=$2
           shift
           ;;
-        --db-backup)
-          DB_BACKUP=$2
+        --db-backup-dir)
+          DB_BACKUP_DIR=$2
           shift
           ;;
         -ebl )
@@ -239,6 +239,11 @@ getDb() {
   else
 	rsync -avzhe ssh --progress ${dbBackDir}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${EXPORT_DIR}/
   fi
+  #TODO: find better way to resolve issue
+
+  #since db is copied to mirror_db server, setting value to EXPORT_DIR
+  DB_BACKUP_DIR=$EXPORT_DIR
+
 }
 
 putDb() {

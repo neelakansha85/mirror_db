@@ -23,11 +23,11 @@ uploadImportMain(){
   if [ ! "$PARALLEL_IMPORT" = true ]; then
     uploadMirrorDbFiles $DEST
 
-    if [[ "$DB_BACKUP" == "''" ]]; then
-      DB_BACKUP=${EXPORT_DIR}      
+    if [ -z $DB_BACKUP_DIR ]; then
+      DB_BACKUP_DIR=${EXPORT_DIR}
     fi
     echo "Executing ${PUT_DB_SCRIPT} script"
-    putDb ${DB_BACKUP}
+    putDb ${DB_BACKUP_DIR}
     echo "File Transfer complete."
 
     echo "Starting to import database..."
@@ -58,7 +58,7 @@ uploadImportMain(){
     echo "Uploading ${DB_FILE_NAME}... "
     # Put all SQL files on ${DEST} server from mirror_db server
     echo "Executing ${PUT_DB_SCRIPT} script"
-    putDb ${DB_BACKUP}
+    putDb ${DB_BACKUP_DIR}
 
     echo "Starting to import ${DB_FILE_NAME}..."
     now=$(date +"%T")
