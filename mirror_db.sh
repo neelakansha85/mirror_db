@@ -15,7 +15,7 @@ mirrorDbMain() {
   echo "Starting to execute mirror_db."
   echo "##############################"
   echo "Current time: $(date)"
-  checkFlagStatus
+
   if [ ! -d "$LOGS_DIR" ]; then
 	  mkdir $LOGS_DIR
   fi
