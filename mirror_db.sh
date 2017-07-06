@@ -7,21 +7,9 @@ set -e
 . upload_import.sh
 . merge.sh
 
-mirrorDbMain() {
-  setGlobalVariables
-  parseArgs $@
-
-  echo ""
-  echo "Starting to execute mirror_db."
-  echo "##############################"
-  echo "Current time: $(date)"
-
+checkFlagValue() {
   if [ ! -d "$LOGS_DIR" ]; then
 	  mkdir $LOGS_DIR
-  fi
-
-  if [ "$DROP_TABLES" = true ]; then
-	  DROP_TABLES='--drop-tables'
   fi
 
   if [ ! -z $DB_BACKUP_DIR ]; then
@@ -29,43 +17,30 @@ mirrorDbMain() {
   fi
 
   if [ "$SKIP_EXPORT" = true ]; then
-	  SKIP_EXPORT='--skip-export'
 	  DB_BACKUP_DIR=${DB_BACKUP_DIR}
   fi
 
   if [ "$SKIP_IMPORT" = true ]; then
-	  SKIP_IMPORT='--skip-import'
 	  # Cannot drop entire database if skipping import process
 	  DROP_TABLES=
 	  DROP_TABLES_SQL=
   fi
 
-  if [ "$SKIP_NETWORK_IMPORT" = true ]; then
-	  SKIP_NETWORK_IMPORT='--skip-network-import'
-  fi
-
-  if [ "$SKIP_REPLACE" = true ]; then
-	  SKIP_REPLACE='--skip-replace'
-  fi
-
-  if [ "$DROP_TABLES_SQL" = true ]; then
-	  DROP_TABLES_SQL='--drop-tables-sql'
-  fi
-
   if [ "$PARALLEL_IMPORT" = true ]; then
-	  PARALLEL_IMPORT='--parallel-import'
 	  # Cannot drop entire database if running parallel-import
 	  DROP_TABLES=
 	  DROP_TABLES_SQL=
   fi
+}
 
-  if [ "$IS_LAST_IMPORT" = true ]; then
-	  IS_LAST_IMPORT='--is-last-import'
-  fi
-
-  if [ "$NETWORK_FLAG" = true ]; then
-	  NETWORK_FLAG='--network-flag'
-  fi
+mirrorDbMain() {
+  setGlobalVariables
+  parseArgs $@
+  checkFlagValue
+  echo ""
+  echo "Starting to execute mirror_db."
+  echo "##############################"
+  echo "Current time: $(date)"
 
   setFilePermissions
 
@@ -76,15 +51,19 @@ mirrorDbMain() {
   fi
 
   if [ ! -z $SRC ]; then
-	  DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
-	  echo "Executing db export script"
-	  uploadExportMain
+    if [ ! "$SKIP_EXPORT" = true ]; then
+	    DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
+	    echo "Executing db export script"
+	    uploadExportMain
 
-	  # Exit if all tables are exported
-	  if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
-		  echo "No more tables to export. Exiting... "
-		  # exit
+	    # Exit if all tables are exported
+	    if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
+		    echo "No more tables to export. Exiting... "
+		    exit
+      fi
+    fi
 
+    if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
 		  # Merge all tables to one mysql.sql
       echo "Executing merge script"
       #./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT} ${PARALLEL_IMPORT}
@@ -92,7 +71,6 @@ mirrorDbMain() {
 	  fi
 
 	  readProperties $SRC
-
 	  SRC_URL=$URL
 	  SRC_SHIB_URL=$SHIB_URL
 	  SRC_G_ANALYTICS=$G_ANALYTICS
