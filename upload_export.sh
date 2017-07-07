@@ -34,6 +34,12 @@ uploadExportMain() {
     echo "Upload Export completed..."
     now=$(date +"%T")
     echo "End time : $now "
+
+    # Exit if all tables are exported
+    if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
+      echo "No more tables to export. Exiting... "
+      exit
+    fi
   else
   echo "Skipped Export Process..."
   fi

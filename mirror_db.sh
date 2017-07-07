@@ -50,17 +50,9 @@ mirrorDbMain() {
   fi
 
   if [ ! -z $SRC ]; then
-    if [ ! "$SKIP_EXPORT" = true ]; then
-	    DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
-	    echo "Executing db export script"
-	    uploadExportMain
-
-	    # Exit if all tables are exported
-	    if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
-		    echo "No more tables to export. Exiting... "
-		    exit
-      fi
-    fi
+    DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
+    echo "Executing db export script"
+    uploadExportMain
 
     if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
 		  # Merge all tables to one mysql.sql
