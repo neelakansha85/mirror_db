@@ -3,101 +3,82 @@
 . utilityFunctions.sh
 
 replaceShibUrl() {
-  local MRDB=$1
-  local SRC_SHIB_URL=$2
-  local DEST_SHIB_URL=$3
-  local SRC_SHIB_LOGOUT_URL=$4
-  local DEST_SHIB_LOGOUT_URL=$5
-  echo "File ${MRDB} found..."
-  echo "Changing environment specific information"
-  if [ ! -z ${SRC_SHIB_URL} ] && [ "${SRC_SHIB_URL}" != "''" ]; then
-    # Replace Shib Production with Shib QA
-    echo "Replacing Shibboleth URL..."
-    sed -i'' "s@${SRC_SHIB_URL}@${DEST_SHIB_URL}@g" ${MRDB}
-    sed -i'' "s@${SRC_SHIB_LOGOUT_URL}@${DEST_SHIB_LOGOUT_URL}@g" ${MRDB}
-  fi
+  local dbFile="$1"
+  # Replace Shib Production with Shib QA
+  echo "Replacing Shibboleth URL..."
+  sed -i'' "s@${srcShibUrl}@${destShibUrl}@g" $dbFile
+  sed -i'' "s@${srcShibLogoutUrl}@${destShibLogoutUrl}@g" $dbFile
 }
 
 replaceDomain() {
-  local MRDB=$1
-  local SRC_URL=$2
-  local SRC_URL2=$3
-  local SRC_URL3=$4
-
-  local DEST_URL=$5
-  local DEST_URL2=$6
-  local DEST_URL3=$7
+  local dbFile="$1"
   # Replace old domain with the new domain
   echo "Replacing Site URL..."
-  echo "Running -> sed -i'' \"s@${SRC_URL}@${DEST_URL}@g\" ${MRDB}"
-  sed -i'' "s@${SRC_URL}@${DEST_URL}@g" ${MRDB}
-
-  echo "Running -> sed -i'' \"s@${SRC_URL2}@${DEST_URL2}@g\" ${MRDB}"
-  sed -i'' "s@${SRC_URL2}@${DEST_URL2}@g" ${MRDB}
-
-  echo "Running -> sed -i'' \"s@${SRC_URL3}@${DEST_URL3}@g\" ${MRDB}"
-  sed -i'' "s@${SRC_URL3}@${DEST_URL3}@g" ${MRDB}
+  echo "Running -> sed -i'' \"s@${srcUrl}@${destUrl}@g\" ${MRDB}"
+  sed -i'' "s@${srcUrl}@${destUrl}@g" $dbFile
+  echo "Running -> sed -i'' \"s@${srcUrl2}@${destUrl2}@g\" ${MRDB}"
+  sed -i'' "s@${srcUrl2}@${destUrl2}@g" $dbFile
+  echo "Running -> sed -i'' \"s@${srcUrl3}@${destUrl3}@g\" ${MRDB}"
+  sed -i'' "s@${srcUrl3}@${destUrl3}@g" $dbFile
 }
 
-replaceCDNUrl() {
-  local MRDB=$1
-  local SRC_CDN_URL=$2
-  local DEST_CDN_URL=$3
-  local SRC_HTTPS_CDN_URL=$4
-  local DEST_HTTPS_CDN_URL=$5
+replaceCdnUrl() {
+  local dbFile="$1"
   echo "Replacing CDN URL..."
-  sed -i'' "s@${SRC_CDN_URL}@${DEST_CDN_URL}@g" ${MRDB}
-  sed -i'' "s@${SRC_HTTPS_CDN_URL}@${DEST_HTTPS_CDN_URL}@g" ${MRDB}
+  sed -i'' "s@${srcCdnUrl}@${destCdnUrl}@g" $dbFile
+  sed -i'' "s@${srcHttpsCdnUrl}@${destHttpsCdnUrl}@g" $dbFile
 }
 
 replaceGoogleAnalytics() {
-  local MRDB=$1
-  local SRC_G_ANALYTICS=$2
-  local DEST_G_ANALYTICS=$3
+  local dbFile="$1"
   echo "Replacing Google Analytics code..."
-  sed -i'' "s@${SRC_G_ANALYTICS}@${DEST_G_ANALYTICS}@g" ${MRDB}
+  sed -i'' "s@${srcGoogleAnalytics}@${destGoogleAnalytics}@g" $dbFile
 }
 
 searchReplace() {
-
-  SRC_URL=",'${URL}"
-  SRC_URL2=",'http://${URL}"
-  SRC_URL3=",'https://${URL}"
-  SRC_SHIB_URL=",'${SHIB_URL}'"
-  SRC_SHIB_LOGOUT_URL=",'${SHIB_LOGOUT_URL}'"
-  SRC_G_ANALYTICS="${G_ANALYTICS}"
-  SRC_CDN_URL="${CDN_URL}"
-  SRC_HTTPS_CDN_URL="${HTTPS_CDN_URL}"
+  readProperties $SRC
+  local srcUrl=",'${URL}"
+  local srcUrl2=",'http://${URL}"
+  local srcUrl3=",'https://${URL}"
+  local srcShibUrl=",'${SHIB_URL}'"
+  local srcShibLogoutUrl=",'${SHIB_LOGOUT_URL}'"
+  local srcGoogleAnalytics="${G_ANALYTICS}"
+  local srcCdnUrl="${CDN_URL}"
+  local srcHttpsCdnUrl="${HTTPS_CDN_URL}"
 
   readProperties $DEST
-
-  DEST_URL=",'${URL}"
-  DEST_URL2=",'http://${URL}"
-  DEST_URL3=",'https://${URL}"
-  DEST_SHIB_URL=",'${SHIB_URL}'"
-  DEST_SHIB_LOGOUT_URL=",'${SHIB_LOGOUT_URL}'"
-  DEST_G_ANALYTICS="${G_ANALYTICS}"
-  DEST_CDN_URL="${CDN_URL}"
-  DEST_HTTPS_CDN_URL="${HTTPS_CDN_URL}"
+  local destUrl=",'${URL}"
+  local destUrl2=",'http://${URL}"
+  local destUrl3=",'https://${URL}"
+  local destShibUrl=",'${SHIB_URL}'"
+  local destShibLogoutUrl=",'${SHIB_LOGOUT_URL}'"
+  local destGoogleAnalytics="${G_ANALYTICS}"
+  local destCdnUrl="${CDN_URL}"
+  local destHttpsCdnUrl="${HTTPS_CDN_URL}"
 
   cd ${exportDir}
 
   if [ ! "$SKIP_REPLACE" = true ]; then
-    for MRDB in `ls *.sql`
+    for MRDB in $(ls *.sql)
     do
       if [ -e ${MRDB} ]; then
-        replaceShibUrl $MRDB $SRC_SHIB_URL $DEST_SHIB_URL $SRC_SHIB_LOGOUT_URL $DEST_SHIB_LOGOUT_URL
-
-        if [ ! -z ${SRC_URL} ]; then
-          replaceDomain $MRDB $SRC_URL $SRC_URL2 $SRC_URL3 $DEST_URL $DEST_URL2 $DEST_URL3
+        echo "File ${MRDB} found..."
+        echo "Changing environment specific information"
+        
+        if [ ! -z ${srcShibUrl} ] && [ "${srcShibUrl}" != "''" ]; then
+          replaceShibUrl "$MRDB"
         fi
 
-        if [ ! -z ${SRC_G_ANALYTICS} ] && [ "${SRC_G_ANALYTICS}" != "''" ]; then
-          replaceGoogleAnalytics $MRDB $SRC_G_ANALYTICS $DEST_G_ANALYTICS
+        if [ ! -z ${srcUrl} ]; then
+          replaceDomain "$MRDB"
         fi
 
-        if [ ! -z ${SRC_CDN_URL} ] && [ "${SRC_CDN_URL}" != "''" ] && [ ! -z ${SRC_HTTPS_CDN_URL} ] && [ "${SRC_HTTPS_CDN_URL}" != "''" ] ; then
-          replaceCDNUrl $MRDB $SRC_CDN_URL $DEST_CDN_URL $SRC_HTTPS_CDN_URL $DEST_HTTPS_CDN_URL
+        if [ ! -z ${srcGoogleAnalytics} ] && [ "${srcGoogleAnalytics}" != "''" ]; then
+          replaceGoogleAnalytics "$MRDB"
+        fi
+
+        if [ ! -z ${srcCdnUrl} ] && [ "${srcCdnUrl}" != "''" ] && [ ! -z ${srcHttpsCdnUrl} ] && [ "${srcHttpsCdnUrl}" != "''" ] ; then
+          replaceCdnUrl "$MRDB"
         fi
       fi
     done
@@ -133,14 +114,14 @@ importTables() {
 }
 
 afterImport() {
-  SUPER_ADMIN_TXT="$(cat superadmin_dev.txt)"
-  SUPER_ADMIN=$(php -r "print_r(serialize(array(${SUPER_ADMIN_TXT})));")
+  local superAdminTxt="$(cat superadmin_dev.txt)"
+  local superAdmin=$(php -r "print_r(serialize(array(${superAdminTxt})));")
 
   # Setting pwd to wordpress installation dir
   cd ~/${SITE_DIR}
 
   # Replacing super admins list with the dev list
-  wp db query "UPDATE wp_sitemeta SET meta_value='${SUPER_ADMIN}' WHERE meta_key='site_admins';";
+  wp db query "UPDATE wp_sitemeta SET meta_value='${superAdmin}' WHERE meta_key='site_admins';";
 }
 
 importMain() {
@@ -148,7 +129,6 @@ importMain() {
   local dropSqlFile='drop_tables'
 
   parseArgs $@
-  readProperties $DEST
   searchReplace
 
   cd ${exportDir}

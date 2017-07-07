@@ -4,9 +4,6 @@
 
 uploadExportMain() {
   readProperties $SRC
-  SRC_URL=$URL
-  SRC_SHIB_URL=$SHIB_URL
-  SRC_G_ANALYTICS=$G_ANALYTICS
 
   echo "Start Upload Export Process..."
   now=$(date +"%T")
