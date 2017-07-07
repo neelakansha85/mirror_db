@@ -5,7 +5,6 @@ set -e
 . utilityFunctions.sh
 . upload_export.sh
 . upload_import.sh
-. merge.sh
 
 checkFlagValue() {
   if [ ! -d "$LOGS_DIR" ]; then
