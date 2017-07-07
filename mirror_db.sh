@@ -6,7 +6,7 @@ set -e
 . upload_export.sh
 . upload_import.sh
 
-checkFlagValue() {
+checkFlags() {
   if [ ! -d "$LOGS_DIR" ]; then
 	  mkdir $LOGS_DIR
   fi
@@ -35,7 +35,7 @@ checkFlagValue() {
 mirrorDbMain() {
   setGlobalVariables
   parseArgs $@
-  checkFlagValue
+  checkFlags
   echo ""
   echo "Starting to execute mirror_db."
   echo "##############################"
@@ -60,18 +60,7 @@ mirrorDbMain() {
       #./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT} ${PARALLEL_IMPORT}
       mergeMain
 	  fi
-
-	  readProperties $SRC
-	  SRC_URL=$URL
-	  SRC_SHIB_URL=$SHIB_URL
-	  SRC_G_ANALYTICS=$G_ANALYTICS
 	fi
-
-  # TODO: Need to fix below condition $DB_BACKUP_DIR is now directly by putDb()
-  if [ -z $DB_BACKUP_DIR ]; then
-    echo "No alternate for database path found"
-    DB_BACKUP_DIR="''"
-  fi
 
   if [ ! -z $DEST ]; then
 		echo "Executing upload_import script"
@@ -79,4 +68,5 @@ mirrorDbMain() {
   fi
   exit
 }
+
 mirrorDbMain $@

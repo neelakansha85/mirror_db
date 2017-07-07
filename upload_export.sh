@@ -2,22 +2,24 @@
 
 . utilityFunctions.sh
 
-#starts here
 uploadExportMain() {
   readProperties $SRC
+  SRC_URL=$URL
+  SRC_SHIB_URL=$SHIB_URL
+  SRC_G_ANALYTICS=$G_ANALYTICS
 
   echo "Start Upload Export Process..."
   now=$(date +"%T")
   echo "Start time : $now "
 
-  #executing export at source
+  # Executing export at source
   if [ ! "$SKIP_EXPORT" = true ]; then
     createRemoteScriptDir $SRC
     echo "Start Upload Export Process..."
     now=$(date +"%T")
     echo "Start time : $now "
-
     uploadMirrorDbFiles $SRC
+    # TODO: Use screen for waiting while SRC performs export to avoid broken pipe
     ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${EXPORT_SCRIPT} -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${PARALLEL_IMPORT} ${NETWORK_FLAG} --blog-id ${BLOG_ID};"
 
     if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${DB_BACKUP_DIR} ]" ); then
@@ -28,7 +30,7 @@ uploadExportMain() {
     fi
 
     # Get exported db from SRC to mirror_db server
-    echo "Transferring files from SRC to mirror_db server"
+    echo "Downloading database files from $SRC"
     getDb $sourceDbBackup
     removeMirrorDbFiles $SRC
     echo "Upload Export completed..."

@@ -199,6 +199,13 @@ readProperties() {
   # Set SSH Parameters
   SSH_KEY_PATH=$ssh_key_path
   SSH_USERNAME=$ssh_username
+
+  if [ -z $REMOTE_SCRIPT_DIR ]; then
+    REMOTE_SCRIPT_DIR='mirror_db'
+  fi
+  if [ -z $DB_BACKUP_DIR ]; then
+    DB_BACKUP_DIR='db_backup'
+  fi
 }
 
 getFileName() {
@@ -239,11 +246,8 @@ getDb() {
   else
 	rsync -avzhe ssh --progress ${dbBackDir}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${EXPORT_DIR}/
   fi
-  #TODO: find better way to resolve issue
-
   #since db is copied to mirror_db server, setting value to EXPORT_DIR
-  DB_BACKUP_DIR=$EXPORT_DIR
-
+  readonly MIRROR_DB_BACKUP_DIR=$EXPORT_DIR
 }
 
 putDb() {
@@ -254,9 +258,6 @@ putDb() {
   else
 	  rsync -avzhe ssh --progress ${EXPORT_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
   fi
-
-  echo "DB dir on Dest server: "
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/; pwd;"
 }
 
 createRemoteScriptDir() {
