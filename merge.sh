@@ -4,15 +4,6 @@ set -e
 
 . utilityFunctions.sh
 
-# Config/Default Options
-# TODO: make use of $(pwd) to get absolute path for below variables
-# TODO: Need to use readonly keyword for constants
-REMOTE_SCRIPT_DIR='mirror_db'
-EXPORT_DIR='db_export'
-MERGED_DIR='db_merged'
-DB_BACKUP_DIR='db_backup'
-DB_SUFFIX=''
-
 mergeFileName(){
   local total=$1
   if [ ! "$PARALLEL_IMPORT" = true ]; then

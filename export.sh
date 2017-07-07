@@ -10,6 +10,9 @@ EXPORT_DIR='db_export'
 POOL_WAIT_TIME=300
 LOGS_DIR='log'
 PI_TOTAL_FILE='pi_total.txt'
+REMOTE_SCRIPT_DIR='mirror_db'
+MERGED_DIR='db_merged'
+DB_SUFFIX=''
 
 checkCount() {
   local count=$1
