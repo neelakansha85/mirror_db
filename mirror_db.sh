@@ -15,10 +15,6 @@ checkFlags() {
     SKIP_EXPORT=true
   fi
 
-  if [ "$SKIP_EXPORT" = true ]; then
-	  DB_BACKUP_DIR=${DB_BACKUP_DIR}
-  fi
-
   if [ "$SKIP_IMPORT" = true ]; then
 	  # Cannot drop entire database if skipping import process
 	  DROP_TABLES=
