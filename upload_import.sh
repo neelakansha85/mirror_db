@@ -3,8 +3,13 @@
 . utilityFunctions.sh
 
 prepareForImport() {
+  local mirrorDbBackupDir=""
   uploadMirrorDbFiles $DEST
-  if [ -z mirrorDbBackupDir ]; then
+  if [ ! -z $CUSTOM_DB_BACKUP_DIR ]; then
+    mirrorDbBackupDir=$CUSTOM_DB_BACKUP_DIR
+  elif [ ! -z $MIRROR_DB_BACKUP_DIR ]; then
+    mirrorDbBackupDir=$MIRROR_DB_BACKUP_DIR
+  else
     mirrorDbBackupDir=$DB_BACKUP_DIR
   fi
   echo "Uploading database files to $DEST"
@@ -73,7 +78,6 @@ prepareForImport_PI() {
 
 uploadImportMain(){
   local isLastImport=false
-  local mirrorDbBackupDir=$MIRROR_DB_BACKUP_DIR
   readProperties $DEST
 
   createRemoteScriptDir $DEST

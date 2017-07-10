@@ -54,7 +54,7 @@ parseArgs() {
           shift
           ;;
         --db-backup-dir)
-          DB_BACKUP_DIR=$2
+          CUSTOM_DB_BACKUP_DIR=$2
           shift
           ;;
         -ebl )
