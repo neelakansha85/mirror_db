@@ -21,6 +21,11 @@ checkFlags() {
 	  DROP_TABLES_SQL=
   fi
 
+  if [ "$DROP_TABLES_SQL" = true ]; then
+	  # if drop tables using sql file, should not drop tables using wp cli method which is default
+	  DROP_TABLES=false
+  fi
+
   if [ "$PARALLEL_IMPORT" = true ]; then
 	  # Cannot drop entire database if running parallel-import
 	  DROP_TABLES=
