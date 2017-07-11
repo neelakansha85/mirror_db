@@ -1,93 +1,84 @@
 #!/bin/bash
 
-# Config/Default Options
-REMOTE_SCRIPT_DIR='mirror_db'
-EXPORT_DIR='db_export'
-MERGED_DIR='db_merged'
-DB_BACKUP_DIR='db_backup'
-DB_SUFFIX=''
+set -e
 
-. parse_arguments.sh
-if [[ ! $? == 0 ]]; then
-    echo "FAILURE: Error parsing arguments!"
-    exit 1
-fi
+. utilityFunctions.sh
 
-DB_FILE_EXT=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $2}'`
-DB_FILE_N=`echo ${DB_FILE_NAME} | sed 's/\./ /g' | awk '{print $1}'`
+mergeFileName(){
+  local total=$1
+  if [ ! "$PARALLEL_IMPORT" = true ]; then
+    DB_SUFFIX="_${total}"
+  fi
+  mergedName="${dbFileName}${DB_SUFFIX}.${dbFileExt}"
+  echo $mergedName
+}
 
+moveFileToMergeDir(){
+  if [ -e ${mergedFileName} ]; then
+    mv ${mergedFileName} $MERGED_DIR/${mergedFileName}
+  fi
+}
 
-cd ${EXPORT_DIR}
+mergeFile(){
+  echo "Starting to merge DB to ${dbFile}... "
+  now=$(date +"%T")
+  echo "Current time : $now "
 
-if [ ! -d "$MERGED_DIR" ]; then
-    mkdir $MERGED_DIR
-fi
+  total=1
+  mergeBatchCount=1
 
-echo "Starting to merge DB to ${DB_FILE_NAME}... "
-now=$(date +"%T")
-echo "Current time : $now "
+  for dbtb in $(cat ${LIST_FILE_NAME})
+  do
+    db=$(getDbName $dbtb)
+    tb=$(getTbName $dbtb)
+    gunzip ${db}_${tb}.sql.gz
 
-TOTAL=1
-MERGE_BATCH_COUNT=1
+    mergedFileName=$(mergeFileName $total)
 
-for DBTB in `cat ${LIST_FILE_NAME}`
-do
-    DB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $1}'`
-    TB=`echo ${DBTB} | sed 's/\./ /g' | awk '{print $2}'`
-    gunzip ${DB}_${TB}.sql.gz
-    
-    if [ ! "$PARALLEL_IMPORT" = true ]; then
-        DB_SUFFIX="_${TOTAL}"
+    $(cat ${db}_${tb}.sql >> ${mergedFileName})
+    echo "" >> ${mergedFileName}
+    $(rm ${db}_${tb}.sql)
+    (( mergeBatchCount++ ))
+
+    if [ ${mergeBatchCount} -eq ${MERGE_BATCH_LIMIT} ]; then
+      moveFileToMergeDir
+      mergeBatchCount=1
+      (( total++ ))
+      echo "Merged ${MERGE_BATCH_LIMIT} tables, starting new batch for merging... "
     fi
-    
-    MERGED_DB_FILE_NAME="${DB_FILE_N}${DB_SUFFIX}.${DB_FILE_EXT}"
+  done
+  moveFileToMergeDir
+  echo "Completed merging DB to ${dbFile}... "
+  echo "Total no of merged sql files = ${total}"
+  now=$(date +"%T")
+  echo "Current time : $now "
+}
 
-    `cat ${DB}_${TB}.sql >> ${MERGED_DB_FILE_NAME}`
-	echo "" >> ${MERGED_DB_FILE_NAME}
-	`rm ${DB}_${TB}.sql`
-	(( MERGE_BATCH_COUNT++ ))
-    if [ ${MERGE_BATCH_COUNT} -eq ${MERGE_BATCH_LIMIT} ]; then
-        mv ${MERGED_DB_FILE_NAME} $MERGED_DIR/${MERGED_DB_FILE_NAME}
-        MERGE_BATCH_COUNT=1
-        (( TOTAL++ ))
-        echo "Merged ${MERGE_BATCH_LIMIT} tables, starting new batch for merging... "
-    fi
-done
+archiveMergedFiles(){
+  echo "Copying all merged DB files to archives dir... "
+  # TODO: Update path based on absolute path of the file using $(pwd)
+  for mrdb in $(ls ~/${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/${MERGED_DIR}/*.sql)
+  do
+    cp ${mrdb} ~/${DB_BACKUP_DIR}/${dbFileName}/
+  done
+}
 
-if [ -e ${MERGED_DB_FILE_NAME} ]; then
-    mv ${MERGED_DB_FILE_NAME} $MERGED_DIR/${MERGED_DB_FILE_NAME}
-fi
+mergeMain() {
+  parseArgs $@
 
-echo "Completed merging DB to ${DB_FILE_NAME}... "
-echo "Total no of merged sql files = ${TOTAL}"
-now=$(date +"%T")
-echo "Current time : $now "
+  local dbFile=${DB_FILE_NAME}
+  local dbFileExt=$(getFileExtension $dbFile)
+  local dbFileName=$(getFileName $dbFile)
 
-# Get to Home Dir
-cd ~
+  mkdir -p $MERGED_DIR
+  mergeFile
 
-# Move all .sql files to archives dir for future reference
+  # Move all .sql files to archives dir for future reference
+  if [[ $dbFileName =~ .*_network.* ]]; then
+    dbFileName=$(echo ${dbFileName} | cut -d '_' -f-2)
+  fi
 
-if [ ! -d "${DB_BACKUP_DIR}" ]; then
-	mkdir ${DB_BACKUP_DIR}
-fi
+  mkdir -p ~/$DB_BACKUP_DIR/$dbFileName
 
-cd ${DB_BACKUP_DIR}
-
-if [[ $DB_FILE_N =~ .*_network.* ]]; then
-     DB_FILE_N=`echo ${DB_FILE_N} | cut -d '_' -f-2`
-fi
-
-if [ ! -d "${DB_FILE_N}" ]; then
-     mkdir ${DB_FILE_N}
-fi
-
-# Get to Home Dir
-cd ..
-
-echo "Copying all merged DB files to archives dir... "
-
-for MRDB in `ls ${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/${MERGED_DIR}/*.sql`
-do
-    cp ${MRDB} ${DB_BACKUP_DIR}/${DB_FILE_N}/
-done
+  archiveMergedFiles
+}
