@@ -56,6 +56,8 @@ searchReplace() {
   local destCdnUrl="${CDN_URL}"
   local destHttpsCdnUrl="${HTTPS_CDN_URL}"
 
+  cd ${exportDir}
+
   if [ ! "$SKIP_REPLACE" = true ]; then
     for MRDB in $(ls *.sql)
     do
@@ -81,6 +83,9 @@ searchReplace() {
       fi
     done
   fi
+
+  # Get to root dir
+  cd ..
 }
 
 importTables() {
@@ -124,14 +129,12 @@ importMain() {
   local dropSqlFile='drop_tables'
 
   parseArgs $@
-
-  cd ${exportDir}
   searchReplace
 
+  cd ${exportDir}
   if [ ! "$SKIP_IMPORT" = true ]; then
     importTables
   fi
-  # Get to root dir
   cd ..
 
   afterImport
