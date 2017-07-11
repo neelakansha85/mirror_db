@@ -91,6 +91,8 @@ searchReplace() {
 importTables() {
   echo "Disabling foreign key check before importing db"
 	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=0"
+  # SQL files are inside $exportDir
+  cd ${exportDir}
 
 	if [ ! -z $DB_FILE_NAME ]; then
 	  # Import statement
@@ -108,6 +110,8 @@ importTables() {
 			sleep $IMPORT_WAIT_TIME
 		done
 	fi
+	# Get to root dir
+  cd ..
 
 	echo "Enabling foreign key check after importing db"
 	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=1"
@@ -131,11 +135,9 @@ importMain() {
   parseArgs $@
   searchReplace
 
-  cd ${exportDir}
   if [ ! "$SKIP_IMPORT" = true ]; then
     importTables
   fi
-  cd ..
 
   afterImport
 }
