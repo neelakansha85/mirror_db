@@ -99,7 +99,7 @@ downloadTablesPI() {
       (( PI_TOTAL++ ))
     fi
   done
-  total=total-1
+  total=$total-1
   echo "Completed downloading tables from ${listFileName}..."
   echo "Total no of tables downloaded = ${total}"
   now=$(date +"%T")
@@ -136,7 +136,7 @@ exportParallelMain() {
   # TODO: Verify if mergeMain() is required and if so use below function
   # downloadNetworkTables $networkListFile
   mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-zA-Z]+[a-zA-Z0-9_]*$'" > $networkListFile
-  downloadTables $networkListFile
+  downloadTablesPI $networkListFile
   # TODO: Need to verify if mergeMain() is required for Network tables
   # mergeMain -lf $networkListFile -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
   echo "Executing parallel-import for network tables... "
