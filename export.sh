@@ -168,6 +168,7 @@ exportParallelMain() {
 exportMain() {
 
   parseArgs $@
+  echo $PARALLEL_IMPORT
   # scope of total is limited to exportMain()
   local total=1
   local PI_TOTAL=1
@@ -185,7 +186,9 @@ exportMain() {
 
   # import instance environment variables
   readProperties $SRC
-
+  if [ ! -z $PARALLEL_IMPORT ]; then
+    echo "PI is set"
+  fi
   # Empty EXPORT_DIR dir to remove any previous data
   # TODO: Need to verify if it deletes export dir for 
   # Parallel Import which shouldn't happen
