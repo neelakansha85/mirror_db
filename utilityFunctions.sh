@@ -6,6 +6,8 @@ getWorkspace() {
 }
 
 setGlobalVariables() {
+  UPLOAD_EX='upload_export.sh'
+  UPLOAD_IM='upload_import.sh'
   MIRROR_DB_FILE='mirror_db.sh'
   EXPORT_DIR='db_export'
   MERGED_DIR='db_merged'
@@ -236,7 +238,7 @@ getTbName() {
 setFilePermissions() {
   echo "Changing right permissions for all bash scripts"
   chmod 750 *.sh
-  chmod 754 $DROP_SQL_FILE.sql
+  #chmod 754 $DROP_SQL_FILE.sql
   
 }
 
@@ -272,10 +274,10 @@ uploadMirrorDbFiles() {
   rsync -avzhe ssh --delete --progress ${STRUCTURE_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   echo "Executing structure script for creating dir on ${location} server... "
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}"
-  if [ $location="$DEST" ];then
+  if [ $location="$DEST" ]; then
     rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PROPERTIES_FILE} ${IMPORT_SCRIPT} ${SUPER_ADMIN_TXT} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   else
-    rsync -avzhe ssh --delete --progress ${MIRROR_DB_FILE} ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+    rsync -avzhe ssh --delete --progress ${UPLOAD_EX} ${UPLOAD_IM} ${MIRROR_DB_FILE} ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   fi
 }
 
