@@ -6,6 +6,7 @@ getWorkspace() {
 }
 
 setGlobalVariables() {
+  MIRROR_DB_FILE='mirror_db.sh'
   EXPORT_DIR='db_export'
   MERGED_DIR='db_merged'
   IMPORT_SCRIPT='import.sh'
@@ -274,7 +275,7 @@ uploadMirrorDbFiles() {
   if [ $location="$DEST" ];then
     rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PROPERTIES_FILE} ${IMPORT_SCRIPT} ${SUPER_ADMIN_TXT} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   else
-    rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+    rsync -avzhe ssh --delete --progress ${MIRROR_DB_FILE} ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   fi
 }
 
