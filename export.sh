@@ -144,7 +144,9 @@ exportParallelMain() {
   # Get to root dir
   cd ..
   # Initiate merging and importing all network tables
-  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${networkListFile} -dbf ${networkDb} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1
+  #TODO: the log file is commented due to error, will have to be resolved.
+  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${networkListFile} -dbf ${networkDb} --skip-export --parallel-import
+   #>> ${LOGS_DIR}/mirror_db_network.log 2>&1
   # Continue exporting in EXPORT_DIR
   cd ${EXPORT_DIR}
   # Download all Non Network Tables
@@ -161,6 +163,7 @@ exportParallelMain() {
 
   # Execute merge and upload for the last set of tables downloaded
   dbFileNamePI="${dbFileName}_${PI_TOTAL}.${dbFileExt}"
+  #TODO: the log file is commented due to error, will have to be resolved.
   nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import --is-last-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
 }
 
