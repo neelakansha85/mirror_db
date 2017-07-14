@@ -60,7 +60,7 @@ mirrorDbMain() {
 		  # Merge all tables to one mysql.sql
       echo "Executing merge script"
       #./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT} ${PARALLEL_IMPORT}
-      mergeMain -s ${SRC} -d {DEST} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT} ${PARALLEL_IMPORT}
+      mergeMain -s ${SRC} -d ${DEST} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT} ${PARALLEL_IMPORT}
 	  fi
 	fi
 
