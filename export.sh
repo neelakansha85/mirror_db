@@ -99,7 +99,7 @@ downloadTablesPI() {
       (( PI_TOTAL++ ))
     fi
   done
-  total=$total-1
+  (( total-- ))
   echo "Completed downloading tables from ${listFileName}..."
   echo "Total no of tables downloaded = ${total}"
   now=$(date +"%T")
