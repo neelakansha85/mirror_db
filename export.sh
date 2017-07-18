@@ -70,6 +70,8 @@ downloadTablesPI() {
   local batchCount=1
   local listFileName=$1
   local fileName=$(getFileName $listFileName)
+  networkListFile=${fileName}_${PI_TOTAL}.${listFileExt}
+
   for dbtb in $(cat ${listFileName})
   do
     db=$(getDbName $dbtb)
