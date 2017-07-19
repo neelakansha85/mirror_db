@@ -6,17 +6,18 @@ getWorkspace() {
 }
 
 setGlobalVariables() {
-  EXPORT_DIR='db_export'
-  MERGED_DIR='db_merged'
-  IMPORT_SCRIPT='import.sh'
-  EXPORT_SCRIPT='export.sh'
-  MERGE_SCRIPT='merge.sh'
-  DROP_SQL_FILE='drop_tables'
-  SUPER_ADMIN_TXT='superadmin_dev.txt'
-  STRUCTURE_FILE='mirror_db_structure.sh'
-  PROPERTIES_FILE='db.properties'
-  PI_TOTAL_FILE='pi_total.txt'
-  UTILITY_FILE='utilityFunctions.sh'
+  readonly EXPORT_DIR='db_export'
+  readonly MERGED_DIR='db_merged'
+  readonly IMPORT_SCRIPT='import.sh'
+  readonly EXPORT_SCRIPT='export.sh'
+  readonly MERGE_SCRIPT='merge.sh'
+  readonly DROP_SQL_FILE='drop_tables'
+  readonly SUPER_ADMIN_TXT='superadmin_dev.txt'
+  readonly STRUCTURE_FILE='mirror_db_structure.sh'
+  readonly PROPERTIES_FILE='db.properties'
+  readonly PI_TOTAL_FILE='pi_total.txt'
+  readonly UTILITY_FILE='utilityFunctions.sh'
+  readonly LOGS_DIR='log'
   BATCH_LIMIT=10
   POOL_LIMIT=7000
   MERGE_BATCH_LIMIT=7000
@@ -27,7 +28,6 @@ setGlobalVariables() {
   SRC_URL="''"
   SRC_SHIB_URL="''"
   SRC_G_ANALYTICS="''"
-  LOGS_DIR='log'
   BLOG_ID="''"
   readonly WORKSPACE=$(getWorkspace)
 }
