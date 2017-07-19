@@ -27,7 +27,7 @@ prepareForImport() {
   fi
   # TODO: Use screen for waiting while DEST performs import to avoid broken pipe
   # Execute Import.sh to import database
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${remoteScriptDir}; ./${importScript} -s ${SRC} -d ${DEST} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES_SQL} ${SKIP_REPLACE} ;"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${remoteScriptDir}; ./${importScript} -s ${SRC} -d ${DEST} -iwt ${importWaitTime} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLES_SQL} ${SKIP_REPLACE} ;"
 
   echo "Database imported successfully..."
   now=$(date +"%T")
@@ -56,13 +56,13 @@ prepareForImport_PI() {
   if [[ $DB_FILE_NAME =~ .*_network.* ]]; then
     if [ ! "$SKIP_NETWORK_IMPORT" = true ]; then
       # Execute Import.sh to import network tables
-      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${remoteScriptDir}; ./${importScript} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${SKIP_REPLACE};"
+      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${remoteScriptDir}; ./${importScript} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${importWaitTime} ${SKIP_IMPORT} ${FORCE_IMPORT} ${SKIP_REPLACE};"
     else
       echo "Skipping importing Network Tables... "
     fi
   else
     # Execute Import.sh to import all non-network tables
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${remoteScriptDir}; ./${importScript} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT};"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${remoteScriptDir}; ./${importScript} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${importWaitTime} ${SKIP_IMPORT} ${FORCE_IMPORT};"
   fi
 
   echo "${DB_FILE_NAME} imported successfully..."

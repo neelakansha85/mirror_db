@@ -40,11 +40,11 @@ mergeFile(){
     $(rm ${db}_${tb}.sql)
     (( mergeBatchCount++ ))
 
-    if [ ${mergeBatchCount} -eq ${MERGE_BATCH_LIMIT} ]; then
+    if [ ${mergeBatchCount} -eq ${mergeBatchLimit} ]; then
       moveFileToMergeDir
       mergeBatchCount=1
       (( total++ ))
-      echo "Merged ${MERGE_BATCH_LIMIT} tables, starting new batch for merging... "
+      echo "Merged ${mergeBatchLimit} tables, starting new batch for merging... "
     fi
   done
   moveFileToMergeDir

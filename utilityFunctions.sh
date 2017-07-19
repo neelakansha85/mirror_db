@@ -18,18 +18,20 @@ setGlobalVariables() {
   readonly PiTotalFile='pi_total.txt'
   readonly superAdminTxt='superadmin_dev.txt'
   readonly logsDir='log'
-  BATCH_LIMIT=10
-  POOL_LIMIT=7000
-  MERGE_BATCH_LIMIT=7000
-  WAIT_TIME=3
-  IMPORT_WAIT_TIME=180
+  readonly workspace=$(getWorkspace)
+
+  batchLimit=10
+  poolLimit=7000
+  mergeBatchLimit=7000
+  waitTime=3
+  importWaitTime=180
+  srcUrl="''"
+  srcShibUrl="''"
+  srcGAnalytics="''"
+  blogId="''"
+  # not changing below variables due to similarities in naming of global and local in export.sh, wanted to discuss before proceeding
   LIST_FILE_NAME='table_list.txt'
   DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
-  SRC_URL="''"
-  SRC_SHIB_URL="''"
-  SRC_G_ANALYTICS="''"
-  BLOG_ID="''"
-  readonly WORKSPACE=$(getWorkspace)
 }
 
 parseArgs() {
@@ -53,23 +55,23 @@ parseArgs() {
           shift
           ;;
         -ebl )
-          BATCH_LIMIT=$2
+          batchLimit=$2
           shift
           ;;
         -pl )
-          POOL_LIMIT=$2
+          poolLimit=$2
           shift
           ;;
         -mbl )
-          MERGE_BATCH_LIMIT=$2
+          mergeBatchLimit=$2
           shift
           ;;
         -ewt )
-          WAIT_TIME=$2
+          waitTime=$2
           shift
           ;;
         -iwt )
-          IMPORT_WAIT_TIME=$2
+          importWaitTime=$2
           shift
           ;;
         -lf )
@@ -87,20 +89,20 @@ parseArgs() {
         --blog-id )
           # TODO: Need to remove below condition once all files are cleaned
           if [ ! -z $2 ]; then
-            BLOG_ID=$2
+            blogId=$2
             shift
           fi
           ;;
         --site-url )
-          SRC_URL=$2
+          srcUrl=$2
           shift
           ;;
         --shib-url )
-          SRC_SHIB_URL=$2
+          srcShibUrl=$2
           shift
           ;;
         --g-analytics )
-          SRC_G_ANALYTICS=$2
+          srcGAnalytics=$2
           shift
           ;;
         --force )

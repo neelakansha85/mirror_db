@@ -107,7 +107,7 @@ importTables() {
 			# Import statement
 			echo "Starting to import ${MRDB}"
 			mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${MRDB}
-			sleep $IMPORT_WAIT_TIME
+			sleep $importWaitTime
 		done
 	fi
 	# Get to root dir

@@ -7,8 +7,8 @@ set -e
 . upload_import.sh
 
 checkFlags() {
-  if [ ! -d "$LOGS_DIR" ]; then
-	  mkdir $LOGS_DIR
+  if [ ! -d "$logsDir" ]; then
+	  mkdir $logsDir
   fi
 
   if [ ! -z $DB_BACKUP_DIR ]; then
@@ -58,7 +58,7 @@ mirrorDbMain() {
     if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
 		  # Merge all tables to one mysql.sql
       echo "Executing merge script"
-      #./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT} ${PARALLEL_IMPORT}
+      #./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${mergeBatchLimit} ${PARALLEL_IMPORT}
       mergeMain
 	  fi
 	fi
