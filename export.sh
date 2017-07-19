@@ -6,13 +6,13 @@ set -e
 . merge.sh
 
 
-readonly EXPORT_DIR='db_export'
-readonly MERGED_DIR='db_merged'
-readonly LOGS_DIR='log'
-readonly PI_TOTAL_FILE='pi_total.txt'
-readonly POOL_WAIT_TIME=300
-REMOTE_SCRIPT_DIR='mirror_db'
-DB_SUFFIX=''
+readonly exportDir='db_export'
+readonly mergedDir='db_merged'
+readonly logsDir='log'
+readonly PiTotalFile='pi_total.txt'
+readonly poolWaitTime=300
+remoteScriptDir='mirror_db'
+dbSuffix=''
 
 checkCount() {
   local count=$1
@@ -52,7 +52,7 @@ downloadTables() {
     (( total++ ))
     batchCount=$(checkCountLimit $batchCount $BATCH_LIMIT)
     #NOTE: to be changed: sleep pool_wait_time
-    poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $POOL_WAIT_TIME)
+    poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $poolWaitTime)
   done
   (( total-- ))
   echo "Completed downloading tables from $listFileName ..."
@@ -87,15 +87,15 @@ downloadTablesPI() {
     echo "${db}.${tb}" >> ${listFileName}_${PI_TOTAL}.${listFileExt}
 
     batchCount=$(checkCountLimit $batchCount $BATCH_LIMIT)
-    poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $POOL_WAIT_TIME)
+    poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $poolWaitTime)
     if [ ${poolCount} -eq 1 ]; then
-      # TODO: Remove below line and cd {EXPORT_DIR} if using absolute path for dir
+      # TODO: Remove below line and cd {exportDir} if using absolute path for dir
       # Get to root dir
       cd ..
       dbFileNamePI="${dbFileName}_${PI_TOTAL}.${dbFileExt}"
-      nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
-      # Continue exporting in EXPORT_DIR
-      cd ${EXPORT_DIR}
+      nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${logsDir}/mirror_db_pi.log 2>&1
+      # Continue exporting in exportDir
+      cd ${exportDir}
       (( PI_TOTAL++ ))
     fi
   done
@@ -140,13 +140,13 @@ exportParallelMain() {
   # TODO: Need to verify if mergeMain() is required for Network tables
   # mergeMain -lf $networkListFile -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
   echo "Executing parallel-import for network tables... "
-  # TODO: Remove below line and cd {EXPORT_DIR} if using absolute path for dir
+  # TODO: Remove below line and cd {exportDir} if using absolute path for dir
   # Get to root dir
   cd ..
   # Initiate merging and importing all network tables
-  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${networkListFile} -dbf ${networkDb} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1
-  # Continue exporting in EXPORT_DIR
-  cd ${EXPORT_DIR}
+  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${networkListFile} -dbf ${networkDb} --skip-export --parallel-import >> ${logsDir}/mirror_db_network.log 2>&1
+  # Continue exporting in exportDir
+  cd ${exportDir}
   # Download all Non Network Tables
   # TODO: Verify if mergeMain() is required and if so use below function
   # downloadNonNetworkTables $nonNetworkListFile
@@ -155,13 +155,13 @@ exportParallelMain() {
   # TODO: Need to verify if mergeMain() is required for Network tables
   # mergeMain -lf $nonNetworkListFile -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
   
-  # TODO: Remove below line and cd {EXPORT_DIR} if using absolute path for dir
+  # TODO: Remove below line and cd {exportDir} if using absolute path for dir
   # Get to root dir
   cd ..
 
   # Execute merge and upload for the last set of tables downloaded
   dbFileNamePI="${dbFileName}_${PI_TOTAL}.${dbFileExt}"
-  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import --is-last-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
+  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import --is-last-import >> ${logsDir}/mirror_db_pi.log 2>&1
 }
 
 #starts here
@@ -186,12 +186,12 @@ exportMain() {
   # import instance environment variables
   readProperties $SRC
 
-  # Empty EXPORT_DIR dir to remove any previous data
+  # Empty exportDir dir to remove any previous data
   # TODO: Need to verify if it deletes export dir for 
   # Parallel Import which shouldn't happen
-  rm -rf ${EXPORT_DIR}
-  mkdir ${EXPORT_DIR}
-  cd ${EXPORT_DIR}
+  rm -rf ${exportDir}
+  mkdir ${exportDir}
+  cd ${exportDir}
 
   echo "Starting to download DB... "
   now=$(date +"%T")

@@ -6,18 +6,18 @@ getWorkspace() {
 }
 
 setGlobalVariables() {
-  readonly EXPORT_DIR='db_export'
-  readonly MERGED_DIR='db_merged'
-  readonly IMPORT_SCRIPT='import.sh'
-  readonly EXPORT_SCRIPT='export.sh'
-  readonly MERGE_SCRIPT='merge.sh'
-  readonly DROP_SQL_FILE='drop_tables'
-  readonly SUPER_ADMIN_TXT='superadmin_dev.txt'
-  readonly STRUCTURE_FILE='mirror_db_structure.sh'
-  readonly PROPERTIES_FILE='db.properties'
-  readonly PI_TOTAL_FILE='pi_total.txt'
-  readonly UTILITY_FILE='utilityFunctions.sh'
-  readonly LOGS_DIR='log'
+  readonly exportDir='db_export'
+  readonly mergedDir='db_merged'
+  readonly importScript='import.sh'
+  readonly exportScript='export.sh'
+  readonly mergeScript='merge.sh'
+  readonly structureFile='mirror_db_structure.sh'
+  readonly utilityFile='utilityFunctions.sh'
+  readonly propertiesFile='db.properties'
+  readonly dropSqlFile='drop_tables'
+  readonly PiTotalFile='pi_total.txt'
+  readonly superAdminTxt='superadmin_dev.txt'
+  readonly logsDir='log'
   BATCH_LIMIT=10
   POOL_LIMIT=7000
   MERGE_BATCH_LIMIT=7000
@@ -230,28 +230,28 @@ getTbName() {
 setFilePermissions() {
   echo "Changing right permissions for all bash scripts"
   chmod 750 *.sh
-  chmod 754 $DROP_SQL_FILE.sql
+  chmod 754 $dropSqlFile.sql
   
 }
 
 getDb() {
   local dbBackDir=$1
   if [ ! "$PARALLEL_IMPORT" = true ]; then
-	rsync -avzhe ssh --include '*.sql' --exclude '*' --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${EXPORT_DIR}/
+	rsync -avzhe ssh --include '*.sql' --exclude '*' --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${exportDir}/
   else
-	rsync -avzhe ssh --progress ${dbBackDir}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${EXPORT_DIR}/
+	rsync -avzhe ssh --progress ${dbBackDir}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${exportDir}/
   fi
-  #since db is copied to mirror_db server, setting value to EXPORT_DIR
-  readonly MIRROR_DB_BACKUP_DIR=$EXPORT_DIR
+  #since db is copied to mirror_db server, setting value to exportDir
+  readonly MIRROR_DB_BACKUP_DIR=$exportDir
 }
 
 putDb() {
   local dbBackDir=$1
   if [ ! "$PARALLEL_IMPORT" = true ]; then
     echo "Database path on mirror_db: $dbBackDir"
-	  rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${dbBackDir}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
+	  rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${dbBackDir}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${exportDir}/
   else
-	  rsync -avzhe ssh --progress ${EXPORT_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
+	  rsync -avzhe ssh --progress ${exportDir}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${exportDir}/
   fi
 }
 
@@ -263,13 +263,13 @@ createRemoteScriptDir() {
 
 uploadMirrorDbFiles() {
   local location=$1
-  rsync -avzhe ssh --delete --progress ${STRUCTURE_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+  rsync -avzhe ssh --delete --progress ${structureFile} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   echo "Executing structure script for creating dir on ${location} server... "
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${STRUCTURE_FILE} mk ${EXPORT_DIR}"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${structureFile} mk ${exportDir}"
   if [ $location="$DEST" ];then
-    rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PROPERTIES_FILE} ${IMPORT_SCRIPT} ${SUPER_ADMIN_TXT} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+    rsync -avzhe ssh --delete --progress ${utilityFile} ${exportScript} ${mergeScript} ${propertiesFile} ${importScript} ${superAdminTxt} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   else
-    rsync -avzhe ssh --delete --progress ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PROPERTIES_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+    rsync -avzhe ssh --delete --progress ${utilityFile} ${exportScript} ${mergeScript} ${propertiesFile} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   fi
 }
 

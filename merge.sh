@@ -7,15 +7,15 @@ set -e
 mergeFileName(){
   local total=$1
   if [ ! "$PARALLEL_IMPORT" = true ]; then
-    DB_SUFFIX="_${total}"
+    dbSuffix="_${total}"
   fi
-  mergedName="${dbFileName}${DB_SUFFIX}.${dbFileExt}"
+  mergedName="${dbFileName}${dbSuffix}.${dbFileExt}"
   echo $mergedName
 }
 
 moveFileToMergeDir(){
   if [ -e ${mergedFileName} ]; then
-    mv ${mergedFileName} $MERGED_DIR/${mergedFileName}
+    mv ${mergedFileName} $mergedDir/${mergedFileName}
   fi
 }
 
@@ -57,7 +57,7 @@ mergeFile(){
 archiveMergedFiles(){
   echo "Copying all merged DB files to archives dir... "
   # TODO: Update path based on absolute path of the file using $(pwd)
-  for mrdb in $(ls ~/${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/${MERGED_DIR}/*.sql)
+  for mrdb in $(ls ~/${remoteScriptDir}/${exportDir}/${mergedDir}/*.sql)
   do
     cp ${mrdb} ~/${DB_BACKUP_DIR}/${dbFileName}/
   done
@@ -70,7 +70,7 @@ mergeMain() {
   local dbFileExt=$(getFileExtension $dbFile)
   local dbFileName=$(getFileName $dbFile)
 
-  mkdir -p $MERGED_DIR
+  mkdir -p $mergedDir
   mergeFile
 
   # Move all .sql files to archives dir for future reference
