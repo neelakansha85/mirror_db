@@ -172,8 +172,8 @@ readProperties() {
   SITE_DIR="${domain}_dir"
   SITE_DIR=${!SITE_DIR}
 
-  REMOTE_SCRIPT_DIR="${domain}_remote_dir"
-  REMOTE_SCRIPT_DIR=${!REMOTE_SCRIPT_DIR}
+  remoteScriptDir="${domain}_remote_dir"
+  remoteScriptDir=${!remoteScriptDir}
 
   DB_BACKUP_DIR="${domain}_db_backup_dir"
   DB_BACKUP_DIR=${!DB_BACKUP_DIR}
@@ -197,8 +197,8 @@ readProperties() {
   SSH_KEY_PATH=$ssh_key_path
   SSH_USERNAME=$ssh_username
 
-  if [ -z $REMOTE_SCRIPT_DIR ]; then
-    REMOTE_SCRIPT_DIR='mirror_db'
+  if [ -z $remoteScriptDir ]; then
+    remoteScriptDir='mirror_db'
   fi
   if [ -z $DB_BACKUP_DIR ]; then
     DB_BACKUP_DIR='db_backup'
@@ -251,32 +251,32 @@ putDb() {
   local dbBackDir=$1
   if [ ! "$PARALLEL_IMPORT" = true ]; then
     echo "Database path on mirror_db: $dbBackDir"
-	  rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${dbBackDir}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${exportDir}/
+	  rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${dbBackDir}/ ${SSH_USERNAME}@${HOST_NAME}:${remoteScriptDir}/${exportDir}/
   else
-	  rsync -avzhe ssh --progress ${exportDir}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${exportDir}/
+	  rsync -avzhe ssh --progress ${exportDir}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${remoteScriptDir}/${exportDir}/
   fi
 }
 
 createRemoteScriptDir() {
   local location=$1
-  echo "Creating ${REMOTE_SCRIPT_DIR} on ${location}..."
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "mkdir -p ${REMOTE_SCRIPT_DIR};"
+  echo "Creating ${remoteScriptDir} on ${location}..."
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "mkdir -p ${remoteScriptDir};"
 }
 
 uploadMirrorDbFiles() {
   local location=$1
-  rsync -avzhe ssh --delete --progress ${structureFile} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+  rsync -avzhe ssh --delete --progress ${structureFile} ${SSH_USERNAME}@${HOST_NAME}:${remoteScriptDir}/
   echo "Executing structure script for creating dir on ${location} server... "
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${structureFile} mk ${exportDir}"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${remoteScriptDir}; ./${structureFile} mk ${exportDir}"
   if [ $location="$DEST" ];then
-    rsync -avzhe ssh --delete --progress ${utilityFile} ${exportScript} ${mergeScript} ${propertiesFile} ${importScript} ${superAdminTxt} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+    rsync -avzhe ssh --delete --progress ${utilityFile} ${exportScript} ${mergeScript} ${propertiesFile} ${importScript} ${superAdminTxt} ${SSH_USERNAME}@${HOST_NAME}:${remoteScriptDir}/
   else
-    rsync -avzhe ssh --delete --progress ${utilityFile} ${exportScript} ${mergeScript} ${propertiesFile} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
+    rsync -avzhe ssh --delete --progress ${utilityFile} ${exportScript} ${mergeScript} ${propertiesFile} ${SSH_USERNAME}@${HOST_NAME}:${remoteScriptDir}/
   fi
 }
 
 removeMirrorDbFiles() {
   local location=$1
-  echo "Removing ${REMOTE_SCRIPT_DIR} from ${location}..."
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "rm -rf ${REMOTE_SCRIPT_DIR};"
+  echo "Removing ${remoteScriptDir} from ${location}..."
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "rm -rf ${remoteScriptDir};"
 }
