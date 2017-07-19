@@ -13,12 +13,13 @@ setGlobalVariables() {
   readonly mergeScript='merge.sh'
   readonly structureFile='mirror_db_structure.sh'
   readonly utilityFile='utilityFunctions.sh'
-  readonly propertiesFile='db.properties'
   readonly dropSqlFile='drop_tables'
   readonly PiTotalFile='pi_total.txt'
   readonly superAdminTxt='superadmin_dev.txt'
   readonly logsDir='log'
   readonly workspace=$(getWorkspace)
+  #properties file can be changed during execution hence not made readonly
+  propertiesFile='db.properties'
 
   batchLimit=10
   poolLimit=7000
@@ -43,15 +44,15 @@ parseArgs() {
   while [ "$1" != "" ]; do
       case $1 in
         -s | --source)
-          SRC=$2
+          src=$2
           shift
           ;;
         -d | --destination)
-          DEST=$2
+          dest=$2
           shift
           ;;
         --db-backup-dir)
-          CUSTOM_DB_BACKUP_DIR=$2
+          customDbBackupDir=$2
           shift
           ;;
         -ebl )
@@ -83,7 +84,7 @@ parseArgs() {
           shift
           ;;
         -pf | --properties-file )
-          PROPERTIES_FILE=$2
+          propertiesFile=$2
           shift
           ;;
         --blog-id )
@@ -106,34 +107,34 @@ parseArgs() {
           shift
           ;;
         --force )
-          FORCE_IMPORT=--force
+          forceImport=--force
           ;;
         --drop-tables)
-          DROP_TABLES=true
+          dropTables=true
           ;;
         --drop-tables-sql)
-          DROP_TABLES_SQL=true
+          dropTableSql=true
           ;;
         --skip-export)
-          SKIP_EXPORT=true
+          skipExport=true
           ;;
         --skip-import)
-          SKIP_IMPORT=true
+          skipImport=true
           ;;
         --skip-network-import)
-          SKIP_NETWORK_IMPORT=true
+          skipNetworkImport=true
           ;;
         --skip-replace)
-          SKIP_REPLACE=true
+          skipReplace=true
           ;;
         --parallel-import)
-          PARALLEL_IMPORT=true
+          parallelImport=true
           ;;
         --is-last-import)
-          IS_LAST_IMPORT=true
+          isLastImport=true
           ;;
         --network-flag)
-          NETWORK_FLAG=true
+          networkFlag=true
           ;;
         -- )
           shift;
@@ -238,10 +239,10 @@ setFilePermissions() {
 
 getDb() {
   local dbBackDir=$1
-  if [ ! "$PARALLEL_IMPORT" = true ]; then
-	rsync -avzhe ssh --include '*.sql' --exclude '*' --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${exportDir}/
+  if [ ! "$parallelImport" = true ]; then
+	  rsync -avzhe ssh --include '*.sql' --exclude '*' --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${exportDir}/
   else
-	rsync -avzhe ssh --progress ${dbBackDir}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${exportDir}/
+	  rsync -avzhe ssh --progress ${dbBackDir}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${exportDir}/
   fi
   #since db is copied to mirror_db server, setting value to exportDir
   readonly MIRROR_DB_BACKUP_DIR=$exportDir
@@ -249,7 +250,7 @@ getDb() {
 
 putDb() {
   local dbBackDir=$1
-  if [ ! "$PARALLEL_IMPORT" = true ]; then
+  if [ ! "$parallelImport" = true ]; then
     echo "Database path on mirror_db: $dbBackDir"
 	  rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${dbBackDir}/ ${SSH_USERNAME}@${HOST_NAME}:${remoteScriptDir}/${exportDir}/
   else

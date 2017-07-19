@@ -36,7 +36,7 @@ replaceGoogleAnalytics() {
 }
 
 searchReplace() {
-  readProperties $SRC
+  readProperties $src
   local srcUrl=",'${URL}"
   local srcUrl2=",'http://${URL}"
   local srcUrl3=",'https://${URL}"
@@ -58,7 +58,7 @@ searchReplace() {
 
   cd ${exportDir}
 
-  if [ ! "$SKIP_REPLACE" = true ]; then
+  if [ ! "$skipReplace" = true ]; then
     for MRDB in $(ls *.sql)
     do
       if [ -e ${MRDB} ]; then
@@ -97,7 +97,7 @@ importTables() {
 	if [ ! -z $DB_FILE_NAME ]; then
 	  # Import statement
 		echo "Starting to import ${DB_FILE_NAME}"
-		mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${DB_FILE_NAME}
+		mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${forceImport} < ${DB_FILE_NAME}
 		# Remove file to avoid importing it twice
 		rm $DB_FILE_NAME
 	else
@@ -106,7 +106,7 @@ importTables() {
 		do
 			# Import statement
 			echo "Starting to import ${MRDB}"
-			mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${MRDB}
+			mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${forceImport} < ${MRDB}
 			sleep $importWaitTime
 		done
 	fi
@@ -135,7 +135,7 @@ importMain() {
   parseArgs $@
   searchReplace
 
-  if [ ! "$SKIP_IMPORT" = true ]; then
+  if [ ! "$skipImport" = true ]; then
     importTables
   fi
 

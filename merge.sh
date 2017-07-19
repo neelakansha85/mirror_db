@@ -6,7 +6,7 @@ set -e
 
 mergeFileName(){
   local total=$1
-  if [ ! "$PARALLEL_IMPORT" = true ]; then
+  if [ ! "$skipReplace" = true ]; then
     dbSuffix="_${total}"
   fi
   mergedName="${dbFileName}${dbSuffix}.${dbFileExt}"

@@ -93,7 +93,7 @@ downloadTablesPI() {
       # Get to root dir
       cd ..
       dbFileNamePI="${dbFileName}_${PI_TOTAL}.${dbFileExt}"
-      nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${logsDir}/mirror_db_pi.log 2>&1
+      nohup ./mirror_db.sh -s ${src} -d ${dest} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${logsDir}/mirror_db_pi.log 2>&1
       # Continue exporting in exportDir
       cd ${exportDir}
       (( PI_TOTAL++ ))
@@ -144,7 +144,7 @@ exportParallelMain() {
   # Get to root dir
   cd ..
   # Initiate merging and importing all network tables
-  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${networkListFile} -dbf ${networkDb} --skip-export --parallel-import >> ${logsDir}/mirror_db_network.log 2>&1
+  nohup ./mirror_db.sh -s ${src} -d ${dest} -lf ${networkListFile} -dbf ${networkDb} --skip-export --parallel-import >> ${logsDir}/mirror_db_network.log 2>&1
   # Continue exporting in exportDir
   cd ${exportDir}
   # Download all Non Network Tables
@@ -161,7 +161,7 @@ exportParallelMain() {
 
   # Execute merge and upload for the last set of tables downloaded
   dbFileNamePI="${dbFileName}_${PI_TOTAL}.${dbFileExt}"
-  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import --is-last-import >> ${logsDir}/mirror_db_pi.log 2>&1
+  nohup ./mirror_db.sh -s ${src} -d ${dest} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import --is-last-import >> ${logsDir}/mirror_db_pi.log 2>&1
 }
 
 #starts here
@@ -184,7 +184,7 @@ exportMain() {
   local nonNetworkListFile="${listFileName}_non_network.${listFileExt}"
 
   # import instance environment variables
-  readProperties $SRC
+  readProperties $src
 
   # Empty exportDir dir to remove any previous data
   # TODO: Need to verify if it deletes export dir for 
@@ -197,10 +197,10 @@ exportMain() {
   now=$(date +"%T")
   echo "Current time : $now "
 
-  if [ ! "$PARALLEL_IMPORT" = true ]; then
+  if [ ! "$parallelImport" = true ]; then
     if [ ! -z "$blogId" ]; then
       downloadBlogTables $blogListFile
-    elif [ "$NETWORK_FLAG" = true ]; then
+    elif [ "$networkFlag" = true ]; then
       downloadNetworkTables $networkListFile
     else
       downloadNetworkTables $networkListFile

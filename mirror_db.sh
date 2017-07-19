@@ -17,19 +17,19 @@ checkFlags() {
 
   if [ "$SKIP_IMPORT" = true ]; then
 	  # Cannot drop entire database if skipping import process
-	  DROP_TABLES=
-	  DROP_TABLES_SQL=
+	  dropTables=
+	  dropTableSql=
   fi
 
-  if [ "$DROP_TABLES_SQL" = true ]; then
+  if [ "$dropTableSql" = true ]; then
 	  # if drop tables using sql file, should not drop tables using wp cli method which is default
-	  DROP_TABLES=false
+	  dropTables=false
   fi
 
-  if [ "$PARALLEL_IMPORT" = true ]; then
+  if [ "$parallelImport" = true ]; then
 	  # Cannot drop entire database if running parallel-import
-	  DROP_TABLES=
-	  DROP_TABLES_SQL=
+	  dropTables=
+	  dropTableSql=
   fi
 }
 
@@ -50,15 +50,15 @@ mirrorDbMain() {
 	  cat $propertiesFile > db.properties
   fi
 
-  if [ ! -z $SRC ]; then
-    DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
+  if [ ! -z $src ]; then
+    DB_FILE_NAME="${src}_$(date +"%Y-%m-%d").sql"
     echo "Executing db export script"
     uploadExportMain
 
-    if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
+    if [ "$parallelImport" = true ] || [ "$parallelImport" == '--parallel-import' ]; then
 		  # Merge all tables to one mysql.sql
       echo "Executing merge script"
-      #./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${mergeBatchLimit} ${PARALLEL_IMPORT}
+      #./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${mergeBatchLimit} ${parallelImport}
       mergeMain
 	  fi
 	fi
