@@ -12,7 +12,7 @@ prepareForImport() {
   else
     mirrorDbBackupDir=$DB_BACKUP_DIR
   fi
-  echo "Uploading database files to $DEST"
+  echo "Uploading database files to $dest"
   putDb $mirrorDbBackupDir
   echo "File Transfer complete."
   echo "Starting to import database..."
@@ -32,7 +32,7 @@ prepareForImport() {
   echo "Database imported successfully..."
   now=$(date +"%T")
   echo "End time : $now "
-  removeMirrorDbFiles $DEST
+  removeMirrorDbFiles $dest
 }
 
 prepareForImport_PI() {
@@ -72,15 +72,15 @@ prepareForImport_PI() {
   if [ "$isLastImport" = true ]; then
     echo "Changing permission for structure file before cleanup... "
     ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${remoteScriptDir}; chmod 755 ${structureFile}"
-    removeMirrorDbFiles $DEST
+    removeMirrorDbFiles $dest
   fi
 }
 
 uploadImportMain(){
   local isLastImport=false
-  readProperties $DEST
+  readProperties $dest
 
-  createRemoteScriptDir $DEST
+  createRemoteScriptDir $dest
 
   if [ ! "$parallelImport" = true ]; then
     prepareForImport

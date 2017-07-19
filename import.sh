@@ -46,7 +46,7 @@ searchReplace() {
   local srcCdnUrl="${CDN_URL}"
   local srcHttpsCdnUrl="${HTTPS_CDN_URL}"
 
-  readProperties $DEST
+  readProperties $dest
   local destUrl=",'${URL}"
   local destUrl2=",'http://${URL}"
   local destUrl3=",'https://${URL}"
