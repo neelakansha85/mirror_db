@@ -17,7 +17,7 @@ uploadExportMain() {
     echo "Start time : $now "
     uploadMirrorDbFiles $src
     # TODO: Use screen for waiting while src performs export to avoid broken pipe
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${remoteScriptDir}; ./${exportScript} -s ${src} -d ${dest} -ebl ${batchLimit} -pl ${poolLimit} -mbl ${mergeBatchLimit} -ewt ${waitTime} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} --parallel-import ${networkFlag} --blog-id ${blogId};"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${remoteScriptDir}; ./${exportScript} -s ${src} -d ${dest} -ebl ${batchLimit} -pl ${poolLimit} -mbl ${mergeBatchLimit} -ewt ${waitTime} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${networkFlag} --blog-id ${blogId};"
 
     if ( ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "[ -d ${DB_BACKUP_DIR} ]" ); then
       # Get path for source db relative to DB_BACKUP_DIR
