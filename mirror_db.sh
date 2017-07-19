@@ -63,7 +63,7 @@ mirrorDbMain() {
 	  fi
 	fi
 
-  if [ ! -z $DEST ]; then
+  if [ ! -z $dest ]; then
 		echo "Executing upload_import script"
 		uploadImportMain
   fi
