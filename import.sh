@@ -40,21 +40,21 @@ searchReplace() {
   local srcUrl=",'${URL}"
   local srcUrl2=",'http://${URL}"
   local srcUrl3=",'https://${URL}"
-  local srcShibUrl=",'${SHIB_URL}'"
-  local srcShibLogoutUrl=",'${SHIB_LOGOUT_URL}'"
+  local srcShibUrl=",'${shibUrl}'"
+  local srcShibLogoutUrl=",'${shibLogoutUrl}'"
   local srcGoogleAnalytics="${G_ANALYTICS}"
-  local srcCdnUrl="${CDN_URL}"
-  local srcHttpsCdnUrl="${HTTPS_CDN_URL}"
+  local srcCdnUrl="${cdnUrl}"
+  local srcHttpsCdnUrl="${httpsCdnUrl}"
 
   readProperties $dest
   local destUrl=",'${URL}"
   local destUrl2=",'http://${URL}"
   local destUrl3=",'https://${URL}"
-  local destShibUrl=",'${SHIB_URL}'"
-  local destShibLogoutUrl=",'${SHIB_LOGOUT_URL}'"
+  local destShibUrl=",'${shibUrl}'"
+  local destShibLogoutUrl=",'${shibLogoutUrl}'"
   local destGoogleAnalytics="${G_ANALYTICS}"
-  local destCdnUrl="${CDN_URL}"
-  local destHttpsCdnUrl="${HTTPS_CDN_URL}"
+  local destCdnUrl="${cdnUrl}"
+  local destHttpsCdnUrl="${httpsCdnUrl}"
 
   cd ${exportDir}
 

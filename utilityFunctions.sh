@@ -179,17 +179,17 @@ readProperties() {
   DB_BACKUP_DIR="${domain}_db_backup_dir"
   DB_BACKUP_DIR=${!DB_BACKUP_DIR}
 
-  SHIB_URL="${domain}_shib_url"
-  SHIB_URL=${!SHIB_URL}
+  shibUrl="${domain}_shib_url"
+  shibUrl=${!shibUrl}
 
-  SHIB_LOGOUT_URL="${domain}_shib_logout_url"
-  SHIB_LOGOUT_URL=${!SHIB_LOGOUT_URL}
+  shibLogoutUrl="${domain}_shib_logout_url"
+  shibLogoutUrl=${!shibLogoutUrl}
 
-  CDN_URL="${domain}_cdn_url"
-  CDN_URL=${!CDN_URL}
+  cdnUrl="${domain}_cdn_url"
+  cdnUrl=${!cdnUrl}
 
-  HTTPS_CDN_URL="${domain}_https_cdn_url"
-  HTTPS_CDN_URL=${!HTTPS_CDN_URL}
+  httpsCdnUrl="${domain}_https_cdn_url"
+  httpsCdnUrl=${!httpsCdnUrl}
 
   G_ANALYTICS="${domain}_g_analytics"
   G_ANALYTICS=${!G_ANALYTICS}
