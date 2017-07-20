@@ -14,24 +14,11 @@ setGlobalVariables() {
   readonly structureFile='mirror_db_structure.sh'
   readonly utilityFile='utilityFunctions.sh'
   readonly dropSqlFile='drop_tables'
-  # where is below file used?
   readonly PiTotalFile='pi_total.txt'
   readonly superAdminTxt='superadmin_dev.txt'
-  #logsDir is used only on export side, can it be declared only there?
   readonly logsDir='log'
   readonly workspace=$(getWorkspace)
-  #properties file can be changed during execution hence not made readonly
-  propertiesFile='db.properties'
-
-  batchLimit=10
-  poolLimit=7000
-  mergeBatchLimit=7000
-  waitTime=3
-  importWaitTime=180
-  srcUrl="''"
-  srcShibUrl="''"
-  srcGAnalytics="''"
-  blogId="''"
+  
   # not changing below variables due to similarities in naming of global and local in export.sh, wanted to discuss before proceeding
   LIST_FILE_NAME='table_list.txt'
   DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
@@ -104,19 +91,6 @@ parseArgs() {
             blogId=$2
             shift
           fi
-          ;;
-        --site-url )
-          srcUrl=$2
-          shift
-          ;;
-        --shib-url )
-          srcShibUrl=$2
-          shift
-          ;;
-          # later in code we only make use of gAnalytics, should that be changed to use parameter passed by user
-        --g-analytics )
-          srcGAnalytics=$2
-          shift
           ;;
         --force )
           forceImport=--force

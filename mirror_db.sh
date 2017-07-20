@@ -7,10 +7,6 @@ set -e
 . upload_import.sh
 
 checkFlags() {
-  if [ ! -d "$logsDir" ]; then
-	  mkdir $logsDir
-  fi
-
   if [ ! -z $DB_BACKUP_DIR ]; then
     skipExport=true
   fi
@@ -34,7 +30,16 @@ checkFlags() {
 }
 
 mirrorDbMain() {
+  # Setting Defaults
+  local propertiesFile='db.properties'
+  local batchLimit=10
+  local poolLimit=7000
+  local mergeBatchLimit=7000
+  local waitTime=3
+  local importWaitTime=180
+
   setGlobalVariables
+  # Update options based on user's arguments
   parseArgs $@
   checkFlags
   echo ""
@@ -43,6 +48,8 @@ mirrorDbMain() {
   echo "Current time: $(date)"
 
   setFilePermissions
+  # Create logsDir if doesn't exist
+  mkdir -p $logsDir
 
   if [[ $propertiesFile != "db.properties" && -e "$propertiesFile" ]]; then
 	  echo "--properties-file option is set"
