@@ -5,16 +5,14 @@ set -e
 . utilityFunctions.sh
 . merge.sh
 
-
-readonly exportDir='db_export'
-readonly mergedDir='db_merged'
-readonly logsDir='log'
-readonly PiTotalFile='pi_total.txt'
-readonly poolWaitTime=300
-# remoteScriptDir gets set in readProperties
-remoteScriptDir='mirror_db'
-# dbSuffix gets set in merge.sh
-dbSuffix=''
+setExportGlobalVariables() {
+  # These variables are shared between export.sh and merge.sh files
+  readonly exportDir='db_export'
+  readonly mergedDir='db_merged'
+  readonly logsDir='log'
+  readonly PiTotalFile='pi_total.txt'
+  readonly poolWaitTime=300
+}
 
 checkCount() {
   local count=$1
@@ -169,7 +167,11 @@ exportParallelMain() {
 #starts here
 exportMain() {
 
+  # Set's global variables for the export process running on src server
+  setExportGlobalVariables
+  
   parseArgs $@
+  
   # scope of total is limited to exportMain()
   local total=1
   local piTotal=1
@@ -184,6 +186,8 @@ exportMain() {
   local networkListFile="${listFileName}_network.${listFileExt}"
   local blogListFile="${listFileName}_${blogId}.${listFileExt}"
   local nonNetworkListFile="${listFileName}_non_network.${listFileExt}"
+  local remoteScriptDir='mirror_db'
+  local dbSuffix=''
 
   # import instance environment variables
   readProperties $src
