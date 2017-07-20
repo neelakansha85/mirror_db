@@ -19,11 +19,11 @@ uploadExportMain() {
     # TODO: Use screen for waiting while src performs export to avoid broken pipe
     ssh -i ${sshKeyPath} ${sshUsername}@${hostName} "cd ${remoteScriptDir}; ./${exportScript} -s ${src} -d ${dest} -ebl ${batchLimit} -pl ${poolLimit} -mbl ${mergeBatchLimit} -ewt ${waitTime} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${networkFlag} --blog-id ${blogId};"
 
-    if ( ssh -i ${sshKeyPath} ${sshUsername}@${hostName} "[ -d ${DB_BACKUP_DIR} ]" ); then
-      # Get path for source db relative to DB_BACKUP_DIR
+    if ( ssh -i ${sshKeyPath} ${sshUsername}@${hostName} "[ -d ${dbBackupDir} ]" ); then
+      # Get path for source db relative to dbBackupDir
       DB_FILE_N=$(getFileName $DB_FILE_NAME)
       # Get absolute path for DB_BACKUP_DIR_PATH
-      local sourceDbBackup=$(ssh -i ${sshKeyPath} ${sshUsername}@${hostName} "cd ${DB_BACKUP_DIR}; cd ${DB_FILE_N}; pwd")
+      local sourceDbBackup=$(ssh -i ${sshKeyPath} ${sshUsername}@${hostName} "cd ${dbBackupDir}; cd ${DB_FILE_N}; pwd")
     fi
 
     # Get exported db from src to mirror_db server

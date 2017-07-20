@@ -14,6 +14,7 @@ setGlobalVariables() {
   readonly structureFile='mirror_db_structure.sh'
   readonly utilityFile='utilityFunctions.sh'
   readonly dropSqlFile='drop_tables'
+  # where is below file used?
   readonly PiTotalFile='pi_total.txt'
   readonly superAdminTxt='superadmin_dev.txt'
   readonly logsDir='log'
@@ -176,8 +177,8 @@ readProperties() {
   remoteScriptDir="${domain}_remote_dir"
   remoteScriptDir=${!remoteScriptDir}
 
-  DB_BACKUP_DIR="${domain}_db_backup_dir"
-  DB_BACKUP_DIR=${!DB_BACKUP_DIR}
+  dbBackupDir="${domain}_db_backup_dir"
+  dbBackupDir=${!dbBackupDir}
 
   shibUrl="${domain}_shib_url"
   shibUrl=${!shibUrl}
@@ -201,8 +202,8 @@ readProperties() {
   if [ -z $remoteScriptDir ]; then
     remoteScriptDir='mirror_db'
   fi
-  if [ -z $DB_BACKUP_DIR ]; then
-    DB_BACKUP_DIR='db_backup'
+  if [ -z $dbBackupDir ]; then
+    dbBackupDir='db_backup'
   fi
 }
 

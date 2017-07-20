@@ -84,7 +84,7 @@ downloadTablesPI() {
     (( total++ ))
 
     # Required for identifying which file needs to be imported
-    echo "${db}.${tb}" >> ${listFileName}_${PI_TOTAL}.${listFileExt}
+    echo "${db}.${tb}" >> ${listFileName}_${piTotal}.${listFileExt}
 
     batchCount=$(checkCountLimit $batchCount $batchLimit)
     poolCount=$(checkCountLimit $poolCount $poolLimit $poolWaitTime)
@@ -92,11 +92,11 @@ downloadTablesPI() {
       # TODO: Remove below line and cd {exportDir} if using absolute path for dir
       # Get to root dir
       cd ..
-      dbFileNamePI="${dbFileName}_${PI_TOTAL}.${dbFileExt}"
-      nohup ./mirror_db.sh -s ${src} -d ${dest} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${logsDir}/mirror_db_pi.log 2>&1
+      dbFileNamePI="${dbFileName}_${piTotal}.${dbFileExt}"
+      nohup ./mirror_db.sh -s ${src} -d ${dest} -lf ${listFileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${logsDir}/mirror_db_pi.log 2>&1
       # Continue exporting in exportDir
       cd ${exportDir}
-      (( PI_TOTAL++ ))
+      (( piTotal++ ))
     fi
   done
   total=total-1
@@ -160,8 +160,8 @@ exportParallelMain() {
   cd ..
 
   # Execute merge and upload for the last set of tables downloaded
-  dbFileNamePI="${dbFileName}_${PI_TOTAL}.${dbFileExt}"
-  nohup ./mirror_db.sh -s ${src} -d ${dest} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import --is-last-import >> ${logsDir}/mirror_db_pi.log 2>&1
+  dbFileNamePI="${dbFileName}_${piTotal}.${dbFileExt}"
+  nohup ./mirror_db.sh -s ${src} -d ${dest} -lf ${listFileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import --is-last-import >> ${logsDir}/mirror_db_pi.log 2>&1
 }
 
 #starts here
@@ -170,7 +170,7 @@ exportMain() {
   parseArgs $@
   # scope of total is limited to exportMain()
   local total=1
-  local PI_TOTAL=1
+  local piTotal=1
   local dbFile=${DB_FILE_NAME}
   local listFile=${LIST_FILE_NAME}
   local dbFileExt=$(getFileExtension $dbFile)

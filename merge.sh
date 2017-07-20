@@ -59,7 +59,7 @@ archiveMergedFiles(){
   # TODO: Update path based on absolute path of the file using $(pwd)
   for mrdb in $(ls ~/${remoteScriptDir}/${exportDir}/${mergedDir}/*.sql)
   do
-    cp ${mrdb} ~/${DB_BACKUP_DIR}/${dbFileName}/
+    cp ${mrdb} ~/${dbBackupDir}/${dbFileName}/
   done
 }
 

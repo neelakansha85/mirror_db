@@ -44,7 +44,7 @@ prepareForImport_PI() {
   echo "Uploading ${DB_FILE_NAME}... "
   # Put all SQL files on ${dest} server from mirror_db server
   echo "Executing ${PUT_DB_SCRIPT} script"
-  putDb ${DB_BACKUP_DIR}
+  putDb ${dbBackupDir}
 
   echo "Starting to import ${DB_FILE_NAME}..."
   now=$(date +"%T")
