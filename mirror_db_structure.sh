@@ -3,12 +3,12 @@
 mirrorDbStructure() {
   # Config Options
   # do the following variables also have to be readonly
-  arg1=$1
-  exportDir=${2:-'db_export'}
-  importScript='import.sh'
-  dropSqlFile='drop_tables'
-  superAdminTxt='superadmin_dev.txt'
-  propertiesFile='db.properties'
+  local arg1=$1
+  local exportDir=${2:-'db_export'}
+  local importScript='import.sh'
+  local dropSqlFile='drop_tables'
+  local superAdminTxt='superadmin_dev.txt'
+  local propertiesFile='db.properties'
 
   if [ "$arg1" == "mk" ]; then
 	  if [ ! -d "$exportDir" ]; then
