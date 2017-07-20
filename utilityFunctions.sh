@@ -152,17 +152,17 @@ readProperties() {
   local domain=$1
 	. db.properties
 
-  DB_USER="${domain}_db_user"
-  DB_USER=${!DB_USER}
+  dbUser="${domain}_db_user"
+  dbUser=${!dbUser}
 
-  DB_PASSWORD="${domain}_db_pass"
-  DB_PASSWORD=${!DB_PASSWORD}
+  dbPassword="${domain}_db_pass"
+  dbPassword=${!dbPassword}
 
-  DB_HOST_NAME="${domain}_db_host"
-  DB_HOST_NAME=${!DB_HOST_NAME}
+  dbHostName="${domain}_db_host"
+  dbHostName=${!dbHostName}
 
-  DB_SCHEMA="${domain}_db_name"
-  DB_SCHEMA=${!DB_SCHEMA}
+  dbSchema="${domain}_db_name"
+  dbSchema=${!dbSchema}
 
   URL="${domain}_url"
   URL=${!URL}
@@ -170,8 +170,8 @@ readProperties() {
   HOST_NAME="${domain}_host"
   HOST_NAME=${!HOST_NAME}
 
-  SITE_DIR="${domain}_dir"
-  SITE_DIR=${!SITE_DIR}
+  siteDir="${domain}_dir"
+  siteDir=${!siteDir}
 
   remoteScriptDir="${domain}_remote_dir"
   remoteScriptDir=${!remoteScriptDir}
@@ -269,7 +269,7 @@ uploadMirrorDbFiles() {
   rsync -avzhe ssh --delete --progress ${structureFile} ${SSH_USERNAME}@${HOST_NAME}:${remoteScriptDir}/
   echo "Executing structure script for creating dir on ${location} server... "
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${remoteScriptDir}; ./${structureFile} mk ${exportDir}"
-  if [ $location="$DEST" ];then
+  if [ $location="$dest" ];then
     rsync -avzhe ssh --delete --progress ${utilityFile} ${exportScript} ${mergeScript} ${propertiesFile} ${importScript} ${superAdminTxt} ${SSH_USERNAME}@${HOST_NAME}:${remoteScriptDir}/
   else
     rsync -avzhe ssh --delete --progress ${utilityFile} ${exportScript} ${mergeScript} ${propertiesFile} ${SSH_USERNAME}@${HOST_NAME}:${remoteScriptDir}/

@@ -23,7 +23,7 @@ prepareForImport() {
   if [ "$dropTables" = true ]; then
     echo "Emptying Database using wp-cli..."
     # TODO: Use screen for waiting while dest performs db reset to avoid broken pipe
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${SITE_DIR}; wp db reset --yes"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${siteDir}; wp db reset --yes"
   fi
   # TODO: Use screen for waiting while dest performs import to avoid broken pipe
   # Execute Import.sh to import database

@@ -46,7 +46,7 @@ downloadTables() {
     checkCount $batchCount "Batch"
     echo "Downloading ${tb}.sql ... "
 
-    mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${db} ${tb} | gzip > ${db}_${tb}.sql.gz &
+    mysqldump --host=${dbHostName} --user=${dbUser} --password=${dbPassword} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${db} ${tb} | gzip > ${db}_${tb}.sql.gz &
     (( batchCount++ ))
     (( poolCount++ ))
     (( total++ ))
@@ -78,7 +78,7 @@ downloadTablesPI() {
     checkCount $batchCount "Batch"
     echo "Downloading ${tb}.sql ... "
 
-    mysqldump --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${db} ${tb} | gzip > ${db}_${tb}.sql.gz &
+    mysqldump --host=${dbHostName} --user=${dbUser} --password=${dbPassword} --default-character-set=utf8 --hex-blob --single-transaction --quick --triggers ${db} ${tb} | gzip > ${db}_${tb}.sql.gz &
     (( batchCount++ ))
     (( poolCount++ ))
     (( total++ ))
@@ -111,21 +111,21 @@ downloadTablesPI() {
 
 downloadNetworkTables() {
   local listFileName=${1:-table_list.txt}
-  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-zA-Z]+[a-zA-Z0-9_]*$'" > $listFileName
+  mysql --host=${dbHostName} --user=${dbUser} --password=${dbPassword} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${dbSchema}' AND TABLE_NAME REGEXP '^wp_[a-zA-Z]+[a-zA-Z0-9_]*$'" > $listFileName
   downloadTables $listFileName
   mergeMain -lf $listFileName -dbf ${networkDb} -mbl ${mergeBatchLimit}
 }
 
 downloadBlogTables() {
   local listFileName=${1:-table_list.txt}
-  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_${blogId}+[a-zA-Z0-9_]*$'" > $listFileName
+  mysql --host=${dbHostName} --user=${dbUser} --password=${dbPassword} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${dbSchema}' AND TABLE_NAME REGEXP '^wp_${blogId}+[a-zA-Z0-9_]*$'" > $listFileName
   downloadTables $listFileName
   mergeMain -lf $listFileName -dbf ${blogDb} -mbl ${mergeBatchLimit}
 }
 
 downloadNonNetworkTables() {
   local listFileName=${1:-table_list.txt}
-  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[0-9]+[a-zA-Z0-9_]*$'" > $listFileName
+  mysql --host=${dbHostName} --user=${dbUser} --password=${dbPassword} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${dbSchema}' AND TABLE_NAME REGEXP '^wp_[0-9]+[a-zA-Z0-9_]*$'" > $listFileName
   downloadTables $listFileName
   mergeMain -lf $listFileName -dbf ${dbFile} -mbl ${mergeBatchLimit}
 }
@@ -135,7 +135,7 @@ exportParallelMain() {
   # Download Network tables first
   # TODO: Verify if mergeMain() is required and if so use below function
   # downloadNetworkTables $networkListFile
-  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-zA-Z]+[a-zA-Z0-9_]*$'" > $networkListFile
+  mysql --host=${dbHostName} --user=${dbUser} --password=${dbPassword} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${dbSchema}' AND TABLE_NAME REGEXP '^wp_[a-zA-Z]+[a-zA-Z0-9_]*$'" > $networkListFile
   downloadTables $networkListFile
   # TODO: Need to verify if mergeMain() is required for Network tables
   # mergeMain -lf $networkListFile -dbf ${dbFile} -mbl ${mergeBatchLimit}
@@ -150,7 +150,7 @@ exportParallelMain() {
   # Download all Non Network Tables
   # TODO: Verify if mergeMain() is required and if so use below function
   # downloadNonNetworkTables $nonNetworkListFile
-  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[0-9]+[a-zA-Z0-9_]*$'" > $nonNetworkListFile
+  mysql --host=${dbHostName} --user=${dbUser} --password=${dbPassword} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${dbSchema}' AND TABLE_NAME REGEXP '^wp_[0-9]+[a-zA-Z0-9_]*$'" > $nonNetworkListFile
   downloadTablesPI $nonNetworkListFile
   # TODO: Need to verify if mergeMain() is required for Network tables
   # mergeMain -lf $nonNetworkListFile -dbf ${dbFile} -mbl ${mergeBatchLimit}

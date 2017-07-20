@@ -90,14 +90,14 @@ searchReplace() {
 
 importTables() {
   echo "Disabling foreign key check before importing db"
-	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=0"
+	mysql --host=${dbHostName} --user=${dbUser} --password=${dbPassword} ${dbSchema} -e "SET foreign_key_checks=0"
   # SQL files are inside $exportDir
   cd ${exportDir}
 
 	if [ ! -z $DB_FILE_NAME ]; then
 	  # Import statement
 		echo "Starting to import ${DB_FILE_NAME}"
-		mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${forceImport} < ${DB_FILE_NAME}
+		mysql --host=${dbHostName} --user=${dbUser} --password=${dbPassword} ${dbSchema} ${forceImport} < ${DB_FILE_NAME}
 		# Remove file to avoid importing it twice
 		rm $DB_FILE_NAME
 	else
@@ -106,7 +106,7 @@ importTables() {
 		do
 			# Import statement
 			echo "Starting to import ${MRDB}"
-			mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${forceImport} < ${MRDB}
+			mysql --host=${dbHostName} --user=${dbUser} --password=${dbPassword} ${dbSchema} ${forceImport} < ${MRDB}
 			sleep $importWaitTime
 		done
 	fi
@@ -114,7 +114,7 @@ importTables() {
   cd ..
 
 	echo "Enabling foreign key check after importing db"
-	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=1"
+	mysql --host=${dbHostName} --user=${dbUser} --password=${dbPassword} ${dbSchema} -e "SET foreign_key_checks=1"
 }
 
 afterImport() {
@@ -122,7 +122,7 @@ afterImport() {
   local superAdmin=$(php -r "print_r(serialize(array(${superAdminTxt})));")
 
   # Setting pwd to wordpress installation dir
-  cd ~/${SITE_DIR}
+  cd ~/${siteDir}
 
   # Replacing super admins list with the dev list
   wp db query "UPDATE wp_sitemeta SET meta_value='${superAdmin}' WHERE meta_key='site_admins';";
