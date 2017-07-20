@@ -12,10 +12,10 @@ checkFlags() {
   fi
 
   if [ ! -z $DB_BACKUP_DIR ]; then
-    SKIP_EXPORT=true
+    skipExport=true
   fi
 
-  if [ "$SKIP_IMPORT" = true ]; then
+  if [ "$skipImport" = true ]; then
 	  # Cannot drop entire database if skipping import process
 	  dropTables=
 	  dropTableSql=

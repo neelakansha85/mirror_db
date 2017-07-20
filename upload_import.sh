@@ -4,7 +4,7 @@
 
 prepareForImport() {
   local mirrorDbBackupDir=""
-  uploadMirrorDbFiles $DEST
+  uploadMirrorDbFiles $dest
   if [ ! -z $customDbBackupDir ]; then
     mirrorDbBackupDir=$customDbBackupDir
   elif [ ! -z $MIRROR_DB_BACKUP_DIR ]; then

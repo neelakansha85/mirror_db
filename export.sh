@@ -52,7 +52,7 @@ downloadTables() {
     (( total++ ))
     batchCount=$(checkCountLimit $batchCount $batchLimit)
     #NOTE: to be changed: sleep pool_wait_time
-    poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $poolWaitTime)
+    poolCount=$(checkCountLimit $poolCount $poolLimit $poolWaitTime)
   done
   (( total-- ))
   echo "Completed downloading tables from $listFileName ..."
@@ -87,7 +87,7 @@ downloadTablesPI() {
     echo "${db}.${tb}" >> ${listFileName}_${PI_TOTAL}.${listFileExt}
 
     batchCount=$(checkCountLimit $batchCount $batchLimit)
-    poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $poolWaitTime)
+    poolCount=$(checkCountLimit $poolCount $poolLimit $poolWaitTime)
     if [ ${poolCount} -eq 1 ]; then
       # TODO: Remove below line and cd {exportDir} if using absolute path for dir
       # Get to root dir
