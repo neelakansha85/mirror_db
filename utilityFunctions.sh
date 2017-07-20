@@ -37,6 +37,15 @@ setGlobalVariables() {
   DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
 }
 
+setExportGlobalVariables() {
+  # These variables are shared between export.sh and merge.sh files
+  readonly exportDir='db_export'
+  readonly mergedDir='db_merged'
+  readonly logsDir='log'
+  readonly PiTotalFile='pi_total.txt'
+  readonly poolWaitTime=300
+}
+
 parseArgs() {
   if [ ! $# -ge 2 ]; then
       echo "Please enter the source or destination to run"

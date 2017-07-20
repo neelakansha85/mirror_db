@@ -5,15 +5,6 @@ set -e
 . utilityFunctions.sh
 . merge.sh
 
-setExportGlobalVariables() {
-  # These variables are shared between export.sh and merge.sh files
-  readonly exportDir='db_export'
-  readonly mergedDir='db_merged'
-  readonly logsDir='log'
-  readonly PiTotalFile='pi_total.txt'
-  readonly poolWaitTime=300
-}
-
 checkCount() {
   local count=$1
   local set=$2
