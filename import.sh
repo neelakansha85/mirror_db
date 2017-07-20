@@ -37,22 +37,22 @@ replaceGoogleAnalytics() {
 
 searchReplace() {
   readProperties $src
-  local srcUrl=",'${URL}"
-  local srcUrl2=",'http://${URL}"
-  local srcUrl3=",'https://${URL}"
+  local srcUrl=",'${url}"
+  local srcUrl2=",'http://${url}"
+  local srcUrl3=",'https://${url}"
   local srcShibUrl=",'${shibUrl}'"
   local srcShibLogoutUrl=",'${shibLogoutUrl}'"
-  local srcGoogleAnalytics="${G_ANALYTICS}"
+  local srcGoogleAnalytics="${gAnalytics}"
   local srcCdnUrl="${cdnUrl}"
   local srcHttpsCdnUrl="${httpsCdnUrl}"
 
   readProperties $dest
-  local destUrl=",'${URL}"
-  local destUrl2=",'http://${URL}"
-  local destUrl3=",'https://${URL}"
+  local destUrl=",'${url}"
+  local destUrl2=",'http://${url}"
+  local destUrl3=",'https://${url}"
   local destShibUrl=",'${shibUrl}'"
   local destShibLogoutUrl=",'${shibLogoutUrl}'"
-  local destGoogleAnalytics="${G_ANALYTICS}"
+  local destGoogleAnalytics="${gAnalytics}"
   local destCdnUrl="${cdnUrl}"
   local destHttpsCdnUrl="${httpsCdnUrl}"
 

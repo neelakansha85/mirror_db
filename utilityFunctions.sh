@@ -164,11 +164,11 @@ readProperties() {
   dbSchema="${domain}_db_name"
   dbSchema=${!dbSchema}
 
-  URL="${domain}_url"
-  URL=${!URL}
+  url="${domain}_url"
+  url=${!url}
 
-  HOST_NAME="${domain}_host"
-  HOST_NAME=${!HOST_NAME}
+  hostName="${domain}_host"
+  hostName=${!hostName}
 
   siteDir="${domain}_dir"
   siteDir=${!siteDir}
@@ -191,12 +191,12 @@ readProperties() {
   httpsCdnUrl="${domain}_https_cdn_url"
   httpsCdnUrl=${!httpsCdnUrl}
 
-  G_ANALYTICS="${domain}_g_analytics"
-  G_ANALYTICS=${!G_ANALYTICS}
+  gAnalytics="${domain}_g_analytics"
+  gAnalytics=${!gAnalytics}
 
   # Set SSH Parameters
-  SSH_KEY_PATH=$ssh_key_path
-  SSH_USERNAME=$ssh_username
+  sshKeyPath=$ssh_key_path
+  sshUsername=$ssh_username
 
   if [ -z $remoteScriptDir ]; then
     remoteScriptDir='mirror_db'
@@ -240,9 +240,9 @@ setFilePermissions() {
 getDb() {
   local dbBackDir=$1
   if [ ! "$parallelImport" = true ]; then
-	  rsync -avzhe ssh --include '*.sql' --exclude '*' --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${exportDir}/
+	  rsync -avzhe ssh --include '*.sql' --exclude '*' --delete --progress ${sshUsername}@${hostName}:${dbBackDir}/ ${exportDir}/
   else
-	  rsync -avzhe ssh --progress ${dbBackDir}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${exportDir}/
+	  rsync -avzhe ssh --progress ${dbBackDir}/${DB_FILE_NAME} ${sshUsername}@${hostName}:${dbBackDir}/ ${exportDir}/
   fi
   #since db is copied to mirror_db server, setting value to exportDir
   readonly MIRROR_DB_BACKUP_DIR=$exportDir
@@ -252,32 +252,32 @@ putDb() {
   local dbBackDir=$1
   if [ ! "$parallelImport" = true ]; then
     echo "Database path on mirror_db: $dbBackDir"
-	  rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${dbBackDir}/ ${SSH_USERNAME}@${HOST_NAME}:${remoteScriptDir}/${exportDir}/
+	  rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${dbBackDir}/ ${sshUsername}@${hostName}:${remoteScriptDir}/${exportDir}/
   else
-	  rsync -avzhe ssh --progress ${exportDir}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${remoteScriptDir}/${exportDir}/
+	  rsync -avzhe ssh --progress ${exportDir}/${DB_FILE_NAME} ${sshUsername}@${hostName}:${remoteScriptDir}/${exportDir}/
   fi
 }
 
 createRemoteScriptDir() {
   local location=$1
   echo "Creating ${remoteScriptDir} on ${location}..."
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "mkdir -p ${remoteScriptDir};"
+  ssh -i ${sshKeyPath} ${sshUsername}@${hostName} "mkdir -p ${remoteScriptDir};"
 }
 
 uploadMirrorDbFiles() {
   local location=$1
-  rsync -avzhe ssh --delete --progress ${structureFile} ${SSH_USERNAME}@${HOST_NAME}:${remoteScriptDir}/
+  rsync -avzhe ssh --delete --progress ${structureFile} ${sshUsername}@${hostName}:${remoteScriptDir}/
   echo "Executing structure script for creating dir on ${location} server... "
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${remoteScriptDir}; ./${structureFile} mk ${exportDir}"
+  ssh -i ${sshKeyPath} ${sshUsername}@${hostName} "cd ${remoteScriptDir}; ./${structureFile} mk ${exportDir}"
   if [ $location="$dest" ];then
-    rsync -avzhe ssh --delete --progress ${utilityFile} ${exportScript} ${mergeScript} ${propertiesFile} ${importScript} ${superAdminTxt} ${SSH_USERNAME}@${HOST_NAME}:${remoteScriptDir}/
+    rsync -avzhe ssh --delete --progress ${utilityFile} ${exportScript} ${mergeScript} ${propertiesFile} ${importScript} ${superAdminTxt} ${sshUsername}@${hostName}:${remoteScriptDir}/
   else
-    rsync -avzhe ssh --delete --progress ${utilityFile} ${exportScript} ${mergeScript} ${propertiesFile} ${SSH_USERNAME}@${HOST_NAME}:${remoteScriptDir}/
+    rsync -avzhe ssh --delete --progress ${utilityFile} ${exportScript} ${mergeScript} ${propertiesFile} ${sshUsername}@${hostName}:${remoteScriptDir}/
   fi
 }
 
 removeMirrorDbFiles() {
   local location=$1
   echo "Removing ${remoteScriptDir} from ${location}..."
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "rm -rf ${remoteScriptDir};"
+  ssh -i ${sshKeyPath} ${sshUsername}@${hostName} "rm -rf ${remoteScriptDir};"
 }
