@@ -2,6 +2,7 @@
 
 mirrorDbStructure() {
   # Config Options
+  # do the following variables also have to be readonly
   arg1=$1
   exportDir=${2:-'db_export'}
   importScript='import.sh'

@@ -11,7 +11,9 @@ readonly mergedDir='db_merged'
 readonly logsDir='log'
 readonly PiTotalFile='pi_total.txt'
 readonly poolWaitTime=300
+# remoteScriptDir gets set in readProperties
 remoteScriptDir='mirror_db'
+# dbSuffix gets set in merge.sh
 dbSuffix=''
 
 checkCount() {

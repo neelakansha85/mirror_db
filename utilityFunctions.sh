@@ -17,6 +17,7 @@ setGlobalVariables() {
   # where is below file used?
   readonly PiTotalFile='pi_total.txt'
   readonly superAdminTxt='superadmin_dev.txt'
+  #logsDir is used only on export side, can it be declared only there?
   readonly logsDir='log'
   readonly workspace=$(getWorkspace)
   #properties file can be changed during execution hence not made readonly
@@ -103,6 +104,7 @@ parseArgs() {
           srcShibUrl=$2
           shift
           ;;
+          # later in code we only make use of gAnalytics, should that be changed to use parameter passed by user
         --g-analytics )
           srcGAnalytics=$2
           shift

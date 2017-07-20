@@ -10,7 +10,7 @@ prepareForImport() {
   elif [ ! -z $MIRROR_DB_BACKUP_DIR ]; then
     mirrorDbBackupDir=$MIRROR_DB_BACKUP_DIR
   else
-    mirrorDbBackupDir=$DB_BACKUP_DIR
+    mirrorDbBackupDir=$dbBackupDir
   fi
   echo "Uploading database files to $dest"
   putDb $mirrorDbBackupDir
