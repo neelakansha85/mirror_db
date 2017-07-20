@@ -12,9 +12,21 @@ checkFlags() {
   fi
 
   if [ "$skipImport" = true ]; then
+    # This value has to be passed over to import.sh on Dest
+    skipImport='--skip-import'
 	  # Cannot drop entire database if skipping import process
 	  dropTables=
 	  dropTableSql=
+  fi
+  
+  if [ "$skipReplace" = true ]; then
+    # This value has to be passed over to import.sh on Dest
+    skipReplace='--skip-replace'
+  fi  
+
+  if [ "$skipNetworkImport" = true ]; then
+    # This value has to be passed over to export.sh on Src
+    skipNetworkImport='--skip-network-import'
   fi
 
   if [ "$dropTableSql" = true ]; then
