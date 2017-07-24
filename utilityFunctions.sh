@@ -241,6 +241,43 @@ exportParseArgs() {
   fi
 }
 
+mergeParseArgs() {
+  while [ "$1" != "" ]; do
+      case $1 in
+        -mbl )
+          readonly MERGE_BATCH_LIMIT=$2
+          shift
+          ;;
+        -lf )
+          readonly LIST_FILE_NAME=$2
+          shift
+          ;;
+        -dbf )
+          readonly DB_FILE_NAME=$2
+          shift
+          ;;
+        * )
+          break
+          ;;
+      esac
+      shift
+  done
+
+  if [ -z $MERGE_BATCH_LIMIT ]; then
+    readonly MERGE_BATCH_LIMIT=7000
+  fi
+  if [ -z $LIST_FILE_NAME ]; then
+    readonly LIST_FILE_NAME="table_list.txt"
+  fi
+  if [ -z $DB_FILE_NAME ]; then
+    if [ ! -z $SRC ]; then
+      readonly DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
+    else
+      readonly DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
+    fi
+  fi
+}
+
 readProperties() {
   local domain=$1
 	. db.properties
