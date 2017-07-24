@@ -6,7 +6,7 @@ set -e
 
 mergeFileName(){
   local total=$1
-  if [ ! "$skipReplace" = true ]; then
+  if [ ! "$SKIP_REPLACE" = true ]; then
     dbSuffix="_${total}"
   fi
   mergedName="${dbFileName}${dbSuffix}.${dbFileExt}"
@@ -15,7 +15,7 @@ mergeFileName(){
 
 moveFileToMergeDir(){
   if [ -e ${mergedFileName} ]; then
-    mv ${mergedFileName} $mergedDir/${mergedFileName}
+    mv ${mergedFileName} $MERGED_DIR/${mergedFileName}
   fi
 }
 
@@ -40,11 +40,11 @@ mergeFile(){
     $(rm ${db}_${tb}.sql)
     (( mergeBatchCount++ ))
 
-    if [ ${mergeBatchCount} -eq ${mergeBatchLimit} ]; then
+    if [ ${mergeBatchCount} -eq ${MERGE_BATCH_LIMIT} ]; then
       moveFileToMergeDir
       mergeBatchCount=1
       (( total++ ))
-      echo "Merged ${mergeBatchLimit} tables, starting new batch for merging... "
+      echo "Merged ${MERGE_BATCH_LIMIT} tables, starting new batch for merging... "
     fi
   done
   moveFileToMergeDir
@@ -57,9 +57,9 @@ mergeFile(){
 archiveMergedFiles(){
   echo "Copying all merged DB files to archives dir... "
   # TODO: Update path based on absolute path of the file using $(pwd)
-  for mrdb in $(ls ~/${remoteScriptDir}/${exportDir}/${mergedDir}/*.sql)
+  for mrdb in $(ls ~/${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/${MERGED_DIR}/*.sql)
   do
-    cp ${mrdb} ~/${dbBackupDir}/${dbFileName}/
+    cp ${mrdb} ~/${DB_BACKUP_DIR}/${dbFileName}/
   done
 }
 
@@ -70,7 +70,7 @@ mergeMain() {
   local dbFileExt=$(getFileExtension $dbFile)
   local dbFileName=$(getFileName $dbFile)
 
-  mkdir -p $mergedDir
+  mkdir -p $MERGED_DIR
   mergeFile
 
   # Move all .sql files to archives dir for future reference

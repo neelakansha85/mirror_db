@@ -36,29 +36,29 @@ replaceGoogleAnalytics() {
 }
 
 searchReplace() {
-  readProperties $src
-  local srcUrl=",'${url}"
-  local srcUrl2=",'http://${url}"
-  local srcUrl3=",'https://${url}"
-  local srcShibUrl=",'${shibUrl}'"
-  local srcShibLogoutUrl=",'${shibLogoutUrl}'"
-  local srcGoogleAnalytics="${gAnalytics}"
-  local srcCdnUrl="${cdnUrl}"
-  local srcHttpsCdnUrl="${httpsCdnUrl}"
+  readProperties $SRC
+  local srcUrl=",'${URL}"
+  local srcUrl2=",'http://${URL}"
+  local srcUrl3=",'https://${URL}"
+  local srcShibUrl=",'${SHIB_URL}'"
+  local srcShibLogoutUrl=",'${SHIB_LOGOUT_URL}'"
+  local srcGoogleAnalytics="${G_ANALYTICS}"
+  local srcCdnUrl="${CDN_URL}"
+  local srcHttpsCdnUrl="${HTTPS_CDN_URL}"
 
-  readProperties $dest
-  local destUrl=",'${url}"
-  local destUrl2=",'http://${url}"
-  local destUrl3=",'https://${url}"
-  local destShibUrl=",'${shibUrl}'"
-  local destShibLogoutUrl=",'${shibLogoutUrl}'"
-  local destGoogleAnalytics="${gAnalytics}"
-  local destCdnUrl="${cdnUrl}"
-  local destHttpsCdnUrl="${httpsCdnUrl}"
+  readProperties $DEST
+  local destUrl=",'${URL}"
+  local destUrl2=",'http://${URL}"
+  local destUrl3=",'https://${URL}"
+  local destShibUrl=",'${SHIB_URL}'"
+  local destShibLogoutUrl=",'${SHIB_LOGOUT_URL}'"
+  local destGoogleAnalytics="${G_ANALYTICS}"
+  local destCdnUrl="${CDN_URL}"
+  local destHttpsCdnUrl="${HTTPS_CDN_URL}"
 
-  cd ${exportDir}
+  cd ${EXPORT_DIR}
 
-  if [ ! "$skipReplace" = true ]; then
+  if [ ! "$SKIP_REPLACE" = true ]; then
     for MRDB in $(ls *.sql)
     do
       if [ -e ${MRDB} ]; then
@@ -90,14 +90,14 @@ searchReplace() {
 
 importTables() {
   echo "Disabling foreign key check before importing db"
-	mysql --host=${dbHostName} --user=${dbUser} --password=${dbPassword} ${dbSchema} -e "SET foreign_key_checks=0"
-  # SQL files are inside $exportDir
-  cd ${exportDir}
+	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=0"
+  # SQL files are inside $EXPORT_DIR
+  cd ${EXPORT_DIR}
 
 	if [ ! -z $DB_FILE_NAME ]; then
 	  # Import statement
 		echo "Starting to import ${DB_FILE_NAME}"
-		mysql --host=${dbHostName} --user=${dbUser} --password=${dbPassword} ${dbSchema} ${forceImport} < ${DB_FILE_NAME}
+		mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${DB_FILE_NAME}
 		# Remove file to avoid importing it twice
 		rm $DB_FILE_NAME
 	else
@@ -106,36 +106,36 @@ importTables() {
 		do
 			# Import statement
 			echo "Starting to import ${MRDB}"
-			mysql --host=${dbHostName} --user=${dbUser} --password=${dbPassword} ${dbSchema} ${forceImport} < ${MRDB}
-			sleep $importWaitTime
+			mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} ${FORCE_IMPORT} < ${MRDB}
+			sleep $IMPORT_WAIT_TIME
 		done
 	fi
 	# Get to root dir
   cd ..
 
 	echo "Enabling foreign key check after importing db"
-	mysql --host=${dbHostName} --user=${dbUser} --password=${dbPassword} ${dbSchema} -e "SET foreign_key_checks=1"
+	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=1"
 }
 
 afterImport() {
-  local superAdminTxt="$(cat superadmin_dev.txt)"
-  local superAdmin=$(php -r "print_r(serialize(array(${superAdminTxt})));")
+  local SUPER_ADMIN_TXT="$(cat superadmin_dev.txt)"
+  local superAdmin=$(php -r "print_r(serialize(array(${SUPER_ADMIN_TXT})));")
 
   # Setting pwd to wordpress installation dir
-  cd ~/${siteDir}
+  cd ~/${SITE_DIR}
 
   # Replacing super admins list with the dev list
   wp db query "UPDATE wp_sitemeta SET meta_value='${superAdmin}' WHERE meta_key='site_admins';";
 }
 
 importMain() {
-  local exportDir='db_export'
-  local dropSqlFile='drop_tables'
+  local EXPORT_DIR='db_export'
+  local DROP_SQL_FILE='drop_tables'
 
   parseArgs $@
   searchReplace
 
-  if [ ! "$skipImport" = true ]; then
+  if [ ! "$SKIP_IMPORT" = true ]; then
     importTables
   fi
 
