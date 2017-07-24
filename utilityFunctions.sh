@@ -161,6 +161,86 @@ parseArgs() {
   fi
 }
 
+exportParseArgs() {
+  while [ "$1" != "" ]; do
+      case $1 in
+        -s | --source )
+          readonly SRC=$2
+          shift
+          ;;
+        -d | --destination )
+          readonly DEST=$2
+          shift
+          ;;
+        -ebl )
+          readonly BATCH_LIMIT=$2
+          shift
+          ;;
+        -pl )
+          readonly POOL_LIMIT=$2
+          shift
+          ;;
+        -mbl )
+          readonly MERGE_BATCH_LIMIT=$2
+          shift
+          ;;
+        -ewt )
+          readonly WAIT_TIME=$2
+          shift
+          ;;
+        -lf )
+          readonly LIST_FILE_NAME=$2
+          shift
+          ;;
+        -dbf )
+          readonly DB_FILE_NAME=$2
+          shift
+          ;;
+        --blog-id )
+          # TODO: Need to remove below condition once all files are cleaned
+          if [ ! -z $2 ]; then
+            readonly BLOG_ID=$2
+            shift
+          fi
+          ;;
+        --network-flag )
+          readonly NETWORK_FLAG=true
+          ;;
+        -- )
+          shift;
+          break
+          ;;
+        * )
+          break
+          ;;
+      esac
+      shift
+  done
+
+  if [ -z $BATCH_LIMIT ]; then
+    readonly BATCH_LIMIT=10
+  fi
+  if [ -z $POOL_LIMIT ]; then
+    readonly POOL_LIMIT=7000
+  fi
+  if [ -z $MERGE_BATCH_LIMIT ]; then
+    readonly MERGE_BATCH_LIMIT=7000
+  fi
+  if [ -z $WAIT_TIME ]; then
+    readonly WAIT_TIME=3
+  fi
+  if [ -z $LIST_FILE_NAME ]; then
+    readonly LIST_FILE_NAME="table_list.txt"
+  fi
+  if [ -z $DB_FILE_NAME ]; then
+    if [ ! -z $SRC ]; then
+      readonly DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
+    else
+      readonly DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
+    fi
+  fi
+}
+
 readProperties() {
   local domain=$1
 	. db.properties

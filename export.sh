@@ -160,8 +160,7 @@ exportMain() {
 
   # Set's global variables for the export process running on SRC server
   setExportGlobalVariables
-  
-  parseArgs $@
+  exportParseArgs $@
   
   # scope of total is limited to exportMain()
   local total=1
