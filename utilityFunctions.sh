@@ -6,31 +6,28 @@ getWorkspace() {
 }
 
 setGlobalVariables() {
-  readonly exportDir='db_export'
-  readonly mergedDir='db_merged'
-  readonly importScript='import.sh'
-  readonly exportScript='export.sh'
-  readonly mergeScript='merge.sh'
-  readonly structureFile='mirror_db_structure.sh'
-  readonly utilityFile='utilityFunctions.sh'
-  readonly dropSqlFile='drop_tables'
-  readonly PiTotalFile='pi_total.txt'
-  readonly superAdminTxt='superadmin_dev.txt'
-  readonly logsDir='log'
-  readonly workspace=$(getWorkspace)
-  
-  # not changing below variables due to similarities in naming of global and local in export.sh, wanted to discuss before proceeding
-  LIST_FILE_NAME='table_list.txt'
-  DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
+  readonly EXPORT_DIR='db_export'
+  readonly MERGED_DIR='db_merged'
+  readonly IMPORT_SCRIPT='import.sh'
+  readonly EXPORT_SCRIPT='export.sh'
+  readonly MERGE_SCRIPT='merge.sh'
+  readonly STRUCTURE_FILE='mirror_db_structure.sh'
+  readonly UTILITY_FILE='utilityFunctions.sh'
+  readonly DROP_SQL_FILE='drop_tables'
+  readonly PI_TOTAL_FILE='pi_total.txt'
+  readonly SUPER_ADMIN_TXT='superadmin_dev.txt'
+  readonly LOGS_DIR='log'
+  readonly WORKSPACE=$(getWorkspace)
 }
 
 setExportGlobalVariables() {
   # These variables are shared between export.sh and merge.sh files
-  readonly exportDir='db_export'
-  readonly mergedDir='db_merged'
-  readonly logsDir='log'
-  readonly PiTotalFile='pi_total.txt'
-  readonly poolWaitTime=300
+  readonly EXPORT_DIR='db_export'
+  readonly MERGED_DIR='db_merged'
+  readonly LOGS_DIR='log'
+  readonly PI_TOTAL_FILE='pi_total.txt'
+  readonly POOL_WAIT_TIME=300
+  readonly WORKSPACE=$(getWorkspace)
 }
 
 parseArgs() {
@@ -41,86 +38,86 @@ parseArgs() {
 
   while [ "$1" != "" ]; do
       case $1 in
-        -s | --source)
-          src=$2
+        -s | --source )
+          SRC=$2
           shift
           ;;
-        -d | --destination)
-          dest=$2
+        -d | --destination )
+          DEST=$2
           shift
           ;;
-        --db-backup-dir)
-          customDbBackupDir=$2
+        --db-backup-dir )
+          CUSTOM_DB_BACKUP_DIR=$2
           shift
           ;;
         -ebl )
-          batchLimit=$2
+          BATCH_LIMIT=$2
           shift
           ;;
         -pl )
-          poolLimit=$2
+          POOL_LIMIT=$2
           shift
           ;;
         -mbl )
-          mergeBatchLimit=$2
+          MERGE_BATCH_LIMIT=$2
           shift
           ;;
         -ewt )
-          waitTime=$2
+          WAIT_TIME=$2
           shift
           ;;
         -iwt )
-          importWaitTime=$2
+          IMPORT_WAIT_TIME=$2
           shift
           ;;
         -lf )
-          LIST_FILE_NAME=$2
+          CUSTOM_LIST_FILE_NAME=$2
           shift
           ;;
         -dbf )
-          DB_FILE_NAME=$2
+          CUSTOM_DB_FILE_NAME=$2
           shift
           ;;
         -pf | --properties-file )
-          propertiesFile=$2
+          PROPERTIES_FILE=$2
           shift
           ;;
         --blog-id )
           # TODO: Need to remove below condition once all files are cleaned
           if [ ! -z $2 ]; then
-            blogId=$2
+            BLOG_ID=$2
             shift
           fi
           ;;
-        --force )
-          forceImport=--force
+        --force)
+          FORCE_IMPORT=--force
           ;;
         --drop-tables)
-          dropTables=true
+          DROP_TABLES=true
           ;;
         --drop-tables-sql)
-          dropTableSql=true
+          DROP_TABLE_SQL=true
           ;;
         --skip-export)
-          skipExport=true
+          SKIP_EXPORT=true
           ;;
         --skip-import)
-          skipImport=true
+          SKIP_IMPORT=true
           ;;
         --skip-network-import)
-          skipNetworkImport=true
+          SKIP_NETWORK_IMPORT=true
           ;;
         --skip-replace)
-          skipReplace=true
+          SKIP_REPLACE=true
           ;;
         --parallel-import)
-          parallelImport=true
+          PARALLEL_IMPORT=true
           ;;
         --is-last-import)
-          isLastImport=true
+          IS_LAST_IMPORT=true
           ;;
         --network-flag)
-          networkFlag=true
+          NETWORK_FLAG=true
           ;;
         -- )
           shift;
@@ -138,57 +135,57 @@ readProperties() {
   local domain=$1
 	. db.properties
 
-  dbUser="${domain}_db_user"
-  dbUser=${!dbUser}
+  DB_USER="${domain}_db_user"
+  DB_USER=${!DB_USER}
 
-  dbPassword="${domain}_db_pass"
-  dbPassword=${!dbPassword}
+  DB_PASSWORD="${domain}_db_pass"
+  DB_PASSWORD=${!DB_PASSWORD}
 
-  dbHostName="${domain}_db_host"
-  dbHostName=${!dbHostName}
+  DB_HOST_NAME="${domain}_db_host"
+  DB_HOST_NAME=${!DB_HOST_NAME}
 
-  dbSchema="${domain}_db_name"
-  dbSchema=${!dbSchema}
+  DB_SCHEMA="${domain}_db_name"
+  DB_SCHEMA=${!DB_SCHEMA}
 
-  url="${domain}_url"
-  url=${!url}
+  URL="${domain}_url"
+  URL=${!URL}
 
-  hostName="${domain}_host"
-  hostName=${!hostName}
+  HOST_NAME="${domain}_host"
+  HOST_NAME=${!HOST_NAME}
 
-  siteDir="${domain}_dir"
-  siteDir=${!siteDir}
+  SITE_DIR="${domain}_dir"
+  SITE_DIR=${!SITE_DIR}
 
-  remoteScriptDir="${domain}_remote_dir"
-  remoteScriptDir=${!remoteScriptDir}
+  REMOTE_SCRIPT_DIR="${domain}_remote_dir"
+  REMOTE_SCRIPT_DIR=${!REMOTE_SCRIPT_DIR}
 
-  dbBackupDir="${domain}_db_backup_dir"
-  dbBackupDir=${!dbBackupDir}
+  DB_BACKUP_DIR="${domain}_db_backup_dir"
+  DB_BACKUP_DIR=${!DB_BACKUP_DIR}
 
-  shibUrl="${domain}_shib_url"
-  shibUrl=${!shibUrl}
+  SHIB_URL="${domain}_shib_url"
+  SHIB_URL=${!SHIB_URL}
 
-  shibLogoutUrl="${domain}_shib_logout_url"
-  shibLogoutUrl=${!shibLogoutUrl}
+  SHIB_LOGOUT_URL="${domain}_shib_logout_url"
+  SHIB_LOGOUT_URL=${!SHIB_LOGOUT_URL}
 
-  cdnUrl="${domain}_cdn_url"
-  cdnUrl=${!cdnUrl}
+  CDN_URL="${domain}_cdn_url"
+  CDN_URL=${!CDN_URL}
 
-  httpsCdnUrl="${domain}_https_cdn_url"
-  httpsCdnUrl=${!httpsCdnUrl}
+  HTTPS_CDN_URL="${domain}_https_cdn_url"
+  HTTPS_CDN_URL=${!HTTPS_CDN_URL}
 
-  gAnalytics="${domain}_g_analytics"
-  gAnalytics=${!gAnalytics}
+  G_ANALYTICS="${domain}_g_analytics"
+  G_ANALYTICS=${!G_ANALYTICS}
 
   # Set SSH Parameters
-  sshKeyPath=$ssh_key_path
-  sshUsername=$ssh_username
+  SSH_KEY_PATH=$ssh_key_path
+  SSH_USERNAME=$ssh_username
 
-  if [ -z $remoteScriptDir ]; then
-    remoteScriptDir='mirror_db'
+  if [ -z $REMOTE_SCRIPT_DIR ]; then
+    REMOTE_SCRIPT_DIR='mirror_db'
   fi
-  if [ -z $dbBackupDir ]; then
-    dbBackupDir='db_backup'
+  if [ -z $DB_BACKUP_DIR ]; then
+    DB_BACKUP_DIR='db_backup'
   fi
 }
 
@@ -219,51 +216,57 @@ getTbName() {
 setFilePermissions() {
   echo "Changing right permissions for all bash scripts"
   chmod 750 *.sh
-  chmod 754 $dropSqlFile.sql
+  chmod 754 $DROP_SQL_FILE.sql
   
 }
 
 getDb() {
   local dbBackDir=$1
-  if [ ! "$parallelImport" = true ]; then
-	  rsync -avzhe ssh --include '*.sql' --exclude '*' --delete --progress ${sshUsername}@${hostName}:${dbBackDir}/ ${exportDir}/
+  if [ ! "$PARALLEL_IMPORT" = true ]; then
+	  rsync -avzhe ssh --include '*.sql' --exclude '*' --delete --progress ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${EXPORT_DIR}/
   else
-	  rsync -avzhe ssh --progress ${dbBackDir}/${DB_FILE_NAME} ${sshUsername}@${hostName}:${dbBackDir}/ ${exportDir}/
+	  rsync -avzhe ssh --progress ${dbBackDir}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${dbBackDir}/ ${EXPORT_DIR}/
   fi
-  #since db is copied to mirror_db server, setting value to exportDir
-  readonly MIRROR_DB_BACKUP_DIR=$exportDir
+  #since db is copied to mirror_db server, setting value to EXPORT_DIR
+  readonly MIRROR_DB_BACKUP_DIR=$EXPORT_DIR
 }
 
 putDb() {
   local dbBackDir=$1
-  if [ ! "$parallelImport" = true ]; then
+  if [ ! "$PARALLEL_IMPORT" = true ]; then
     echo "Database path on mirror_db: $dbBackDir"
-	  rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${dbBackDir}/ ${sshUsername}@${hostName}:${remoteScriptDir}/${exportDir}/
+	  rsync -avzhe ssh --include '*.sql' --exclude '*'  --delete --progress ${dbBackDir}/ ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
   else
-	  rsync -avzhe ssh --progress ${exportDir}/${DB_FILE_NAME} ${sshUsername}@${hostName}:${remoteScriptDir}/${exportDir}/
+	  rsync -avzhe ssh --progress ${EXPORT_DIR}/${DB_FILE_NAME} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/
   fi
 }
 
 createRemoteScriptDir() {
   local location=$1
-  echo "Creating ${remoteScriptDir} on ${location}..."
-  ssh -i ${sshKeyPath} ${sshUsername}@${hostName} "mkdir -p ${remoteScriptDir};"
+  echo "Creating ${REMOTE_SCRIPT_DIR} on ${location}..."
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "mkdir -p ${REMOTE_SCRIPT_DIR};"
+}
+
+prepareForDist() {
+  DIST_DIR=distFolder
+  mkdir -p $DIST_DIR
+  cd $DIST_DIR
+  cp ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PROPERTIES_FILE} ${IMPORT_SCRIPT} ${SUPER_ADMIN_TXT} .
+  #setting file permissions
+  setFilePermissions
+  cd $WORKSPACE
 }
 
 uploadMirrorDbFiles() {
   local location=$1
-  rsync -avzhe ssh --delete --progress ${structureFile} ${sshUsername}@${hostName}:${remoteScriptDir}/
+  rsync -avzhe ssh --delete --progress ${STRUCTURE_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   echo "Executing structure script for creating dir on ${location} server... "
-  ssh -i ${sshKeyPath} ${sshUsername}@${hostName} "cd ${remoteScriptDir}; ./${structureFile} mk ${exportDir}"
-  if [ $location="$dest" ];then
-    rsync -avzhe ssh --delete --progress ${utilityFile} ${exportScript} ${mergeScript} ${propertiesFile} ${importScript} ${superAdminTxt} ${sshUsername}@${hostName}:${remoteScriptDir}/
-  else
-    rsync -avzhe ssh --delete --progress ${utilityFile} ${exportScript} ${mergeScript} ${propertiesFile} ${sshUsername}@${hostName}:${remoteScriptDir}/
-  fi
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; rm -rf *; mkdir -p ${EXPORT_DIR}"
+  rsync -avzhe ssh --delete --progress ${DIST_DIR}/* ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
 }
 
 removeMirrorDbFiles() {
   local location=$1
-  echo "Removing ${remoteScriptDir} from ${location}..."
-  ssh -i ${sshKeyPath} ${sshUsername}@${hostName} "rm -rf ${remoteScriptDir};"
+  echo "Removing ${REMOTE_SCRIPT_DIR} from ${location}..."
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "rm -rf ${REMOTE_SCRIPT_DIR};"
 }
