@@ -8,81 +8,104 @@ set -e
 
 checkFlags() {
   if [ ! -z $DB_BACKUP_DIR ]; then
-    skipExport=true
+    SKIP_EXPORT=true
   fi
 
-  if [ "$skipImport" = true ]; then
+  if [ "$NETWORK_FLAG" = true ]; then
+    # This value has to be passed to export.sh on Src
+    NETWORK_FLAG='--network-flag'
+  fi
+
+  if [ "$SKIP_IMPORT" = true ]; then
     # This value has to be passed over to import.sh on Dest
-    skipImport='--skip-import'
+    SKIP_IMPORT='--skip-import'
 	  # Cannot drop entire database if skipping import process
-	  dropTables=
-	  dropTableSql=
+	  DROP_TABLES=
+	  DROP_TABLE_SQL=
   fi
   
-  if [ "$skipReplace" = true ]; then
+  if [ "$SKIP_REPLACE" = true ]; then
     # This value has to be passed over to import.sh on Dest
-    skipReplace='--skip-replace'
+    SKIP_REPLACE='--skip-replace'
   fi  
 
-  if [ "$skipNetworkImport" = true ]; then
-    # This value has to be passed over to export.sh on Src
-    skipNetworkImport='--skip-network-import'
+  if [ "$SKIP_NETWORK_IMPORT" = true ]; then
+    # This value has to be passed over to import.sh on Dest (PI)
+    SKIP_NETWORK_IMPORT='--skip-network-import'
   fi
 
-  if [ "$dropTableSql" = true ]; then
+  if [ "$DROP_TABLE_SQL" = true ]; then
+    #this value has to be passed over to import.sh on Dest
+    DROP_TABLE_SQL=--drop-tables-sql
 	  # if drop tables using sql file, should not drop tables using wp cli method which is default
-	  dropTables=false
+	  DROP_TABLES=false
   fi
 
-  if [ "$parallelImport" = true ]; then
+  if [ "$PARALLEL_IMPORT" = true ]; then
 	  # Cannot drop entire database if running parallel-import
-	  dropTables=
-	  dropTableSql=
+	  DROP_TABLES=
+	  DROP_TABLE_SQL=
   fi
 }
 
 mirrorDbMain() {
   # Setting Defaults
-  local propertiesFile='db.properties'
-  local batchLimit=10
-  local poolLimit=7000
-  local mergeBatchLimit=7000
-  local waitTime=3
-  local importWaitTime=180
+  local PROPERTIES_FILE='db.properties'
+  local BATCH_LIMIT=10
+  local POOL_LIMIT=7000
+  local MERGE_BATCH_LIMIT=7000
+  local WAIT_TIME=3
+  local IMPORT_WAIT_TIME=180
 
   setGlobalVariables
   # Update options based on user's arguments
   parseArgs $@
+
+  if [ ! -z $CUSTOM_LIST_FILE_NAME ]; then
+    readonly LIST_FILE_NAME=$CUSTOM_LIST_FILE_NAME
+  else
+    readonly LIST_FILE_NAME="table_list.txt"
+  fi
+
+  if [ ! -z $SRC ]; then
+    readonly DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
+  elif [ ! -z $CUSTOM_DB_FILE_NAME ]; then
+    readonly DB_FILE_NAME=$CUSTOM_DB_FILE_NAME
+  else
+    readonly DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
+  fi
+
   checkFlags
+
   echo ""
   echo "Starting to execute mirror_db."
   echo "##############################"
   echo "Current time: $(date)"
 
-  setFilePermissions
-  # Create logsDir if doesn't exist
-  mkdir -p $logsDir
+  prepareForDist
+  #setFilePermissions
+  # Create LOGS_DIR if doesn't exist
+  mkdir -p $LOGS_DIR
 
-  if [[ $propertiesFile != "db.properties" && -e "$propertiesFile" ]]; then
+  if [[ $PROPERTIES_FILE != "db.properties" && -e "$PROPERTIES_FILE" ]]; then
 	  echo "--properties-file option is set"
-	  echo "Copying ${propertiesFile} to db.properties file in current dir"
-	  cat $propertiesFile > db.properties
+	  echo "Copying ${PROPERTIES_FILE} to db.properties file in current dir"
+	  cat $PROPERTIES_FILE > db.properties
   fi
 
-  if [ ! -z $src ]; then
-    DB_FILE_NAME="${src}_$(date +"%Y-%m-%d").sql"
+  if [ ! -z $SRC ]; then
     echo "Executing db export script"
     uploadExportMain
 
-    if [ "$parallelImport" = true ] || [ "$parallelImport" == '--parallel-import' ]; then
+    if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
 		  # Merge all tables to one mysql.sql
       echo "Executing merge script"
-      #./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${mergeBatchLimit} ${parallelImport}
+      #./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT} ${PARALLEL_IMPORT}
       mergeMain
 	  fi
 	fi
 
-  if [ ! -z $dest ]; then
+  if [ ! -z $DEST ]; then
 		echo "Executing upload_import script"
 		uploadImportMain
   fi
