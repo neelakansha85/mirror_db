@@ -39,85 +39,85 @@ parseArgs() {
   while [ "$1" != "" ]; do
       case $1 in
         -s | --source )
-          SRC=$2
+          readonly SRC=$2
           shift
           ;;
         -d | --destination )
-          DEST=$2
+          readonly DEST=$2
           shift
           ;;
         --db-backup-dir )
-          CUSTOM_DB_BACKUP_DIR=$2
+          readonly CUSTOM_DB_BACKUP_DIR=$2
           shift
           ;;
         -ebl )
-          BATCH_LIMIT=$2
+          readonly BATCH_LIMIT=$2
           shift
           ;;
         -pl )
-          POOL_LIMIT=$2
+          readonly POOL_LIMIT=$2
           shift
           ;;
         -mbl )
-          MERGE_BATCH_LIMIT=$2
+          readonly MERGE_BATCH_LIMIT=$2
           shift
           ;;
         -ewt )
-          WAIT_TIME=$2
+          readonly WAIT_TIME=$2
           shift
           ;;
         -iwt )
-          IMPORT_WAIT_TIME=$2
+          readonly IMPORT_WAIT_TIME=$2
           shift
           ;;
         -lf )
-          CUSTOM_LIST_FILE_NAME=$2
+          readonly LIST_FILE_NAME=$2
           shift
           ;;
         -dbf )
-          CUSTOM_DB_FILE_NAME=$2
+          readonly DB_FILE_NAME=$2
           shift
           ;;
         -pf | --properties-file )
-          PROPERTIES_FILE=$2
+          readonly PROPERTIES_FILE=$2
           shift
           ;;
         --blog-id )
           # TODO: Need to remove below condition once all files are cleaned
           if [ ! -z $2 ]; then
-            BLOG_ID=$2
+            readonly BLOG_ID=$2
             shift
           fi
           ;;
         --force)
-          FORCE_IMPORT=--force
+          readonly FORCE_IMPORT=--force
           ;;
         --drop-tables)
-          DROP_TABLES=true
+          readonly DROP_TABLES=true
           ;;
         --drop-tables-sql)
-          DROP_TABLE_SQL=true
+          readonly DROP_TABLE_SQL=true
           ;;
         --skip-export)
-          SKIP_EXPORT=true
+          readonly SKIP_EXPORT=true
           ;;
         --skip-import)
-          SKIP_IMPORT=true
+          readonly SKIP_IMPORT=true
           ;;
         --skip-network-import)
-          SKIP_NETWORK_IMPORT=true
+          readonly SKIP_NETWORK_IMPORT=true
           ;;
         --skip-replace)
-          SKIP_REPLACE=true
+          readonly SKIP_REPLACE=true
           ;;
         --parallel-import)
-          PARALLEL_IMPORT=true
+          readonly PARALLEL_IMPORT=true
           ;;
         --is-last-import)
-          IS_LAST_IMPORT=true
+          readonly IS_LAST_IMPORT=true
           ;;
         --network-flag)
-          NETWORK_FLAG=true
+          readonly NETWORK_FLAG=true
           ;;
         -- )
           shift;
@@ -129,6 +129,36 @@ parseArgs() {
       esac
       shift
   done
+
+  # Setting Defaults
+  if [ -z $PROPERTIES_FILE ]; then
+    readonly PROPERTIES_FILE='db.properties'
+  fi
+  if [ -z $BATCH_LIMIT ]; then
+    readonly BATCH_LIMIT=10
+  fi
+  if [ -z $POOL_LIMIT ]; then
+    readonly POOL_LIMIT=7000
+  fi
+  if [ -z $MERGE_BATCH_LIMIT ]; then
+    readonly MERGE_BATCH_LIMIT=7000
+  fi
+  if [ -z $WAIT_TIME ]; then
+    readonly WAIT_TIME=3
+  fi
+  if [ -z $IMPORT_WAIT_TIME ]; then
+    readonly IMPORT_WAIT_TIME=180
+  fi
+  if [ -z $LIST_FILE_NAME ]; then
+    readonly LIST_FILE_NAME="table_list.txt"
+  fi
+  if [ -z $DB_FILE_NAME ]; then
+    if [ ! -z $SRC ]; then
+      readonly DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
+    else
+      readonly DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
+    fi
+  fi
 }
 
 readProperties() {
@@ -250,16 +280,15 @@ createRemoteScriptDir() {
 prepareForDist() {
   DIST_DIR=distFolder
   mkdir -p $DIST_DIR
+  cp ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PROPERTIES_FILE} ${IMPORT_SCRIPT} ${SUPER_ADMIN_TXT} ${DROP_SQL_FILE}.sql ${DIST_DIR}
   cd $DIST_DIR
-  cp ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PROPERTIES_FILE} ${IMPORT_SCRIPT} ${SUPER_ADMIN_TXT} .
-  #setting file permissions
+  echo "Changing right permissions for all bash scripts"
   setFilePermissions
   cd $WORKSPACE
 }
 
 uploadMirrorDbFiles() {
   local location=$1
-  rsync -avzhe ssh --delete --progress ${STRUCTURE_FILE} ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/
   echo "Executing structure script for creating dir on ${location} server... "
   ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; rm -rf *; mkdir -p ${EXPORT_DIR}"
   rsync -avzhe ssh --delete --progress ${DIST_DIR}/* ${SSH_USERNAME}@${HOST_NAME}:${REMOTE_SCRIPT_DIR}/

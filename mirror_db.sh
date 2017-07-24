@@ -49,41 +49,16 @@ checkFlags() {
 }
 
 mirrorDbMain() {
-  # Setting Defaults
-  local PROPERTIES_FILE='db.properties'
-  local BATCH_LIMIT=10
-  local POOL_LIMIT=7000
-  local MERGE_BATCH_LIMIT=7000
-  local WAIT_TIME=3
-  local IMPORT_WAIT_TIME=180
-
   setGlobalVariables
   # Update options based on user's arguments
   parseArgs $@
-
-  if [ ! -z $CUSTOM_LIST_FILE_NAME ]; then
-    readonly LIST_FILE_NAME=$CUSTOM_LIST_FILE_NAME
-  else
-    readonly LIST_FILE_NAME="table_list.txt"
-  fi
-
-  if [ ! -z $SRC ]; then
-    readonly DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
-  elif [ ! -z $CUSTOM_DB_FILE_NAME ]; then
-    readonly DB_FILE_NAME=$CUSTOM_DB_FILE_NAME
-  else
-    readonly DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
-  fi
-
   checkFlags
-
+  
   echo ""
   echo "Starting to execute mirror_db."
   echo "##############################"
   echo "Current time: $(date)"
-
   prepareForDist
-  #setFilePermissions
   # Create LOGS_DIR if doesn't exist
   mkdir -p $LOGS_DIR
 
