@@ -75,7 +75,7 @@ mergeMain() {
 
   # Move all .sql files to archives dir for future reference
   if [[ $dbFileName =~ .*_network.* ]]; then
-    dbFileName=$(echo ${dbFileName} | cut -d '_' -f-2)
+    dbFileName=$(echo ${dbFileName} | cut -d '_' -f-3)
   fi
 
   mkdir -p ~/$DB_BACKUP_DIR/$dbFileName
