@@ -7,14 +7,14 @@ set -e
 . upload_import.sh
 
 checkFlags() {
-  if [ ! -z $DB_BACKUP_DIR ]; then
-    SKIP_EXPORT=true
+  if [ ! -z $CUSTOM_DB_BACKUP_DIR ] && [ -z $SKIP_EXPORT ]; then
+    readonly SKIP_EXPORT=true
   fi
 
   if [ "$SKIP_IMPORT" = true ]; then
 	  # Cannot drop entire database if skipping import process
-	  DROP_TABLES=
-	  DROP_TABLE_SQL=
+	  DROP_TABLES=false
+	  DROP_TABLE_SQL=false
   fi
   
   if [ "$DROP_TABLE_SQL" = true ]; then
@@ -24,8 +24,8 @@ checkFlags() {
 
   if [ "$PARALLEL_IMPORT" = true ]; then
 	  # Cannot drop entire database if running parallel-import
-	  DROP_TABLES=
-	  DROP_TABLE_SQL=
+	  DROP_TABLES=false
+	  DROP_TABLE_SQL=false
   fi
 }
 

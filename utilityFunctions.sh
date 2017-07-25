@@ -92,11 +92,12 @@ parseArgs() {
         --force)
           readonly FORCE_IMPORT=--force
           ;;
+          # Below constants are modified in checkFlags()
         --drop-tables)
-          readonly DROP_TABLES=true
+          DROP_TABLES=true
           ;;
         --drop-tables-sql)
-          readonly DROP_TABLE_SQL=true
+          DROP_TABLE_SQL=true
           ;;
         --skip-export)
           readonly SKIP_EXPORT=true
