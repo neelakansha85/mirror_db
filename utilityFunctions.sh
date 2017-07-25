@@ -240,9 +240,9 @@ exportParseArgs() {
   fi
   if [ -z $DB_FILE_NAME ]; then
     if [ ! -z $SRC ]; then
-      DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
+      DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d_%H%M%S").sql"
     else
-      DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
+      DB_FILE_NAME="mysql_$(date +"%Y-%m-%d_%H%M%S").sql"
     fi
   fi
 }
@@ -288,12 +288,10 @@ importParseArgs() {
   if [ -z $IMPORT_WAIT_TIME ]; then
     readonly IMPORT_WAIT_TIME=180
   fi
-  if [ -z $DB_FILE_NAME ]; then
-    if [ ! -z $SRC ]; then
-      DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
-    else
-      DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
-    fi
+  if [ ! -z $SRC ]; then
+    readonly DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d_%H%M%S").sql"
+  else
+    readonly DB_FILE_NAME="mysql_$(date +"%Y-%m-%d_%H%M%S").sql"
   fi
 }
 
