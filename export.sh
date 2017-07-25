@@ -176,8 +176,6 @@ exportMain() {
   local networkListFile="${listFileName}_network.${listFileExt}"
   local blogListFile="${listFileName}_${BLOG_ID}.${listFileExt}"
   local nonNetworkListFile="${listFileName}_non_network.${listFileExt}"
-  local REMOTE_SCRIPT_DIR='mirror_db'
-  local dbSuffix=''
 
   # import instance environment variables
   readProperties $SRC

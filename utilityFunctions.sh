@@ -196,6 +196,9 @@ exportParseArgs() {
           DB_FILE_NAME=$2
           shift
           ;;
+        --parallel-import)
+          readonly PARALLEL_IMPORT=true
+          ;;
         --blog-id )
           # TODO: Need to remove below condition once all files are cleaned
           if [ ! -z $2 ]; then
@@ -238,43 +241,6 @@ exportParseArgs() {
     else
       DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
     fi
-  fi
-}
-
-mergeParseArgs() {
-  while [ "$1" != "" ]; do
-      case $1 in
-        -lf )
-          LIST_FILE_NAME=$2
-          shift
-          ;;
-        -dbf )
-          DB_FILE_NAME=$2
-          shift
-          ;;
-        -mbl )
-          MERGE_BATCH_LIMIT=$2
-          shift
-          ;;
-        * )
-          break
-          ;;
-      esac
-      shift
-  done
-
-  if [ -z $LIST_FILE_NAME ]; then
-    LIST_FILE_NAME="table_list.txt"
-  fi
-  if [ -z $DB_FILE_NAME ]; then
-    if [ ! -z $SRC ]; then
-      DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
-    else
-      DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
-    fi
-  fi
-  if [ -z $MERGE_BATCH_LIMIT ]; then
-    MERGE_BATCH_LIMIT=7000
   fi
 }
 
