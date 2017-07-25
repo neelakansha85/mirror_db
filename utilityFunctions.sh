@@ -238,13 +238,6 @@ exportParseArgs() {
   if [ -z $LIST_FILE_NAME ]; then
     LIST_FILE_NAME="table_list.txt"
   fi
-  if [ -z $DB_FILE_NAME ]; then
-    if [ ! -z $SRC ]; then
-      DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d_%H%M%S").sql"
-    else
-      DB_FILE_NAME="mysql_$(date +"%Y-%m-%d_%H%M%S").sql"
-    fi
-  fi
 }
 
 importParseArgs() {
@@ -287,11 +280,6 @@ importParseArgs() {
 
   if [ -z $IMPORT_WAIT_TIME ]; then
     readonly IMPORT_WAIT_TIME=180
-  fi
-  if [ ! -z $SRC ]; then
-    readonly DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d_%H%M%S").sql"
-  else
-    readonly DB_FILE_NAME="mysql_$(date +"%Y-%m-%d_%H%M%S").sql"
   fi
 }
 
