@@ -181,7 +181,7 @@ exportParseArgs() {
           shift
           ;;
         -mbl )
-          readonly MERGE_BATCH_LIMIT=$2
+          MERGE_BATCH_LIMIT=$2
           shift
           ;;
         -ewt )
@@ -189,11 +189,11 @@ exportParseArgs() {
           shift
           ;;
         -lf )
-          readonly LIST_FILE_NAME=$2
+          LIST_FILE_NAME=$2
           shift
           ;;
         -dbf )
-          readonly DB_FILE_NAME=$2
+          DB_FILE_NAME=$2
           shift
           ;;
         --blog-id )
@@ -224,37 +224,49 @@ exportParseArgs() {
     readonly POOL_LIMIT=7000
   fi
   if [ -z $MERGE_BATCH_LIMIT ]; then
-    readonly MERGE_BATCH_LIMIT=7000
+    MERGE_BATCH_LIMIT=7000
   fi
   if [ -z $WAIT_TIME ]; then
     readonly WAIT_TIME=3
   fi
   if [ -z $LIST_FILE_NAME ]; then
-    readonly LIST_FILE_NAME="table_list.txt"
+    LIST_FILE_NAME="table_list.txt"
   fi
   if [ -z $DB_FILE_NAME ]; then
     if [ ! -z $SRC ]; then
-      readonly DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
+      DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
     else
-      readonly DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
+      DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
     fi
   fi
 }
 
-mergeParseArgs() {
+importParseArgs() {
   while [ "$1" != "" ]; do
       case $1 in
-        -mbl )
-          readonly MERGE_BATCH_LIMIT=$2
+        -s | --source )
+          readonly SRC=$2
           shift
           ;;
-        -lf )
-          readonly LIST_FILE_NAME=$2
+        -d | --destination )
+          readonly DEST=$2
           shift
           ;;
-        -dbf )
-          readonly DB_FILE_NAME=$2
+        -iwt )
+          readonly IMPORT_WAIT_TIME=$2
           shift
+          ;;
+        --force)
+          readonly FORCE_IMPORT=--force
+          ;;
+        --skip-replace)
+          readonly SKIP_REPLACE=true
+          ;;
+        --skip-import)
+          readonly SKIP_IMPORT=true
+          ;;
+        --drop-tables-sql)
+          readonly DROP_TABLE_SQL=true
           ;;
         * )
           break
@@ -262,19 +274,8 @@ mergeParseArgs() {
       esac
       shift
   done
-
-  if [ -z $MERGE_BATCH_LIMIT ]; then
-    readonly MERGE_BATCH_LIMIT=7000
-  fi
-  if [ -z $LIST_FILE_NAME ]; then
-    readonly LIST_FILE_NAME="table_list.txt"
-  fi
-  if [ -z $DB_FILE_NAME ]; then
-    if [ ! -z $SRC ]; then
-      readonly DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
-    else
-      readonly DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
-    fi
+  if [ -z $IMPORT_WAIT_TIME ]; then
+    readonly IMPORT_WAIT_TIME=180
   fi
 }
 

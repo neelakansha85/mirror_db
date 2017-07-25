@@ -64,7 +64,7 @@ archiveMergedFiles(){
 }
 
 mergeMain() {
-  mergeParseArgs $@
+  exportParseArgs $@
 
   local dbFile=${DB_FILE_NAME}
   local dbFileExt=$(getFileExtension $dbFile)

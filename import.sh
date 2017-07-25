@@ -132,7 +132,7 @@ importMain() {
   local EXPORT_DIR='db_export'
   local DROP_SQL_FILE='drop_tables'
 
-  parseArgs $@
+  importParseArgs $@
   searchReplace
 
   if [ ! "$SKIP_IMPORT" = true ]; then
