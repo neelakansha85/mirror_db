@@ -255,6 +255,10 @@ importParseArgs() {
           readonly DEST=$2
           shift
           ;;
+        -dbf )
+          DB_FILE_NAME=$2
+          shift
+          ;;
         -iwt )
           readonly IMPORT_WAIT_TIME=$2
           shift
@@ -280,6 +284,13 @@ importParseArgs() {
 
   if [ -z $IMPORT_WAIT_TIME ]; then
     readonly IMPORT_WAIT_TIME=180
+  fi
+  if [ -z $DB_FILE_NAME ]; then
+    if [ ! -z $SRC ]; then
+      DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
+    else
+      DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
+    fi
   fi
 }
 

@@ -85,7 +85,8 @@ searchReplace() {
   fi
 
   # Get to root dir
-  cd ..
+  #cd ..
+  cd $WORKSPACE
 }
 
 importTables() {
@@ -111,7 +112,8 @@ importTables() {
 		done
 	fi
 	# Get to root dir
-  cd ..
+  #cd ..
+  cd $WORKSPACE
 
 	echo "Enabling foreign key check after importing db"
 	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=1"
