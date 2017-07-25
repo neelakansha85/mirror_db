@@ -57,7 +57,7 @@ mergeFile(){
 archiveMergedFiles(){
   echo "Copying all merged DB files to archives dir... "
   # TODO: Update path based on absolute path of the file using $(pwd)
-  for mrdb in $(ls ~/${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/${MERGED_DIR}/*.sql)
+  for mrdb in $(ls ${WORKSPACE}/${EXPORT_DIR}/${MERGED_DIR}/*.sql)
   do
     cp ${mrdb} ~/${DB_BACKUP_DIR}/${dbFileName}/
   done
