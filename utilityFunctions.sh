@@ -180,12 +180,14 @@ exportParseArgs() {
           readonly POOL_LIMIT=$2
           shift
           ;;
-        -mbl )
-          MERGE_BATCH_LIMIT=$2
-          shift
-          ;;
         -ewt )
           readonly WAIT_TIME=$2
+          shift
+          ;;
+        ## Below 3 flags are being reassigned by export and merge
+        ## both on SRC server and hence can not be declared as readonly.
+        -mbl )
+          MERGE_BATCH_LIMIT=$2
           shift
           ;;
         -lf )
@@ -256,7 +258,7 @@ importParseArgs() {
           shift
           ;;
         -dbf )
-          DB_FILE_NAME=$2
+          readonly DB_FILE_NAME=$2
           shift
           ;;
         -iwt )
