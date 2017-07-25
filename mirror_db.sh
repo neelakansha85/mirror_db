@@ -11,33 +11,14 @@ checkFlags() {
     SKIP_EXPORT=true
   fi
 
-  if [ "$NETWORK_FLAG" = true ]; then
-    # This value has to be passed to export.sh on Src
-    NETWORK_FLAG='--network-flag'
-  fi
-
   if [ "$SKIP_IMPORT" = true ]; then
-    # This value has to be passed over to import.sh on Dest
-    SKIP_IMPORT='--skip-import'
 	  # Cannot drop entire database if skipping import process
 	  DROP_TABLES=
 	  DROP_TABLE_SQL=
   fi
   
-  if [ "$SKIP_REPLACE" = true ]; then
-    # This value has to be passed over to import.sh on Dest
-    SKIP_REPLACE='--skip-replace'
-  fi  
-
-  if [ "$SKIP_NETWORK_IMPORT" = true ]; then
-    # This value has to be passed over to import.sh on Dest (PI)
-    SKIP_NETWORK_IMPORT='--skip-network-import'
-  fi
-
   if [ "$DROP_TABLE_SQL" = true ]; then
-    #this value has to be passed over to import.sh on Dest
-    DROP_TABLE_SQL=--drop-tables-sql
-	  # if drop tables using sql file, should not drop tables using wp cli method which is default
+    # if drop tables using sql file, should not drop tables using wp cli method which is default
 	  DROP_TABLES=false
   fi
 

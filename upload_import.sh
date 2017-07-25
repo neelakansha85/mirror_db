@@ -3,6 +3,7 @@
 . utilityFunctions.sh
 
 prepareForImport() {
+  # Get correct location of DB files for putDb()
   local mirrorDbBackupDir=""
   uploadMirrorDbFiles $DEST
   if [ ! -z $CUSTOM_DB_BACKUP_DIR ]; then
@@ -12,10 +13,10 @@ prepareForImport() {
   else
     mirrorDbBackupDir=$DB_BACKUP_DIR
   fi
+
   echo "Uploading database files to $DEST"
   putDb $mirrorDbBackupDir
   echo "File Transfer complete."
-  echo "Starting to import database..."
   now=$(date +"%T")
   echo "Start time : $now "
 
@@ -27,9 +28,8 @@ prepareForImport() {
   fi
   # TODO: Use screen for waiting while DEST performs import to avoid broken pipe
   # Execute Import.sh to import database
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -s ${SRC} -d ${DEST} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${DROP_TABLE_SQL} ${SKIP_REPLACE} ;"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -s ${SRC} -d ${DEST} -iwt ${IMPORT_WAIT_TIME} ${FORCE_IMPORT} ${skipImport} ${dropTableSql} ${skipReplace} ;"
 
-  echo "Database imported successfully..."
   now=$(date +"%T")
   echo "End time : $now "
   removeMirrorDbFiles $DEST
@@ -51,18 +51,18 @@ prepareForImport_PI() {
   echo "Start time : $now "
 
   # Execute search_replace.sh to replace old domains with new domain
-  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${SEARCH_REPLACE_SCRIPT} -s ${SRC} -d ${DEST} ${SKIP_REPLACE};"
+  ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${SEARCH_REPLACE_SCRIPT} -s ${SRC} -d ${DEST} ${skipReplace};"
 
   if [[ $DB_FILE_NAME =~ .*_network.* ]]; then
     if [ ! "$SKIP_NETWORK_IMPORT" = true ]; then
       # Execute Import.sh to import network tables
-      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT} ${SKIP_REPLACE} ${SKIP_NETWORK_IMPORT};"
+      ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${FORCE_IMPORT} ${skipImport} ${skipReplace} ${skipNetworkImport};"
     else
       echo "Skipping importing Network Tables... "
     fi
   else
     # Execute Import.sh to import all non-network tables
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${SKIP_IMPORT} ${FORCE_IMPORT};"
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${IMPORT_SCRIPT} -d ${DEST} -dbf ${DB_FILE_NAME} -iwt ${IMPORT_WAIT_TIME} ${FORCE_IMPORT} ${skipImport} ;"
   fi
 
   echo "${DB_FILE_NAME} imported successfully..."
@@ -78,6 +78,20 @@ prepareForImport_PI() {
 
 uploadImportMain(){
   local isLastImport=false
+  # Check all flags for passing correct values to import script
+  if [ "$SKIP_IMPORT" = true ]; then
+    local skipImport="--skip-import"
+  fi
+  if [ "$SKIP_REPLACE" = true ]; then
+    local skipReplace="--skip-replace"
+  fi
+  if [ "$SKIP_NETWORK_IMPORT" = true ]; then
+    local skipNetworkImport="--skip-network-import"
+  fi
+  if [ "$DROP_TABLE_SQL" = true ]; then
+    local dropTableSql="--drop-tables-sql"
+  fi
+
   readProperties $DEST
 
   createRemoteScriptDir $DEST
