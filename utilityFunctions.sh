@@ -155,9 +155,9 @@ parseArgs() {
   fi
   if [ -z $DB_FILE_NAME ]; then
     if [ ! -z $SRC ]; then
-      readonly DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
+      readonly DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d_%H%M%S").sql"
     else
-      readonly DB_FILE_NAME="mysql_$(date +"%Y-%m-%d").sql"
+      readonly DB_FILE_NAME="mysql_$(date +"%Y-%m-%d_%H%M%S").sql"
     fi
   fi
 }
