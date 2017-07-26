@@ -73,12 +73,13 @@ mergeMain() {
   mkdir -p $MERGED_DIR
   mergeFile
 
-  # Move all .sql files to archives dir for future reference
-  if [[ $dbFileName =~ .*_network.* ]]; then
+  #commenting out the condition because irrespective of the network/blog file,
+  # the below cut filename is required as db name
+  #if [[ $dbFileName =~ .*_network.* ]]; then
     dbFileName=$(echo ${dbFileName} | cut -d '_' -f-3)
-  fi
+  #fi
 
+  # Move all .sql files to archives dir for future reference
   mkdir -p ~/$DB_BACKUP_DIR/$dbFileName
-
   archiveMergedFiles
 }
