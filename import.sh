@@ -85,7 +85,6 @@ searchReplace() {
   fi
 
   # Get to root dir
-  #cd ..
   cd $WORKSPACE
 }
 
@@ -112,7 +111,6 @@ importTables() {
 		done
 	fi
 	# Get to root dir
-  #cd ..
   cd $WORKSPACE
 
 	echo "Enabling foreign key check after importing db"
@@ -133,7 +131,8 @@ afterImport() {
 importMain() {
   local EXPORT_DIR='db_export'
   local DROP_SQL_FILE='drop_tables'
-
+  WORKSPACE=$(getWorkspace)
+  
   importParseArgs $@
   searchReplace
 
