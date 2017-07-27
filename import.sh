@@ -56,7 +56,7 @@ searchReplace() {
   local destCdnUrl="${CDN_URL}"
   local destHttpsCdnUrl="${HTTPS_CDN_URL}"
 
-  cd ${EXPORT_DIR}
+  cd ${exportDir}
 
   if [ ! "$SKIP_REPLACE" = true ]; then
     for MRDB in $(ls *.sql)
@@ -91,8 +91,8 @@ searchReplace() {
 importTables() {
   echo "Disabling foreign key check before importing db"
 	mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} -e "SET foreign_key_checks=0"
-  # SQL files are inside $EXPORT_DIR
-  cd ${EXPORT_DIR}
+  # SQL files are inside $exportDir
+  cd ${exportDir}
 
 	if [ ! -z $DB_FILE_NAME ]; then
 	  # Import statement
@@ -118,8 +118,8 @@ importTables() {
 }
 
 afterImport() {
-  local SUPER_ADMIN_TXT="$(cat superadmin_dev.txt)"
-  local superAdmin=$(php -r "print_r(serialize(array(${SUPER_ADMIN_TXT})));")
+  local superAdminTxt="$(cat superadmin_dev.txt)"
+  local superAdmin=$(php -r "print_r(serialize(array(${superAdminTxt})));")
 
   # Setting pwd to wordpress installation dir
   cd ~/${SITE_DIR}
@@ -129,12 +129,17 @@ afterImport() {
 }
 
 importMain() {
-  local EXPORT_DIR='db_export'
-  local DROP_SQL_FILE='drop_tables'
-  WORKSPACE=$(getWorkspace)
+  local exportDir='db_export'
+  local dropSqlFile='drop_tables'
+  readonly WORKSPACE=$(getWorkspace)
   
   importParseArgs $@
   searchReplace
+
+  if [ "$DROP_TABLES_SQL" = true ]; then
+	  echo "Emptying Database using sql procedure..."
+	  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} < ${dropSqlFile}.sql
+  fi
 
   if [ ! "$SKIP_IMPORT" = true ]; then
     importTables
