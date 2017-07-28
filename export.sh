@@ -170,11 +170,11 @@ exportMain() {
   local dbFileExt=$(getFileExtension $dbFile)
   local dbFileName=$(getFileName $dbFile)
   local networkDb="${dbFileName}_network.${dbFileExt}"
-  local blogDb="${dbFileName}_${BLOG_ID}.${dbFileExt}"
+  local blogDb="${dbFileName}_blog_${BLOG_ID}.${dbFileExt}"
   local listFileExt=$(getFileExtension $listFile)
   local listFileName=$(getFileName $listFile)
   local networkListFile="${listFileName}_network.${listFileExt}"
-  local blogListFile="${listFileName}_${BLOG_ID}.${listFileExt}"
+  local blogListFile="${listFileName}_blog_${BLOG_ID}.${listFileExt}"
   local nonNetworkListFile="${listFileName}_non_network.${listFileExt}"
 
   # import instance environment variables

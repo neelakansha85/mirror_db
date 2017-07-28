@@ -134,12 +134,11 @@ importMain() {
   readonly WORKSPACE=$(getWorkspace)
   
   importParseArgs $@
-  searchReplace
-
   if [ "$DROP_TABLES_SQL" = true ]; then
 	  echo "Emptying Database using sql procedure..."
 	  mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} ${DB_SCHEMA} < ${dropSqlFile}.sql
   fi
+  searchReplace
 
   if [ ! "$SKIP_IMPORT" = true ]; then
     importTables
