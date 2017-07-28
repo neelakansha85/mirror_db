@@ -37,7 +37,7 @@ uploadExportMain() {
     fi
 
     # Get exported db from SRC to mirror_db server
-    echo "Downloading database files from $SRC"
+    echo "Removing all previous *.sql files if present and downloading database files from $SRC"
     getDb $sourceDbBackup
     removeMirrorDbFiles $SRC
     echo "Upload Export completed..."
