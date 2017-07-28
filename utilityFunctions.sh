@@ -400,8 +400,9 @@ createRemoteScriptDir() {
 }
 
 prepareForDist() {
-  DIST_DIR=distFolder
+  DIST_DIR="dist"
   mkdir -p $DIST_DIR
+  rm -f ${DIST_DIR}/*
   cp ${UTILITY_FILE} ${EXPORT_SCRIPT} ${MERGE_SCRIPT} ${PROPERTIES_FILE} ${IMPORT_SCRIPT} ${SUPER_ADMIN_TXT} ${DROP_SQL_FILE}.sql ${DIST_DIR}
   cd $DIST_DIR
   echo "Changing right permissions for all bash scripts"
