@@ -33,5 +33,6 @@ pi_total.txt
 nohup.out
 table_list*.txt
 temp_*
+dist
 
 !drop_tables.sql

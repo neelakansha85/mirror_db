@@ -5,15 +5,6 @@ set -e
 . utilityFunctions.sh
 . merge.sh
 
-# TODO: Need to use readonly keyword for constants
-EXPORT_DIR='db_export'
-POOL_WAIT_TIME=300
-LOGS_DIR='log'
-PI_TOTAL_FILE='pi_total.txt'
-REMOTE_SCRIPT_DIR='mirror_db'
-MERGED_DIR='db_merged'
-DB_SUFFIX=''
-
 checkCount() {
   local count=$1
   local set=$2
@@ -84,7 +75,7 @@ downloadTablesPI() {
     (( total++ ))
 
     # Required for identifying which file needs to be imported
-    echo "${db}.${tb}" >> ${listFileName}_${PI_TOTAL}.${listFileExt}
+    echo "${db}.${tb}" >> ${listFileName}_${piTotal}.${listFileExt}
 
     batchCount=$(checkCountLimit $batchCount $BATCH_LIMIT)
     poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $POOL_WAIT_TIME)
@@ -92,11 +83,11 @@ downloadTablesPI() {
       # TODO: Remove below line and cd {EXPORT_DIR} if using absolute path for dir
       # Get to root dir
       cd ..
-      dbFileNamePI="${dbFileName}_${PI_TOTAL}.${dbFileExt}"
-      nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
+      dbFileNamePI="${dbFileName}_${piTotal}.${dbFileExt}"
+      nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
       # Continue exporting in EXPORT_DIR
       cd ${EXPORT_DIR}
-      (( PI_TOTAL++ ))
+      (( piTotal++ ))
     fi
   done
   total=total-1
@@ -160,27 +151,30 @@ exportParallelMain() {
   cd ..
 
   # Execute merge and upload for the last set of tables downloaded
-  dbFileNamePI="${dbFileName}_${PI_TOTAL}.${dbFileExt}"
-  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${PI_TOTAL}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import --is-last-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
+  dbFileNamePI="${dbFileName}_${piTotal}.${dbFileExt}"
+  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import --is-last-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
 }
 
 #starts here
 exportMain() {
 
-  parseArgs $@
+  # Set's global variables for the export process running on SRC server
+  setExportGlobalVariables
+  exportParseArgs $@
+  
   # scope of total is limited to exportMain()
   local total=1
-  local PI_TOTAL=1
+  local piTotal=1
   local dbFile=${DB_FILE_NAME}
   local listFile=${LIST_FILE_NAME}
   local dbFileExt=$(getFileExtension $dbFile)
   local dbFileName=$(getFileName $dbFile)
   local networkDb="${dbFileName}_network.${dbFileExt}"
-  local blogDb="${dbFileName}_${BLOG_ID}.${dbFileExt}"
+  local blogDb="${dbFileName}_blog_${BLOG_ID}.${dbFileExt}"
   local listFileExt=$(getFileExtension $listFile)
   local listFileName=$(getFileName $listFile)
   local networkListFile="${listFileName}_network.${listFileExt}"
-  local blogListFile="${listFileName}_${BLOG_ID}.${listFileExt}"
+  local blogListFile="${listFileName}_blog_${BLOG_ID}.${listFileExt}"
   local nonNetworkListFile="${listFileName}_non_network.${listFileExt}"
 
   # import instance environment variables
@@ -195,7 +189,7 @@ exportMain() {
 
   echo "Starting to download DB... "
   now=$(date +"%T")
-  echo "Current time : $now "
+  echo "Current time :$now "
 
   if [ ! "$PARALLEL_IMPORT" = true ]; then
     if [ ! -z "$BLOG_ID" ]; then
@@ -212,7 +206,7 @@ exportMain() {
   fi
 
   # Checking back to root dir
-  cd ..
+  cd $WORKSPACE
 }
 
 exportMain $@
