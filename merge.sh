@@ -6,10 +6,10 @@ set -e
 
 mergeFileName(){
   local total=$1
-  if [ ! "$PARALLEL_IMPORT" = true ]; then
-    DB_SUFFIX="_${total}"
+  if [ ! "$SKIP_REPLACE" = true ]; then
+    dbSuffix="_${total}"
   fi
-  mergedName="${dbFileName}${DB_SUFFIX}.${dbFileExt}"
+  mergedName="${dbFileName}${dbSuffix}.${dbFileExt}"
   echo $mergedName
 }
 
@@ -57,14 +57,14 @@ mergeFile(){
 archiveMergedFiles(){
   echo "Copying all merged DB files to archives dir... "
   # TODO: Update path based on absolute path of the file using $(pwd)
-  for mrdb in $(ls ~/${REMOTE_SCRIPT_DIR}/${EXPORT_DIR}/${MERGED_DIR}/*.sql)
+  for mrdb in $(ls ${WORKSPACE}/${EXPORT_DIR}/${MERGED_DIR}/*.sql)
   do
     cp ${mrdb} ~/${DB_BACKUP_DIR}/${dbFileName}/
   done
 }
 
 mergeMain() {
-  parseArgs $@
+  exportParseArgs $@
 
   local dbFile=${DB_FILE_NAME}
   local dbFileExt=$(getFileExtension $dbFile)
@@ -73,12 +73,11 @@ mergeMain() {
   mkdir -p $MERGED_DIR
   mergeFile
 
-  # Move all .sql files to archives dir for future reference
-  if [[ $dbFileName =~ .*_network.* ]]; then
-    dbFileName=$(echo ${dbFileName} | cut -d '_' -f-2)
+  if [[ $dbFileName =~ .*_network.* ]] || [[ $dbFileName =~ .*_blog.* ]]; then
+    dbFileName=$(echo ${dbFileName} | cut -d '_' -f-3)
   fi
 
+  # Move all .sql files to archives dir for future reference
   mkdir -p ~/$DB_BACKUP_DIR/$dbFileName
-
   archiveMergedFiles
 }

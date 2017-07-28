@@ -7,42 +7,41 @@ set -e
 . upload_import.sh
 
 checkFlags() {
-  if [ ! -d "$LOGS_DIR" ]; then
-	  mkdir $LOGS_DIR
-  fi
-
-  if [ ! -z $DB_BACKUP_DIR ]; then
-    SKIP_EXPORT=true
+  if [ ! -z $CUSTOM_DB_BACKUP_DIR ] && [ -z $SKIP_EXPORT ]; then
+    readonly SKIP_EXPORT=true
   fi
 
   if [ "$SKIP_IMPORT" = true ]; then
 	  # Cannot drop entire database if skipping import process
-	  DROP_TABLES=
-	  DROP_TABLES_SQL=
+	  DROP_TABLES=false
+	  DROP_TABLE_SQL=false
   fi
-
-  if [ "$DROP_TABLES_SQL" = true ]; then
-	  # if drop tables using sql file, should not drop tables using wp cli method which is default
+  
+  if [ "$DROP_TABLE_SQL" = true ]; then
+    # if drop tables using sql file, should not drop tables using wp cli method which is default
 	  DROP_TABLES=false
   fi
 
   if [ "$PARALLEL_IMPORT" = true ]; then
 	  # Cannot drop entire database if running parallel-import
-	  DROP_TABLES=
-	  DROP_TABLES_SQL=
+	  DROP_TABLES=false
+	  DROP_TABLE_SQL=false
   fi
 }
 
 mirrorDbMain() {
   setGlobalVariables
+  # Update options based on user's arguments
   parseArgs $@
   checkFlags
+  
   echo ""
   echo "Starting to execute mirror_db."
   echo "##############################"
   echo "Current time: $(date)"
-
-  setFilePermissions
+  prepareForDist
+  # Create LOGS_DIR if doesn't exist
+  mkdir -p $LOGS_DIR
 
   if [[ $PROPERTIES_FILE != "db.properties" && -e "$PROPERTIES_FILE" ]]; then
 	  echo "--properties-file option is set"
@@ -51,7 +50,6 @@ mirrorDbMain() {
   fi
 
   if [ ! -z $SRC ]; then
-    DB_FILE_NAME="${SRC}_$(date +"%Y-%m-%d").sql"
     echo "Executing db export script"
     uploadExportMain
 
