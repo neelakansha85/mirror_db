@@ -22,8 +22,15 @@ uploadExportMain() {
     uploadMirrorDbFiles $SRC
 
     # TODO: Use screen for waiting while SRC performs export to avoid broken pipe
-    #screen -DR -S final -X -p 0 stuff $'ssh nyu-garima@ec2-35-160-228-245.us-west-2.compute.amazonaws.com\n'
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${EXPORT_SCRIPT} -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${networkFlag} --blog-id ${BLOG_ID};"
+    screen -mdS testingg
+    screen -ls
+    screen -DR -S testingg -X -p 0 stuff $'ssh -i /home/nyu-garima/.ssh/id_rsa nyu-scripts@nyu-web1.vps.pagelyhosting.com "cd mirror_db; ./export.sh -s tstprd -d qa2;"\n'
+
+
+screen -DR -S hi -X -p 0 stuff $'ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./{EXPORT_SCRIPT} -s ${SRC} -d ${DEST};"\n'
+    #ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${EXPORT_SCRIPT} -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${networkFlag} --blog-id ${BLOG_ID};"
+
+
     #$(screen -S export -X quit)
 
     # Get path for source db relative to DB_BACKUP_DIR
@@ -56,3 +63,5 @@ uploadExportMain() {
     echo "Skipped Export Process..."
   fi
 }
+
+screen -DR -S export -X -p 0 stuff $'ssh -i /home/nyu-garima/.ssh/id_rsa nyu-scripts@nyu-web1.vps.pagelyhosting.com "cd mirror_db; ./export.sh -s tstprd -d qa2;"\n'
