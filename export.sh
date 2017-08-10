@@ -60,6 +60,7 @@ downloadTablesPI() {
   local poolCount=1
   local batchCount=1
   local listFileName=$1
+  local fileName=$(getFileName $listFileName)
 
   for dbtb in $(cat ${listFileName})
   do
@@ -75,7 +76,7 @@ downloadTablesPI() {
     (( total++ ))
 
     # Required for identifying which file needs to be imported
-    echo "${db}.${tb}" >> ${listFileName}_${piTotal}.${listFileExt}
+    echo "${db}.${tb}" >> ${fileName}_${piTotal}.${listFileExt}
 
     batchCount=$(checkCountLimit $batchCount $BATCH_LIMIT)
     poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $POOL_WAIT_TIME)
@@ -84,7 +85,7 @@ downloadTablesPI() {
       # Get to root dir
       cd ..
       dbFileNamePI="${dbFileName}_${piTotal}.${dbFileExt}"
-      nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
+      nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
       # Continue exporting in EXPORT_DIR
       cd ${EXPORT_DIR}
       (( piTotal++ ))
