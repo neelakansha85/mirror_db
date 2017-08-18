@@ -46,9 +46,13 @@ uploadExportMain() {
 
     # Exit if all tables are exported
     if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
-      echo "No more tables to export. Exiting... "
+     # if [lastStatus=100; then
+          #getDb
+
+      #else echo "No more tables to export. Exiting... "
       exit
     fi
+
   else
     echo "Skipped Export Process..."
   fi
