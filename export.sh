@@ -81,13 +81,15 @@ downloadTablesPI() {
     batchCount=$(checkCountLimit $batchCount $BATCH_LIMIT)
     poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $POOL_WAIT_TIME)
     if [ ${poolCount} -eq 1 ]; then
-      # TODO: Remove below line and cd {EXPORT_DIR} if using absolute path for dir
-      # Get to root dir
-      cd ..
+      #cd workspace was required when mirrordb.sh was to be executed. now it is not needed hence commented
+      #cd $WORKSPACE
+
       dbFileNamePI="${dbFileName}_${piTotal}.${dbFileExt}"
-      nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
+      trap "{ exec mergeMain -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} -mbl ${MERGE_BATCH_LIMIT} --parallel-import; exit 100; }" EXIT
+      #nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
+
       # Continue exporting in EXPORT_DIR
-      cd ${EXPORT_DIR}
+      #cd ${EXPORT_DIR} already in export dir
       (( piTotal++ ))
     fi
   done
@@ -125,31 +127,23 @@ downloadNonNetworkTables() {
 exportParallelMain() {
   # Starting Parallel Import
   # Download Network tables first
-  # TODO: Verify if mergeMain() is required and if so use below function
-  # downloadNetworkTables $networkListFile
+  echo "Executing parallel-import for network tables... "
   mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-zA-Z]+[a-zA-Z0-9_]*$'" > $networkListFile
   downloadTablesPI $networkListFile
-  # TODO: Need to verify if mergeMain() is required for Network tables
-  # mergeMain -lf $networkListFile -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
-  echo "Executing parallel-import for network tables... "
-  # TODO: Remove below line and cd {EXPORT_DIR} if using absolute path for dir
-  # Get to root dir
-  cd ..
-  # Initiate merging and importing all network tables
-  nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${networkListFile} -dbf ${networkDb} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1
-  # Continue exporting in EXPORT_DIR
-  cd ${EXPORT_DIR}
+    # mergeMain -lf $networkListFile -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
+
+    # cd $WORKSPACE
+    # Initiate merging and importing all network tables
+    # fix to not call mirror_db instead getDb can be called
+    # nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${networkListFile} -dbf ${networkDb} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1
+    # Continue exporting in EXPORT_DIR
+    # cd ${EXPORT_DIR}   commented because it is already in export dir
+
   # Download all Non Network Tables
-  # TODO: Verify if mergeMain() is required and if so use below function
-  # downloadNonNetworkTables $nonNetworkListFile
   mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[0-9]+[a-zA-Z0-9_]*$'" > $nonNetworkListFile
   downloadTablesPI $nonNetworkListFile
-  # TODO: Need to verify if mergeMain() is required for Network tables
   # mergeMain -lf $nonNetworkListFile -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
-  
-  # TODO: Remove below line and cd {EXPORT_DIR} if using absolute path for dir
-  # Get to root dir
-  cd ..
+  cd $WORKSPACE
 
   # Execute merge and upload for the last set of tables downloaded
   dbFileNamePI="${dbFileName}_${piTotal}.${dbFileExt}"
