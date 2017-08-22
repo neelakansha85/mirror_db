@@ -85,7 +85,11 @@ downloadTablesPI() {
       #cd $WORKSPACE
 
       dbFileNamePI="${dbFileName}_${piTotal}.${dbFileExt}"
-      trap "{ exec mergeMain -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} -mbl ${MERGE_BATCH_LIMIT} --parallel-import; exit 100; }" EXIT
+      mergeMain -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} -mbl ${MERGE_BATCH_LIMIT} --parallel-import &
+      local mergePID = $!
+      #add disown to not get msgs frm bg process. can add nohup too
+      signal mergePID &
+      #signal function should waits for merge to complete, and then calls mirrordb
       #nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
 
       # Continue exporting in EXPORT_DIR
@@ -130,7 +134,7 @@ exportParallelMain() {
   echo "Executing parallel-import for network tables... "
   mysql --host=${DB_HOST_NAME} --user=${DB_USER} --password=${DB_PASSWORD} -A --skip-column-names -e"SELECT CONCAT(TABLE_SCHEMA,'.', TABLE_NAME) FROM information_schema.TABLES WHERE table_schema='${DB_SCHEMA}' AND TABLE_NAME REGEXP '^wp_[a-zA-Z]+[a-zA-Z0-9_]*$'" > $networkListFile
   downloadTablesPI $networkListFile
-    # mergeMain -lf $networkListFile -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT}
+  #mergeMain -lf $networkListFile -dbf ${dbFile} -mbl ${MERGE_BATCH_LIMIT} &
 
     # cd $WORKSPACE
     # Initiate merging and importing all network tables
@@ -149,7 +153,18 @@ exportParallelMain() {
   dbFileNamePI="${dbFileName}_${piTotal}.${dbFileExt}"
   nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import --is-last-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
 }
-
+signal() {
+  local status=0
+  local pid=$1
+  while [ "$status" == "0" ]
+  do
+    sleep $delay
+    ps -p$pid 2>&1 > /dev/null
+    status=$?
+  done
+  echo "merging is completed"
+  ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1 &
+}
 #starts here
 exportMain() {
 
