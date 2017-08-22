@@ -86,10 +86,8 @@ downloadTablesPI() {
 
       dbFileNamePI="${dbFileName}_${piTotal}.${dbFileExt}"
       mergeMain -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} -mbl ${MERGE_BATCH_LIMIT} --parallel-import &
-      local mergePID = $!
-      #add disown to not get msgs frm bg process. can add nohup too
-      signal mergePID &
-      #signal function should waits for merge to complete, and then calls mirrordb
+      local mergePID = $!           #add disown to not get msgs frm bg process. can add nohup too
+      signal ${mergePID} &          #signal function should waits for merge to complete, and then calls mirrordb
       #nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
 
       # Continue exporting in EXPORT_DIR
@@ -105,6 +103,20 @@ downloadTablesPI() {
   if [ ${batchCount} -gt 0 ]; then
     sleep 2
   fi
+}
+
+signal() {
+  local status=0
+  local pid=$1
+  while [ "$status" == "0" ]
+  do
+    sleep $delay
+    ps -p$pid 2>&1 > /dev/null
+    status=$?
+  done
+  echo "merging is completed"
+  send signal to mirrordb ->uploadexport
+  #./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1 &
 }
 
 downloadNetworkTables() {
@@ -153,18 +165,7 @@ exportParallelMain() {
   dbFileNamePI="${dbFileName}_${piTotal}.${dbFileExt}"
   nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${listFileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import --is-last-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
 }
-signal() {
-  local status=0
-  local pid=$1
-  while [ "$status" == "0" ]
-  do
-    sleep $delay
-    ps -p$pid 2>&1 > /dev/null
-    status=$?
-  done
-  echo "merging is completed"
-  ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1 &
-}
+
 #starts here
 exportMain() {
 

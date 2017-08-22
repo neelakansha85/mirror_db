@@ -12,9 +12,10 @@ uploadExportMain() {
   if [ "$NETWORK_FLAG" = true ]; then
     local networkFlag='--network-flag'
   fi
-  
+
+ #ideally there is no need to check pi here, since it will be called just once and after that
   # Executing export at source
-  if [ ! "$PARALLEL_IMPORT" = true ]; then
+ # if [ ! "$PARALLEL_IMPORT" = true ]; then
     createRemoteScriptDir $SRC
     echo "Start Upload Export Process..."
     now=$(date +"%T")
@@ -44,16 +45,13 @@ uploadExportMain() {
     now=$(date +"%T")
     echo "End time : $now "
 
+  #else
     # Exit if all tables are exported
-    if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
-     # if [lastStatus=100; then
-          #getDb
-
+    #if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
+     # getDb
       #else echo "No more tables to export. Exiting... "
-      exit
-    fi
-
-  else
-    echo "Skipped Export Process..."
-  fi
+      #exit
+    #fi
+  #  echo "Skipped Export Process..."
+ # fi
 }
