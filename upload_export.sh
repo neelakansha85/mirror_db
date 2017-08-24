@@ -12,7 +12,9 @@ uploadExportMain() {
   if [ "$NETWORK_FLAG" = true ]; then
     local networkFlag='--network-flag'
   fi
-
+  if [ "$PARALLEL_IMPORT" = true ]; then
+    local parallelFlag='--parallel-import'
+  fi
  #ideally there is no need to check pi here, since it will be called just once and after that
   # Executing export at source
  # if [ ! "$PARALLEL_IMPORT" = true ]; then
@@ -21,8 +23,8 @@ uploadExportMain() {
     now=$(date +"%T")
     echo "Start time : $now "
     uploadMirrorDbFiles $SRC
-
-    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${EXPORT_SCRIPT} -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${networkFlag} --blog-id ${BLOG_ID};"
+  #if not PI
+    ssh -i ${SSH_KEY_PATH} ${SSH_USERNAME}@${HOST_NAME} "cd ${REMOTE_SCRIPT_DIR}; ./${EXPORT_SCRIPT} -s ${SRC} -d ${DEST} -ebl ${BATCH_LIMIT} -pl ${POOL_LIMIT} -mbl ${MERGE_BATCH_LIMIT} -ewt ${WAIT_TIME} -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} ${PARALLEL_IMPORT} ${NETWORK_FLAG} --blog-id ${BLOG_ID};"
 
     # Get path for source db relative to DB_BACKUP_DIR
     DB_FILE_N=$(getFileName $DB_FILE_NAME)
@@ -48,6 +50,7 @@ uploadExportMain() {
   #else
     # Exit if all tables are exported
     #if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
+    #capture signal
      # getDb
       #else echo "No more tables to export. Exiting... "
       #exit
