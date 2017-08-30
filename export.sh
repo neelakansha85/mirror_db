@@ -81,17 +81,12 @@ downloadTablesPI() {
     batchCount=$(checkCountLimit $batchCount $BATCH_LIMIT)
     poolCount=$(checkCountLimit $poolCount $POOL_LIMIT $POOL_WAIT_TIME)
     if [ ${poolCount} -eq 1 ]; then
-      #cd workspace was required when mirrordb.sh was to be executed. now it is not needed hence commented
-      #cd $WORKSPACE
-
       dbFileNamePI="${dbFileName}_${piTotal}.${dbFileExt}"
-      mergeMain -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} -mbl ${MERGE_BATCH_LIMIT} --parallel-import &
-      local mergePID = $!           #add disown to not get msgs frm bg process. can add nohup too
-      signal ${mergePID} &          #signal function should waits for merge to complete, and then calls mirrordb
+      mergeMain -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} -mbl ${MERGE_BATCH_LIMIT} &
+      local mergePID=$!           #add disown to not get msgs frm bg process. can add nohup too
+      signal ${mergePID} &          #signal function waits for merge to complete, and then calls mirrordb
       #nohup ./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_pi.log 2>&1
 
-      # Continue exporting in EXPORT_DIR
-      #cd ${EXPORT_DIR} already in export dir
       (( piTotal++ ))
     fi
   done
