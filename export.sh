@@ -110,7 +110,8 @@ signal() {
     status=$?
   done
   echo "merging is completed"
-  send signal to mirrordb ->uploadexport
+  kill -SIGUSR1 ${pid}
+  #send signal to mirrordb ->uploadexport
   #./mirror_db.sh -s ${SRC} -d ${DEST} -lf ${fileName}_${piTotal}.${listFileExt} -dbf ${dbFileNamePI} --skip-export --parallel-import >> ${LOGS_DIR}/mirror_db_network.log 2>&1 &
 }
 

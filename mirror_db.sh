@@ -59,7 +59,7 @@ mirrorDbMain() {
     if [ "$PARALLEL_IMPORT" = true ] || [ "$PARALLEL_IMPORT" == '--parallel-import' ]; then
 		  # Merge all tables to one mysql.sql #echo "Executing merge script" #./merge.sh -lf ${LIST_FILE_NAME} -dbf ${DB_FILE_NAME} -mbl ${MERGE_BATCH_LIMIT} ${PARALLEL_IMPORT}#mergeMain
       #catch signal here, should bypass the export process
-      getDb
+      trap 'echo "got SIGUSR1"; getDb; exit 0' SIGUSR1 &
 	  fi
 	fi
 
